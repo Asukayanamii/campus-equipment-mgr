@@ -1,0 +1,36 @@
+body{
+    display: flex;
+}
+.nav{
+    display: flex;
+    background-color:   pink;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+    height: 100vh;
+}
+.nav-title{
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+.nav-options{
+    display: flex;
+    background-color: rgb(87, 87, 190);
+    flex-direction: column;
+    gap: 30px;
+}
+.data-showing{
+    background-color: green;
+    width: 100vw;
+}
+.data-card{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color:   red;
+    width: 200px;
+    height: 250px;
+    gap: 10px;
+}
