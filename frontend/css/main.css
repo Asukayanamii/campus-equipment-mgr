@@ -5,18 +5,46 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    /* 等我弄到背景图 */
+    /* background-image: url(); */
+    background-color: pink;
 }
 .title{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    gap: 20px;
+}
+.title-h1{
+    font-size: 50px;
+}
+.title-p{
+    font-size: 20px;
 }
 .identity{
-    
+    margin: 20px;
     display: flex;
     flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+}
+.box{
+    display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     justify-content: center;
     align-items: center;
+    margin-left: 20px;
+    margin-right: 20px;
+    /* 等我弄到背景图 */
+    /* border-corner-image: url(); */
+    background-color: black;
+    padding: 40px;
+
+}
+.box-title{
+    font-size: 25px;
+    color: white;
 }

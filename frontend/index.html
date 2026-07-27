@@ -8,32 +8,42 @@
     <link rel="stylesheet" href="./css/reset.css">
     <link rel="stylesheet" href="./css/main.css">
 </head>
+    <script src="./js/util.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/app.js"></script>
 <body>
 
     <div class="main">
         <!-- 标题 -->
         <div class="title">
-            <h1>校园设备借用与维修管理系统</h1>
-            <p>Welcome!</p>
+            <h1 class="title-h1">校园设备借用与维修管理系统</h1>
+            <p class="title-p">Welcome!</p>
         </div>
 
 
         <!-- 选择身份 -->
         <div class="identity">
             <!-- 普通用户 -->
-            <div class="box">
-                <p class="box-title">我是学生</p>
-            </div>
+             <a href="./pages/students.html">
+                <div class="box">
+                    <p class="box-title" >我是学生</p>
+                </div>
+             </a>
+            
+             <a href="./pages/admin.html">
+                <div class="box">
+                    <p class="box-title">我是管理员</p>
+                </div>
+             </a>
 
+            
+             <a href="./pages/maintainer.html">
+                <div class="box">
+                    <p class="box-title">我是维修人员</p>
+                </div>
+             </a>
 
-            <div class="box">
-                <p class="box-title">我是管理员</p>
-            </div>
-
-
-            <div class="box">
-                <p class="box-title">我是维修人员</p>
-            </div>
+            
         </div>
 
 
