@@ -28,7 +28,7 @@ router = APIRouter(prefix="/user", tags=["学生端"])
 #     all_list = get_all_equipment(db)
 #     return Result.success(all_list)
 
-@router.post("/equipments/page",response_model=Result[Page[EquipmentOut]],name="分页条件查询设备")
+@router.get("/equipments/page",response_model=Result[Page[EquipmentOut]],name="分页条件查询设备")
 def page_equipments(query: EquipQuery = Query(),db: Session = Depends(get_db)):
     logger.info("分页条件查询设备")
     res = query_equipment_service(db, query)
