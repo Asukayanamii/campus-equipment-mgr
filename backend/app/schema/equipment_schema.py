@@ -38,17 +38,17 @@ class EquipmentOut(BaseSchema):
 
 class EquipQuery(Params):
     """设备列表查询参数"""
-    page: int | None = Field(default=1, description="页码")
-    size: int | None  = Field(default=10, description="每页条数")
-    category_id: int | None = Field(default=None, description="设备分类ID")
+    page: int | None = Field(default=1, description="页码",ge=1,le=10000)
+    size: int | None  = Field(default=10, description="每页条数",ge=1,le=100)
+    category_id: int | None = Field(default=None, description="设备分类ID",ge=1)
     status: str | None = Field(default=None, description="设备状态")
     equipment_name: str | None = Field(default=None, description="设备名称")
     equipment_no: str | None = Field(default=None, description="设备编号")
     location: str | None = Field(default=None, description="设备存放位置")
     brand: str | None = Field(default=None, description="设备品牌")
     spec: str | None = Field(default=None, description="设备规格型号")
-    start_time: str | None = Field(default=None, description="设备采购开始时间")
-    end_time: str | None = Field(default=None, description="设备采购结束时间")
+    start_time: date | None = Field(default=None, description="设备采购开始时间")
+    end_time: date | None = Field(default=None, description="设备采购结束时间")
     sort: str | None = Field(default='id', description="排序字段")
     order: str | None = Field(default='asc', description="排序顺序")
 
@@ -66,3 +66,28 @@ class EquipQuery(Params):
             return None
         # 非空字符串直接原值返回
         return v
+    # 校验并转换字符串 -> date
+    @field_validator("start_time", mode="before")
+    def parse_start_time(cls, value):
+        # 空值直接返回
+        if value is None or value == "":
+            return None
+        # 如果已经是date/datetime对象，直接返回
+        if isinstance(value, date):
+            return value
+        if isinstance(value, datetime):
+            return value.date()
+        # 字符串格式化解析
+        return datetime.strptime(value, "%Y-%m-%d").date()
+    @field_validator("end_time", mode="before")
+    def parse_end_time(cls, value):
+        # 空值直接返回
+        if value is None or value == "":
+            return None
+        # 如果已经是date/datetime对象，直接返回
+        if isinstance(value, date):
+            return value
+        if isinstance(value, datetime):
+            return value.date()
+        # 字符串格式化解析
+        return datetime.strptime(value, "%Y-%m-%d").date()

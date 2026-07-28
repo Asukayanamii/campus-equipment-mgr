@@ -38,7 +38,7 @@ def query_equipment(session:Session,query:EquipQuery) -> Page[tuple[Equipment, E
     if query.spec:
         stmt = stmt.where(Equipment.spec.like(f"%{query.spec}%"))
     if query.start_time and query.end_time:
-        stmt = stmt.where(Equipment.purchase_time.between(query.start_time,query.end_time))
+        stmt = stmt.where(Equipment.purchase_date.between(query.start_time,query.end_time))
     if query.sort and query.order:
         stmt = stmt.order_by(desc(getattr(Equipment,query.sort)) if query.order == "desc" else asc(getattr(Equipment,query.sort)))
     return paginate(session,stmt,query)
