@@ -2,6 +2,7 @@ from fastapi_pagination import  Page
 from sqlalchemy.orm import Session
 from sqlalchemy import select, desc, asc
 from fastapi_pagination.ext.sqlalchemy import paginate
+from pydantic.alias_generators import to_snake
 from app.db.models.equipment_category_model import EquipmentCategory
 from app.db.models.equipment_model import Equipment
 from app.schema.equipment_schema import EquipQuery
@@ -40,8 +41,9 @@ def query_equipment(session:Session,query:EquipQuery) -> Page[tuple[Equipment, E
         stmt = stmt.where(Equipment.spec.like(f"%{query.spec}%"))
     if query.start_time and query.end_time:
         stmt = stmt.where(Equipment.purchase_date.between(query.start_time,query.end_time))
-    if query.sort and query.order:
-        stmt = stmt.order_by(desc(getattr(Equipment,query.sort)) if query.order == "desc" else asc(getattr(Equipment,query.sort)))
+    if query.sort or query.order:
+        sort_column = getattr(Equipment, to_snake(query.sort or "id"))
+        stmt = stmt.order_by(desc(sort_column) if query.order == "desc" else asc(sort_column))
     # paginate自动分页查询
     return paginate(session,stmt,query)
 

@@ -4,7 +4,7 @@ from fastapi import Depends, Header
 from app.core.config import settings
 from app.core.exceptions import BussinessException
 
-
+#三端鉴权依赖函数
 def user_verity(token: str | None = Header(None)):
     if not token:
         raise BussinessException("未登录，请先登录", status_code=401)
@@ -13,6 +13,7 @@ def user_verity(token: str | None = Header(None)):
     except Exception:
         raise BussinessException("登录已过期或未登录，请重新登录", status_code=401)
     return info
+
 def admin_verity(token: str | None = Header(None)):
     if not token:
         raise BussinessException("未登录，请先登录", status_code=401)
@@ -21,6 +22,7 @@ def admin_verity(token: str | None = Header(None)):
     except Exception:
         raise BussinessException("登录已过期或未登录，请重新登录", status_code=401)
     return info
+
 def repair_verity(token: str | None = Header(None)):
     if not token:
         raise BussinessException("未登录，请先登录", status_code=401)

@@ -38,7 +38,7 @@ class EquipmentOut(BaseSchema):
         return v.strftime("%Y-%m-%d") if v else None
 
 #继承paginate依赖的参数类
-class EquipQuery(Params):
+class EquipQuery(BaseSchema,Params):
     """设备列表查询参数"""
     page: int | None = Field(default=1, description="页码",ge=1,le=10000)
     size: int | None  = Field(default=10, description="每页条数",ge=1,le=100)
