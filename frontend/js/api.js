@@ -7,7 +7,7 @@ let pageNow = 1;
 // 获取某页的数据
 async function getData (QueryData = {}){
     try{
-        const params = new URLSearchParams;
+        const params = new URLSearchParams();
 
 
         // 为查询的参数列表清除空项
@@ -20,9 +20,9 @@ async function getData (QueryData = {}){
         let data = await fetch(`${BASE_URL}/user/equipment/page?${params.toString()}`,{
         method : 'GET',
         headers : {
-            'content-type' : 'application/json'
+            'content-type' : 'application/json',
+            'token' : sessionStorage.getItem(`token`)
         },
-        credentials : 'include'
         });
         return await data.json();
     }catch(error){
