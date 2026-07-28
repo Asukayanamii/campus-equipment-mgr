@@ -21,6 +21,7 @@ def list_all_equipment(session:Session) -> list[Equipment]:
 #     return session.execute(stmt).all()
 
 def query_equipment(session:Session,query:EquipQuery) -> Page[tuple[Equipment, EquipmentCategory]]:
+    #拼接查询语句
     stmt = (select(Equipment,EquipmentCategory)
             .outerjoin(EquipmentCategory,Equipment.category_id==EquipmentCategory.id))
     if query.category_id:
@@ -41,6 +42,7 @@ def query_equipment(session:Session,query:EquipQuery) -> Page[tuple[Equipment, E
         stmt = stmt.where(Equipment.purchase_date.between(query.start_time,query.end_time))
     if query.sort and query.order:
         stmt = stmt.order_by(desc(getattr(Equipment,query.sort)) if query.order == "desc" else asc(getattr(Equipment,query.sort)))
+    # paginate自动分页查询
     return paginate(session,stmt,query)
 
 

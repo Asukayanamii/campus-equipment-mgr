@@ -13,6 +13,7 @@ class EquipmentOut(BaseSchema):
     id: int
     equipment_no: str
     equipment_name: str
+    category_id: int | None = None
     category_name: str | None = None
     spec: str | None = None
     brand: str | None = None
@@ -36,6 +37,7 @@ class EquipmentOut(BaseSchema):
     def serialize_date(self, v: date | None):
         return v.strftime("%Y-%m-%d") if v else None
 
+#继承paginate依赖的参数类
 class EquipQuery(Params):
     """设备列表查询参数"""
     page: int | None = Field(default=1, description="页码",ge=1,le=10000)

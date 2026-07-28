@@ -17,8 +17,10 @@ from app.schema.page_schema import PageResp
 def query_equipment_service(session: Session, query: EquipQuery) -> Page[EquipmentOut]:
     list = []
     res = query_equipment(session,query)
+    # 转换成EquipmentOut
     for e,c in res.items:
         equip_out = EquipmentOut.model_validate(e)
         equip_out.category_name = c.category_name if c else None
         list.append(equip_out)
+    # 返回Page
     return Page(items=list, total=res.total, page=query.page, size=res.size, pages=res.pages)
