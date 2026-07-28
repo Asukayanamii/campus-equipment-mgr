@@ -1,16 +1,14 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi_pagination import Page, add_pagination, paginate
 from app.api.user import user_router
-from app.core.logger import logger
 from app.core.exception_handler import register_exception_handler
-from app.core.exceptions import BussinessException
 from app.result.result import Result
 
 app = FastAPI(title="campus-equipment-mgr",description="校园设备管理系统",version="0.0.1")
 
 register_exception_handler(app)
-
+add_pagination(app)  # 全局注册分页工具
 app.include_router(user_router.router)
 
 # 开发环境：允许所有源（仅用于开发！）

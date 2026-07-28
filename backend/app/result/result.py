@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from typing import TypeVar,Generic,Optional
 from fastapi.responses import JSONResponse
-from app.context.result_context import SUCCESS_CODE, FAIL_CODE
+from app.constant.result_constant import ResultCode
 
 T=TypeVar('T')
 
@@ -14,13 +14,13 @@ class Result(BaseModel,Generic[T]):
     data: T | None = None
 
     @classmethod
-    def success(cls,data: T|None = None,message: str = "success",code: int = SUCCESS_CODE)->'Result[T]':
+    def success(cls,data: T|None = None,message: str = "success",code: int = ResultCode.SUCCESS_CODE)->'Result[T]':
         """
         操作成功
         """
         return cls(message=message, data=data, code=code)
     @classmethod
-    def fail(cls,message: str = "fail",code: int = FAIL_CODE)->'Result[T]':
+    def fail(cls,message: str = "fail",code: int = ResultCode.FAIL_CODE)->'Result[T]':
         """
         操作失败
         """
