@@ -11,17 +11,16 @@ class EquipmentOut(BaseSchema):
     id: int
     equipment_no: str
     equipment_name: str
-    category_id: int | None
-    spec: str | None
-    brand: str | None
-    unit: str | None
-    location: str | None
-    purchase_date: date | None
-    price: Decimal | None
-    cover_img: str | None
-    status: str
-    remark: str | None
-    is_deleted: int
+    category_name: str | None = None
+    spec: str | None = None
+    brand: str | None = None
+    unit: str | None = None
+    location: str | None = None
+    purchase_date: date | None = None
+    price: Decimal | None = None
+    cover_img: str | None = None
+    status: str = ""
+    remark: str | None = None
     create_time: datetime
     update_time: datetime
     # 序列化时把Decimal转字符串

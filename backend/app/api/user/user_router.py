@@ -7,7 +7,7 @@ from app.result.result import Result
 from app.schema.equipment_schema import EquipmentOut
 from app.service.equipment_service import get_all_equipment
 
-router = APIRouter(prefix="/user", tags=["用户端接口"])
+router = APIRouter(prefix="/user", tags=["用户端"])
 
 
 @router.get("/equipments",response_model=Result[list[EquipmentOut]])
