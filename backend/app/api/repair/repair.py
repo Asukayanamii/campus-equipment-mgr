@@ -1,0 +1,24 @@
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+
+from app.core.logger import logger
+from app.db.session import get_db
+from app.result.result import Result
+from app.schema.user_schema import RegisterIn, LoginIn, LoginOut
+from app.service import repair_service
+
+router = APIRouter(prefix="/repair", tags=["维修端"])
+
+
+@router.post("/register", response_model=Result, name="维修员注册")
+def register_by_password(register_in: RegisterIn, db: Session = Depends(get_db)):
+    logger.info("维修端用户名密码注册")
+    repair_service.register_by_password(register_in, db)
+    return Result.success()
+
+
+@router.post("/login", response_model=Result[LoginOut], name="维修员登录")
+def login_by_password(login_in: LoginIn, db: Session = Depends(get_db)):
+    logger.info("维修端用户名密码登录")
+    login_out = repair_service.login(login_in, db)
+    return Result.success(login_out)
