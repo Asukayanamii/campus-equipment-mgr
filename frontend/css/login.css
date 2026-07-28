@@ -1,0 +1,67 @@
+body{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: black;
+}
+.login-box{
+    display: flex;
+    flex-direction: column;
+    height: 400px;
+    width: 600px;
+    justify-content: center;
+    align-items: center;
+    background-color: pink;
+    margin: 90px;
+}
+.login-box form div div {
+      display: flex;
+      align-items: center;
+      margin-bottom: 10px;
+}
+.login-box form div div span{
+    width: 50px;
+}
+.login-form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    justify-content: center;
+    align-content: center;
+    border-style: solid;
+    /* padding: 70px;
+    padding-top: 0px; */
+}
+.identity-choose{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.identity-choose div{
+    border-style: solid;
+    flex: 1;
+    display: flex;
+    justify-content: center;
+
+}
+.input-data{
+    padding: 60px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.account{
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+}
+.password{
+    border-color: black;
+    border-width: 2px;
+    border-style: solid;
+}
+.submit-button{
+    width: 100%;
+    background-color: aliceblue;
+    border-style: solid;
+}

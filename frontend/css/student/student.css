@@ -23,6 +23,9 @@ body{
 .data-showing{
     background-color: green;
     width: 100vw;
+    display: grid;
+    grid-template-columns: repeat(7,1fr);
+    grid-template-rows: repeat(4,1fr);
 }
 .data-card{
     display: flex;
