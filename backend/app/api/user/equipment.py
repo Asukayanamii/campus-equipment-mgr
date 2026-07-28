@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
+from app.core.auth import user_verity
 from app.core.logger import logger
 from app.db.session import get_db
 from app.result.result import Result
@@ -11,7 +12,7 @@ from app.schema.user_schema import RegisterIn
 from app.service.equipment_service import query_equipment, query_equipment_service
 from app.schema.equipment_schema import EquipQuery
 
-router = APIRouter(prefix="/user/equipment", tags=["学生端"])
+router = APIRouter(prefix="/user/equipment", tags=["学生端"],dependencies=[Depends(user_verity)])
 
 # @router.get("/equipments",response_model=Result[PageResp[EquipmentOut]],name="获取所有设备")
 # def all_equipments(db: Session = Depends(get_db)):

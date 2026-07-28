@@ -20,7 +20,9 @@ class Settings(BaseSettings):
     DB_MAX_OVERFLOW: int = 20
 
     #JWT配置
-    JWT_SECRET_KEY: str
+    USER_JWT_SECRET_KEY: str
+    ADMIN_JWT_SECRET_KEY: str
+    REPAIR_JWT_SECRET_KEY: str
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 12
 

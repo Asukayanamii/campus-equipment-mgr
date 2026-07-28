@@ -37,6 +37,6 @@ def login(login_in: LoginIn, db: Session):
     # 设置过期时间：当前时间 + ACCESS_TOKEN_EXPIRE_MINUTES分钟
     expire = datetime.now() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     # 加入过期时间字段 exp（JWT标准字段）
-    token = jwt.encode({"username": user.username, 'id': user.id,'exp': expire}, settings.JWT_SECRET_KEY,
+    token = jwt.encode({"username": user.username, 'id': user.id,'exp': expire}, settings.USER_JWT_SECRET_KEY,
                         algorithm=settings.ALGORITHM)
     return LoginOut(token=token, id=user.id, name=user.name,username=user.username)
