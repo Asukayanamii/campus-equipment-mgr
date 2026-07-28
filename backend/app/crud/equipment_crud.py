@@ -15,10 +15,10 @@ def list_all_equipment(session:Session) -> list[Equipment]:
     stmt = select(Equipment)
     return session.scalars(stmt).all()
 
-def get_all_equipment_out(session:Session) -> list[tuple[Equipment,EquipmentCategory]]:
-    stmt = (select(Equipment,EquipmentCategory)
-            .outerjoin(EquipmentCategory,Equipment.category_id==EquipmentCategory.id))
-    return session.execute(stmt).all()
+# def get_all_equipment_out(session:Session) -> list[tuple[Equipment,EquipmentCategory]]:
+#     stmt = (select(Equipment,EquipmentCategory)
+#             .outerjoin(EquipmentCategory,Equipment.category_id==EquipmentCategory.id))
+#     return session.execute(stmt).all()
 
 def query_equipment(session:Session,query:EquipQuery) -> Page[tuple[Equipment, EquipmentCategory]]:
     stmt = (select(Equipment,EquipmentCategory)
