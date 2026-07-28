@@ -10,7 +10,7 @@ from app.schema.page_schema import PageResp
 from app.service.equipment_service import get_all_equipment, query_equipment, query_equipment_service
 from app.schema.equipment_schema import EquipQuery
 
-router = APIRouter(prefix="/user", tags=["用户端"])
+router = APIRouter(prefix="/user", tags=["学生端"])
 
 
 @router.get("/equipments",response_model=Result[PageResp[EquipmentOut]],name="获取所有设备")
