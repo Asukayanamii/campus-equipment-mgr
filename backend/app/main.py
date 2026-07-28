@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import Page, add_pagination, paginate
-from app.api.user import user_router
+from app.api.user import user, equipment
 from app.core.exception_handler import register_exception_handler
 from app.result.result import Result
 
@@ -9,7 +9,8 @@ app = FastAPI(title="campus-equipment-mgr",description="校园设备管理系统
 
 register_exception_handler(app)
 add_pagination(app)  # 全局注册分页工具
-app.include_router(user_router.router)
+app.include_router(user.router)
+app.include_router(equipment.router)
 
 # 开发环境：允许所有源（仅用于开发！）
 app.add_middleware(

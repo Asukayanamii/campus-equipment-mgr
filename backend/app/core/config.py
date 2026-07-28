@@ -9,6 +9,7 @@ backend_root = os.path.join(current_file_dir, "..", "..")
 env_file_abs = os.path.join(backend_root, ".env")
 
 class Settings(BaseSettings):
+    #数据库配置
     DB_HOST: str
     DB_PORT: int
     DB_USER: str
@@ -18,9 +19,18 @@ class Settings(BaseSettings):
     DB_POOL_SIZE: int = 10
     DB_MAX_OVERFLOW: int = 20
 
+    #JWT配置
+    JWT_SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 12
+
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> str:
         return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_DATABASE}"
+
+    @property
+    def JWT_SECRET_KEY_ALGORITHM(self) -> tuple[str,str]:
+        return self.JWT_SECRET_KEY, self.ALGORITHM
 
     model_config = SettingsConfigDict(
         env_file=env_file_abs,
