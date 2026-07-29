@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 from pydantic import Field, field_validator
 
@@ -41,6 +42,7 @@ class InfoRegexBaseSchema(BaseSchema):
             raise BussinessException("邮箱格式不正确，请输入合法邮箱地址，例如：xxx@xxx.com",422)
         return value
 
+# 注册、登录、修改信息通用基础模型
 class RegisterIn(InfoRegexBaseSchema):
     username: str = Field(..., description="用户名")
     password: str = Field(..., description="密码")
@@ -66,3 +68,13 @@ class UpdateInDTO(InfoRegexBaseSchema):
     name: str = Field(..., description="昵称")
     password: str = Field(..., description="密码")
     image: str | None = Field(None, description="头像")
+
+# 获取当前用户信息响应模型
+class GetMeOut(BaseSchema):
+    id: int = Field(..., description="用户id")
+    name: str = Field(...,description="昵称")
+    username: str = Field(..., description="用户名")
+    image: str | None = Field(None, description="头像")
+    email: str | None = Field(None, description="邮箱")
+    update_time: datetime = Field(..., description="更新时间")
+    create_time: datetime = Field(..., description="创建时间")

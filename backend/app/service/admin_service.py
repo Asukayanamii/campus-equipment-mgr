@@ -11,7 +11,7 @@ from app.db.models.admin_model import Admin
 import bcrypt
 import jwt
 
-from app.schema.common_schema import LoginIn, LoginOut, RegisterIn, UpdateIn
+from app.schema.common_schema import LoginIn, LoginOut, RegisterIn, UpdateIn, GetMeOut
 
 
 def register_by_password(register_in: RegisterIn, db: Session) -> None:
@@ -42,7 +42,7 @@ def login(login_in: LoginIn, db: Session) -> LoginOut:
     return LoginOut(token=token, id=admin.id, name=admin.name, username=admin.username)
 
 
-def update_me(update_in: UpdateIn, db: Session):
+def update_me(update_in: UpdateIn, db: Session) -> None:
     with db.begin():
         admin = admin_crud.get_admin_by_id(update_in.id,db)
         if not admin:
@@ -52,3 +52,9 @@ def update_me(update_in: UpdateIn, db: Session):
         update_model = Admin(**update_in.model_dump())
         update_model.update_time = datetime.now()
         admin_crud.update_admin(update_model,db)
+
+
+def get_me(id: int, db: Session) -> GetMeOut:
+    admin = admin_crud.get_admin_by_id(id, db)
+    me = GetMeOut.model_validate(admin)
+    return me
