@@ -1,7 +1,6 @@
-
-
 const dataShowing = document.getElementById(`data-showing`)
 
+const defaultQueryData = new QueryData({});
 function renderData(){
     getData().then(res => {
         const list = res.data.items;

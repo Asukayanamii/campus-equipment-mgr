@@ -5,6 +5,10 @@ let pageNow = 1;
 
 
 // 获取某页的数据
+/**`
+ * @param {QueryData} QueryData
+ * @returns {}
+ */
 async function getData (QueryData = {}){
     try{
         const params = new URLSearchParams();
@@ -30,5 +34,32 @@ async function getData (QueryData = {}){
         throw error;
     }
     
+}
+
+async function sendRegister(username , password, identity){
+
+    try{
+        const response = await fetch(`${BASE_URL}/${identity}/register`,{
+            method : "POST",
+            headers : {
+                'Content-Type' : 'application/json',
+                // 'token' : sessionStorage.getItem(`token`),
+            },
+            body : JSON.stringify({
+                'username': username,
+                'password' : password 
+            })
+        })
+
+        if(!response.ok){
+            alert()
+        }
+
+        return await response.json();
+
+    }catch(error){
+        console.error("注册失败")
+        throw error
+    }
 }
 

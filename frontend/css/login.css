@@ -60,8 +60,14 @@ body{
     border-width: 2px;
     border-style: solid;
 }
-.submit-button{
-    width: 100%;
+.button-showing{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+.button-showing button{
+    width: 50%;
     background-color: aliceblue;
     border-style: solid;
 }
