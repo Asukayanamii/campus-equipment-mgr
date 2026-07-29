@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app.core.auth import admin_verity
 from app.core.logger import logger
 from app.db.session import get_db
 from app.result.result import Result
@@ -22,3 +23,8 @@ def login_by_password(login_in: LoginIn, db: Session = Depends(get_db)):
     logger.info("管理端用户名密码登录")
     login_out = admin_service.login(login_in, db)
     return Result.success(login_out)
+
+@router.get("/me",response_model=Result,name="管理端鉴权接口")
+def me(info: dict = Depends(admin_verity)):
+    logger.info("管理端鉴权接口")
+    return Result.success()
