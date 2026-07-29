@@ -11,7 +11,7 @@ from app.db.models.repair_user_model import RepairUser
 import bcrypt
 import jwt
 
-from app.schema.common_schema import LoginIn, LoginOut, RegisterIn
+from app.schema.common_schema import GetMeOut, LoginIn, LoginOut, RegisterIn, UpdateIn
 
 
 def register_by_password(register_in: RegisterIn, db: Session):
@@ -40,3 +40,20 @@ def login(login_in: LoginIn, db: Session):
     token = jwt.encode({"username": repair_user.username, 'id': repair_user.id, 'exp': expire}, settings.REPAIR_JWT_SECRET_KEY,
                         algorithm=settings.ALGORITHM)
     return LoginOut(token=token, id=repair_user.id, name=repair_user.name, username=repair_user.username)
+
+
+def update_me(update_in: UpdateIn, db: Session) -> None:
+    with db.begin():
+        repair_user = repair_user_crud.get_repair_user_by_id(update_in.id, db)
+        if not repair_user:
+            raise BussinessException("用户不存在", status_code=404)
+        salt = bcrypt.gensalt()
+        update_in.password = bcrypt.hashpw(update_in.password.encode('utf-8'), salt)
+        update_model = RepairUser(**update_in.model_dump())
+        update_model.update_time = datetime.now()
+        repair_user_crud.update_repair_user(update_model, db)
+
+
+def get_me(id: int, db: Session) -> GetMeOut:
+    repair_user = repair_user_crud.get_repair_user_by_id(id, db)
+    return GetMeOut.model_validate(repair_user)

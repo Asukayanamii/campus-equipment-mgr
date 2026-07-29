@@ -11,7 +11,7 @@ from app.db.models.user_model import User
 import bcrypt
 import jwt
 
-from app.schema.common_schema import LoginIn, LoginOut, RegisterIn
+from app.schema.common_schema import GetMeOut, LoginIn, LoginOut, RegisterIn, UpdateIn
 
 
 def register_by_password(register_in: RegisterIn, db: Session):
@@ -42,3 +42,20 @@ def login(login_in: LoginIn, db: Session):
     token = jwt.encode({"username": user.username, 'id': user.id,'exp': expire}, settings.USER_JWT_SECRET_KEY,
                         algorithm=settings.ALGORITHM)
     return LoginOut(token=token, id=user.id, name=user.name,username=user.username)
+
+
+def update_me(update_in: UpdateIn, db: Session) -> None:
+    with db.begin():
+        user = user_crud.get_user_by_id(update_in.id, db)
+        if not user:
+            raise BussinessException("用户不存在", status_code=404)
+        salt = bcrypt.gensalt()
+        update_in.password = bcrypt.hashpw(update_in.password.encode('utf-8'), salt)
+        update_model = User(**update_in.model_dump())
+        update_model.update_time = datetime.now()
+        user_crud.update_user(update_model, db)
+
+
+def get_me(id: int, db: Session) -> GetMeOut:
+    user = user_crud.get_user_by_id(id, db)
+    return GetMeOut.model_validate(user)
