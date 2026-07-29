@@ -5,7 +5,7 @@ from app.core.auth import admin_verity
 from app.core.logger import logger
 from app.db.session import get_db
 from app.result.result import Result
-from app.schema.user_schema import RegisterIn, LoginIn, LoginOut
+from app.schema.common_schema import RegisterIn, LoginIn, LoginOut, UpdateIn, UpdateInDTO
 from app.service import admin_service
 
 router = APIRouter(prefix="/admin", tags=["管理端"])
@@ -24,7 +24,14 @@ def login_by_password(login_in: LoginIn, db: Session = Depends(get_db)):
     login_out = admin_service.login(login_in, db)
     return Result.success(login_out)
 
-@router.get("/me",response_model=Result,name="管理端鉴权接口")
-def me(info: dict = Depends(admin_verity)):
+@router.get("/me",response_model=Result,name="管理端鉴权接口",dependencies=[Depends(admin_verity)])
+def me():
     logger.info("管理端鉴权接口")
+    return Result.success()
+
+@router.put("/update",response_model=Result,name="修改个人信息")
+def update_me(update_in_DTO: UpdateInDTO,info: dict = Depends(admin_verity),db: Session = Depends(get_db)):
+    logger.info("修改个人信息")
+    update_in = UpdateIn(**update_in_DTO.model_dump(),id=info["id"])
+    admin_service.update_me(update_in,db)
     return Result.success()

@@ -5,7 +5,7 @@ from app.core.auth import repair_verity
 from app.core.logger import logger
 from app.db.session import get_db
 from app.result.result import Result
-from app.schema.user_schema import RegisterIn, LoginIn, LoginOut
+from app.schema.common_schema import RegisterIn, LoginIn, LoginOut
 from app.service import repair_service
 
 router = APIRouter(prefix="/repair", tags=["维修端"])

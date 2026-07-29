@@ -1,3 +1,4 @@
+import uuid
 from datetime import datetime, timedelta
 
 from sqlalchemy.orm import Session
@@ -10,21 +11,22 @@ from app.db.models.user_model import User
 import bcrypt
 import jwt
 
-from app.schema.user_schema import LoginIn, LoginOut
+from app.schema.common_schema import LoginIn, LoginOut, RegisterIn
 
 
-def register_by_password(register_in, db: Session):
-    #判断用户是否存在
-    user = user_crud.query_user_by_username(register_in.username, db)
-    if user:
-        raise BussinessException("用户已存在",status_code=409)
-    user = User(**register_in.model_dump())
-    #密码加密存储
-    salt = bcrypt.gensalt()
-    user.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt)
-    user_crud.add_user(user, db)
-    db.commit()
-    return None
+def register_by_password(register_in: RegisterIn, db: Session):
+    with db.begin():
+        #判断用户是否存在
+        user = user_crud.query_user_by_username(register_in.username, db)
+        if user:
+            raise BussinessException("用户已存在",status_code=409)
+        #密码加密存储
+        salt = bcrypt.gensalt()
+        register_in.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt)
+        user = User(**register_in.model_dump())
+        user.name = 'user'+ uuid.uuid5(uuid.NAMESPACE_DNS, register_in.username).hex[:5]
+        user_crud.add_user(user, db)
+        return None
 
 
 def login(login_in: LoginIn, db: Session):

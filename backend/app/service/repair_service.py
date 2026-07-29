@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 
+import uuid
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -10,21 +11,22 @@ from app.db.models.repair_user_model import RepairUser
 import bcrypt
 import jwt
 
-from app.schema.user_schema import LoginIn, LoginOut
+from app.schema.common_schema import LoginIn, LoginOut, RegisterIn
 
 
-def register_by_password(register_in, db: Session):
-    # 判断用户是否存在
-    repair_user = repair_user_crud.query_repair_user_by_username(register_in.username, db)
-    if repair_user:
-        raise BussinessException("用户已存在", status_code=409)
-    repair_user = RepairUser(**register_in.model_dump())
-    # 密码加密存储
-    salt = bcrypt.gensalt()
-    repair_user.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt)
-    repair_user_crud.add_repair_user(repair_user, db)
-    db.commit()
-    return None
+def register_by_password(register_in: RegisterIn, db: Session):
+    with db.begin():
+        # 判断用户是否存在
+        repair_user = repair_user_crud.query_repair_user_by_username(register_in.username, db)
+        if repair_user:
+            raise BussinessException("用户已存在", status_code=409)
+        # 密码加密存储
+        salt = bcrypt.gensalt()
+        register_in.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt)
+        repair = RepairUser(**register_in.model_dump())
+        repair.name = 'repair'+ uuid.uuid5(uuid.NAMESPACE_DNS, register_in.username).hex[:5]
+        repair_user_crud.add_repair_user(repair, db)
+        return None
 
 
 def login(login_in: LoginIn, db: Session):

@@ -6,4 +6,4 @@ class BussinessException(Exception):
         self.status_code = status_code
         self.message = message
     def __str__(self):
-        return f"{self.status_code} - {self.message}"
+        return f"{self.message}"

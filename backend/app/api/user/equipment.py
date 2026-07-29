@@ -8,8 +8,7 @@ from app.db.session import get_db
 from app.result.result import Result
 from app.schema.equipment_schema import EquipmentOut
 from app.schema.page_schema import PageResp
-from app.schema.user_schema import RegisterIn
-from app.service.equipment_service import query_equipment, query_equipment_service
+from app.service.equipment_service import query_equipment_service
 from app.schema.equipment_schema import EquipQuery
 
 router = APIRouter(prefix="/user/equipment", tags=["学生端"],dependencies=[Depends(user_verity)])
