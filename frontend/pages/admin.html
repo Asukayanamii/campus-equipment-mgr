@@ -4,12 +4,42 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理端</title>
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/admin/admin.css">
 </head>
 <body>
 
 
-    <div>
+    <!-- 左侧导航栏 -->
+    <div class="nav">
+        <!-- 欢迎语句 -->
+        <div class="nav-title">
+            <p>Welcome!</p>
+        </div>
 
+        <!-- 正式选项卡 -->
+        <div class="nav-options">
+            <a href="">数据展示</a>
+            <a href="">我的记录</a>
+        </div>
+
+        <!-- 放个人头像 -->
+        <div>
+            <button>
+                <img src="" alt="">
+            </button>
+        </div>
     </div>
+
+    <!-- 数据展示 -->
+    <div class="data-showing" id="data-showing">
+        <div class="data-card">
+            <h1>这是最后一张喽</h1>
+            <p>存量</p>
+        </div>
+    </div>
+    <script src="../js/util.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/admin/index.js"> </script>
 </body>
 </html>
