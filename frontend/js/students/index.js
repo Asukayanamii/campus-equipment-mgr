@@ -1,6 +1,8 @@
 const dataShowing = document.getElementById(`data-showing`)
-
-const defaultQueryData = new QueryData({});
+let pageNow = 1;
+const defaultQueryData = new QueryData({
+    page : pageNow,
+});
 function renderData(){
     getData().then(res => {
         const list = res.data.items;
@@ -16,6 +18,8 @@ function renderData(){
 }
 
 renderData()
+
+
 
 
 
