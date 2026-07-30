@@ -10,22 +10,22 @@ from app.schema.common_schema import PageQuery
 
 class EquipmentOut(BaseSchema):
     """设备详情/列表单条响应模型"""
-    id: int
-    equipment_no: str
-    equipment_name: str
-    category_id: int | None = None
-    category_name: str | None = None
-    spec: str | None = None
-    brand: str | None = None
-    unit: str | None = None
-    location: str | None = None
-    purchase_date: date | None = None
-    price: Decimal | None = None
-    cover_img: str | None = None
-    status: str = ""
-    remark: str | None = None
-    create_time: datetime
-    update_time: datetime
+    id: int = Field(..., description="设备 ID")
+    equipment_no: str = Field(..., description="设备编号")
+    equipment_name: str = Field(..., description="设备名称")
+    category_id: int | None = Field(None, description="设备分类 ID")
+    category_name: str | None = Field(None, description="设备分类名称")
+    spec: str | None = Field(None, description="设备规格型号")
+    brand: str | None = Field(None, description="设备品牌")
+    unit: str | None = Field(None, description="计量单位")
+    location: str | None = Field(None, description="设备存放位置")
+    purchase_date: date | None = Field(None, description="采购日期")
+    price: Decimal | None = Field(None, description="采购价格")
+    cover_img: str | None = Field(None, description="设备封面图片")
+    status: str = Field("", description="设备状态")
+    remark: str | None = Field(None, description="备注")
+    create_time: datetime = Field(..., description="创建时间")
+    update_time: datetime = Field(..., description="更新时间")
     # 序列化时把Decimal转字符串
     @field_serializer("price")
     def serialize_price(self, v: Decimal | None):

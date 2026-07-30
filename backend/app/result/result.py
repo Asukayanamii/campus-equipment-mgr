@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import TypeVar,Generic,Optional
 from fastapi.responses import JSONResponse
 from app.constant.result_constant import ResultCode
@@ -9,9 +9,9 @@ class Result(BaseModel,Generic[T]):
     """
     统一返回结果类
     """
-    code: int
-    message: str
-    data: T | None = None
+    code: int = Field(..., description="业务状态码")
+    message: str = Field(..., description="响应消息")
+    data: T | None = Field(None, description="响应数据")
 
     @classmethod
     def success(cls,data: T|None = None,message: str = "success",code: int = ResultCode.SUCCESS_CODE)->'Result[T]':

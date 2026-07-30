@@ -10,8 +10,8 @@ from app.schema.base_schema import BaseSchema
 
 
 class PageQuery(BaseSchema):
-    page: int = Field(default=1, ge=1, le=1000)
-    size: int = Field(default=10, ge=1, le=100)
+    page: int = Field(default=1, ge=1, le=1000, description="页码")
+    size: int = Field(default=10, ge=1, le=100, description="每页条数")
 
 
 class InfoRegexBaseSchema(BaseSchema):
@@ -62,19 +62,19 @@ class UpdateIn(InfoRegexBaseSchema):
     id: int = Field(..., description="用户id")
     name: str = Field(..., description="昵称")
     password: str = Field(..., description="密码")
-    image: str | None = Field(None, description="头像")
+    image: str | None = Field(None, description="头像图片 URL")
 
 class UpdateInDTO(InfoRegexBaseSchema):
     name: str = Field(..., description="昵称")
     password: str = Field(..., description="密码")
-    image: str | None = Field(None, description="头像")
+    image: str | None = Field(None, description="头像图片 URL")
 
 # 获取当前用户信息响应模型
 class GetMeOut(BaseSchema):
     id: int = Field(..., description="用户id")
     name: str = Field(...,description="昵称")
     username: str = Field(..., description="用户名")
-    image: str | None = Field(None, description="头像")
+    image: str | None = Field(None, description="头像图片 URL")
     email: str | None = Field(None, description="邮箱")
     update_time: datetime = Field(..., description="更新时间")
     create_time: datetime = Field(..., description="创建时间")

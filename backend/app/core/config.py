@@ -1,4 +1,5 @@
 import os
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # 当前文件：backend/app/core/config.py
@@ -10,31 +11,31 @@ env_file_abs = os.path.join(backend_root, ".env")
 
 class Settings(BaseSettings):
     #数据库配置
-    DB_HOST: str
-    DB_PORT: int
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_DATABASE: str
+    DB_HOST: str = Field(..., description="数据库主机地址")
+    DB_PORT: int = Field(..., description="数据库端口")
+    DB_USER: str = Field(..., description="数据库用户名")
+    DB_PASSWORD: str = Field(..., description="数据库密码")
+    DB_DATABASE: str = Field(..., description="数据库名称")
 
-    DB_POOL_SIZE: int = 10
-    DB_MAX_OVERFLOW: int = 20
+    DB_POOL_SIZE: int = Field(10, description="数据库连接池大小")
+    DB_MAX_OVERFLOW: int = Field(20, description="数据库连接池最大溢出连接数")
 
     #JWT配置
-    USER_JWT_SECRET_KEY: str
-    ADMIN_JWT_SECRET_KEY: str
-    REPAIR_JWT_SECRET_KEY: str
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 12
+    USER_JWT_SECRET_KEY: str = Field(..., description="学生端 JWT 密钥")
+    ADMIN_JWT_SECRET_KEY: str = Field(..., description="管理员端 JWT 密钥")
+    REPAIR_JWT_SECRET_KEY: str = Field(..., description="维修端 JWT 密钥")
+    ALGORITHM: str = Field("HS256", description="JWT 签名算法")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(60 * 12, description="访问令牌有效期，单位为分钟")
 
     #oss配置
-    ALIYUN_OSS_ACCESS_KEY_ID: str
-    ALIYUN_OSS_ACCESS_KEY_SECRET: str
-    ALIYUN_OSS_REGION: str
-    ALIYUN_OSS_BUCKET_NAME: str
+    ALIYUN_OSS_ACCESS_KEY_ID: str = Field(..., description="阿里云 OSS AccessKey ID")
+    ALIYUN_OSS_ACCESS_KEY_SECRET: str = Field(..., description="阿里云 OSS AccessKey Secret")
+    ALIYUN_OSS_REGION: str = Field(..., description="阿里云 OSS 区域")
+    ALIYUN_OSS_BUCKET_NAME: str = Field(..., description="阿里云 OSS 存储桶名称")
 
     #图片上传配置
-    IMAGE_MAX_SIZE: int
-    IMAGE_ALLOWED_EXTENSIONS: str
+    IMAGE_MAX_SIZE: int = Field(..., description="图片上传大小上限")
+    IMAGE_ALLOWED_EXTENSIONS: str = Field(..., description="允许上传的图片扩展名")
 
 
     @property
