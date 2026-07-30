@@ -22,7 +22,7 @@ def register_by_password(register_in: RegisterIn, db: Session):
             raise BussinessException("用户已存在", status_code=409)
         # 密码加密存储
         salt = bcrypt.gensalt()
-        register_in.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt)
+        register_in.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt).decode('utf-8')
         repair = RepairUser(**register_in.model_dump())
         repair.name = 'repair'+ uuid.uuid5(uuid.NAMESPACE_DNS, register_in.username).hex[:5]
         repair_user_crud.add_repair_user(repair, db)
@@ -48,7 +48,7 @@ def update_me(update_in: UpdateIn, db: Session) -> None:
         if not repair_user:
             raise BussinessException("用户不存在", status_code=404)
         salt = bcrypt.gensalt()
-        update_in.password = bcrypt.hashpw(update_in.password.encode('utf-8'), salt)
+        update_in.password = bcrypt.hashpw(update_in.password.encode('utf-8'), salt).decode('utf-8')
         update_model = RepairUser(**update_in.model_dump())
         update_model.update_time = datetime.now()
         repair_user_crud.update_repair_user(update_model, db)
