@@ -57,17 +57,6 @@ function chooseIdentity(target){
     identity = showIdentity(target);
 }
 
-// 身份映射到接口
-function apiChoose(){
-    if(identity === 1){
-        return `/user`
-    }else if(identity === 2){
-        return `/admin`
-    }else if(identity === 3){
-        return `/repair`
-    }
-}
-
 //验证账号是否合规
 function checkAccount(){
     const stringAccount = account.value;
@@ -107,19 +96,20 @@ async function submit(){
 
 
 
-studentLogin.addEventListener('click',() => chooseIdentity(studentLogin))
-maintainerLogin.addEventListener('click',() => chooseIdentity(maintainerLogin))
-adminLogin.addEventListener('click',() => chooseIdentity(adminLogin))
+studentLogin.addEventListener('click',async () => chooseIdentity(studentLogin))
+maintainerLogin.addEventListener('click',async () => chooseIdentity(maintainerLogin))
+adminLogin.addEventListener('click',async () => chooseIdentity(adminLogin))
 
-registerButton.addEventListener('click',() => {
+registerButton.addEventListener('click',async () => {
     if(await register() === true ){
         alert("注册成功")
     }else{
         alert("注册失败")
     }
 })
-submitButton.addEventListener('click',() => {
+submitButton.addEventListener('click',async () => {
     if(await submit() === true){
         alert("登录成功")
+        window.location.href = `${BASE_URL}/${identity}`
     }
 })

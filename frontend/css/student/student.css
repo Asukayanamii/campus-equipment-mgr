@@ -1,44 +1,3 @@
-body{
-    display: flex;
-}
-.nav{
-    display: flex;
-    background-color:   pink;
-    flex-wrap: nowrap;
-    flex-direction: column;
-    align-items: center;
-    width: 200px;
-    height: 100vh;
-}
-.nav-title{
-    margin-top: 30px;
-    margin-bottom: 30px;
-}
-.nav-options{
-    display: flex;
-    background-color: rgb(87, 87, 190);
-    flex-direction: column;
-    gap: 30px;
-}
-.data-showing{
-    background-color: green;
-    width: 100vw;
-    display: grid;
-    grid-template-columns: repeat(7,1fr);
-    grid-template-rows: repeat(4,1fr);
-}
-.data-card{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    background-color:   red;
-    width: 200px;
-    height: 250px;
-    gap: 10px;
-}
-
-
 :root {
     --nav-bg: #1e293b;
     --nav-text: #e2e8f0;
@@ -52,18 +11,27 @@ body{
 }
 
 body {
+    display: flex;
     background-color: var(--body-bg);
     font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
 .nav {
+    display: flex;
     background-color: var(--nav-bg);
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: center;
+    width: 200px;
+    height: 100vh;
     padding: 0 16px;
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.1);
     z-index: 10;
 }
 
 .nav-title {
+    margin-top: 30px;
+    margin-bottom: 30px;
     width: 100%;
     padding: 24px 0 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -78,7 +46,10 @@ body {
 }
 
 .nav-options {
+    display: flex;
+    flex: 1;
     background-color: transparent;
+    flex-direction: column;
     width: 100%;
     padding: 16px 0;
     gap: 4px;
@@ -100,8 +71,44 @@ body {
     color: var(--nav-accent);
 }
 
+.profile-showing{
+    display: flex;
+    width: 100%;
+    height: 70px;
+}
+
+.profile-picture-box{
+    height: 70px;
+    width: 70px;
+}
+
+
+
+.profile-name-box{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+
+.profile-picture{
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+}
+
+.profile-name{
+    color: white;
+}
+
+
 .data-showing {
+    display: grid;
     background-color: transparent;
+    width: 100vw;
+    grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(3    , 1fr);
     padding: 32px;
     gap: 24px;
     align-content: start;
@@ -109,7 +116,14 @@ body {
 }
 
 .data-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
     background-color: var(--card-bg);
+    width: 200px;
+    height: 250px;
+    gap: 10px;
     border-radius: 12px;
     box-shadow: var(--card-shadow);
     border: 1px solid var(--border-light);

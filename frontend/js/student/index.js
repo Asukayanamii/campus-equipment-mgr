@@ -1,5 +1,9 @@
 const dataShowing = document.getElementById(`data-showing`)
+
+const profileName = document.getElementById('profileName')
+const profilePicture = document.getElementById('profile-picture')
 let pageNow = 1;
+const identity = 1
 const defaultQueryData = new QueryData({
     page : pageNow,
 });
@@ -17,6 +21,13 @@ function renderData(){
     })
 }
 
+function renderPersonalData(){
+    const personalData = getPersonalData(apiChoose())
+
+    profileName.innerText = personalData.name
+    profilePicture.src = personalData.image
+    
+}
 renderData()
 
 
