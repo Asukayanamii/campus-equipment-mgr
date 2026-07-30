@@ -10,11 +10,11 @@ window.fetch = async function (input , init ){
     const response = await originalFetch.call(this,input,init);
 
 
-    if(response.status === 401){
+    if(response.status !== 200){
         if(isRedirecting === false){
             isRedirecting = true;
-            localStorage.removeItem('token');
-            window.location.replace(`/login`);
+            sessionStorage.removeItem('token');
+            window.location.replace(`campus-equipment-mgr/frontend/login.html`);
         }
     }
 

@@ -58,7 +58,7 @@ async function sendRegister(username , password, identity){
             method : "POST",
             headers : {
                 'Content-Type' : 'application/json',
-                // 'token' : sessionStorage.getItem(`token`),
+                'token' : sessionStorage.getItem(`token`)
             },
             body : JSON.stringify({
                 'username': username,

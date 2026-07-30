@@ -110,6 +110,6 @@ registerButton.addEventListener('click',async () => {
 submitButton.addEventListener('click',async () => {
     if(await submit() === true){
         alert("登录成功")
-        window.location.href = `${BASE_URL}/${identity}`
+        window.location.replace(`/campus-equipment-mgr/frontend/pages/${apiChoose()}.html`)
     }
 })
