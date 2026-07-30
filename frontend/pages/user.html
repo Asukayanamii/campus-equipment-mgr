@@ -34,13 +34,34 @@
         </div>
     </div>
 
-    <!-- 数据展示 -->
-    <div class="data-showing" id="data-showing">
-        <div class="data-card">
-            <h1>这是最后一张喽</h1>
-            <p>存量</p>
+    <!-- 右侧区域 -->
+     <div class="right-side">
+        <!-- 搜索框 -->
+         <div class="search-box">
+            <p>搜索：<input type="text" class="search"></p>
+         </div>
+        <!-- 数据展示 -->
+        <div class="data-showing" id="data-showing">
+            <div class="data-card">
+                <p>6</p>
+                <div class="data-detail-showing" id="data-detail-showing">
+                    <p>6</p>
+                </div>
+            </div>
         </div>
-    </div>
+
+        <!-- 页码选择 -->
+        <div class="page-choose-box">
+            <button id="start"></button>
+            <button id="pre-2"></button>
+            <button id="pre-1"></button>
+            <button id="cur"></button>
+            <button id="aft-1"></button>
+            <button id="aft-2"></button>
+            <button id="end"></button>
+        </div>
+     </div>
+    
     <script src="../js/util.js"></script>
     <script src="../js/api.js"></script>
     <script src="../js/user/index.js"> </script>

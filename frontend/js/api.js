@@ -1,4 +1,4 @@
-const BASE_URL = 'https://frp-put.com:58235'
+const BASE_URL = 'http://127.0.0.1:4523/m1/8634384-8414797-default'
 
 
 // 跳转
@@ -14,7 +14,7 @@ function goTo(identity , location){
 // 获取某页的数据
 /**`
  * @param {QueryData} QueryData
- * @returns {}
+ * @returns {Result_Page_EquipmentOut}
  */
 async function getData (QueryData = {}){
     try{
@@ -28,13 +28,14 @@ async function getData (QueryData = {}){
             }
         }
 
-        let data = await fetch(`${BASE_URL}/user/equipment/page?${params.toString()}`,{
+        const data = await fetch(`${BASE_URL}/user/equipment/page?${params.toString()}`,{
         method : 'GET',
         headers : {
             'content-type' : 'application/json',
             'token' : sessionStorage.getItem(`token`)
         },
         });
+
         return await data.json();
     }catch(error){
         console.error(`请求数据失败`,error)
