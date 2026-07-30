@@ -26,6 +26,17 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 12
 
+    #oss配置
+    ALIYUN_OSS_ACCESS_KEY_ID: str
+    ALIYUN_OSS_ACCESS_KEY_SECRET: str
+    ALIYUN_OSS_REGION: str
+    ALIYUN_OSS_BUCKET_NAME: str
+
+    #图片上传配置
+    IMAGE_MAX_SIZE: int
+    IMAGE_ALLOWED_EXTENSIONS: str
+
+
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> str:
         return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_DATABASE}"

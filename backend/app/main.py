@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import Page, add_pagination, paginate
+
+from app.api.common import common
 from app.api.user import user, equipment
 from app.api.admin import admin, equipment as admin_equipment
 from app.api.repair import repair, equipment as repair_equipment
@@ -17,6 +19,7 @@ app.include_router(admin.router)
 app.include_router(admin_equipment.router)
 app.include_router(repair.router)
 app.include_router(repair_equipment.router)
+app.include_router(common.router)
 
 # 开发环境：允许所有源（仅用于开发！）
 app.add_middleware(
