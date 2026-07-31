@@ -175,6 +175,21 @@ token: <login-response.data.token>
 `available`、`pending_borrow`、`borrowed`、`pending_return`、`damaged`、`repair_pending`、`repairing`、
 `repaired`、`scrapped`、`offline`。设备编号全局唯一。
 
+### 管理端设备分类
+
+以下接口均需管理员 `token`。删除为逻辑删除，列表与详情不会返回已删除分类。
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/admin/equipment-category/page` | 按 ID 或分类名分页查询 |
+| GET | `/admin/equipment-category/{categoryId}` | 查询设备分类详情 |
+| POST | `/admin/equipment-category/` | 新增设备分类 |
+| PUT | `/admin/equipment-category/{categoryId}` | 更新设备分类，未传字段保持原值 |
+| DELETE | `/admin/equipment-category/{categoryId}` | 删除设备分类 |
+
+新增请求体中的 `categoryName` 必填，长度为 1-50；`sort` 默认为 `0`，值越小排序越靠前。
+分页查询支持 `id`、`categoryName`、`page`、`size`、`sort` 和 `order` 参数，其中 `categoryName` 为模糊匹配。
+
 可用查询参数包括：
 
 | 参数 | 说明 | 默认值 |

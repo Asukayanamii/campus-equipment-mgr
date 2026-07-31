@@ -4,7 +4,7 @@ from fastapi_pagination import Page, add_pagination, paginate
 
 from app.api.common import common
 from app.api.user import user, equipment
-from app.api.admin import admin, equipment as admin_equipment
+from app.api.admin import admin, equipment as admin_equipment, equipment_category as admin_equipment_category
 from app.api.repair import repair, equipment as repair_equipment
 from app.core.exception_handler import register_exception_handler
 from app.result.result import Result
@@ -17,6 +17,7 @@ app.include_router(user.router)
 app.include_router(equipment.router)
 app.include_router(admin.router)
 app.include_router(admin_equipment.router)
+app.include_router(admin_equipment_category.router)
 app.include_router(repair.router)
 app.include_router(repair_equipment.router)
 app.include_router(common.router)
