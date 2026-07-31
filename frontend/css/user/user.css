@@ -16,7 +16,14 @@ body {
     font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
+.place-holder{
+    width: 200px;
+    height: 100%;
+    flex-shrink: 0;
+}
+
 .nav {
+    position: fixed;
     display: flex;
     background-color: var(--nav-bg);
     flex-wrap: nowrap;
@@ -125,15 +132,16 @@ body {
 
 .data-showing {
     flex: 1;
-    display: grid;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     background-color: transparent;
     width: 100%;
-    grid-template-columns: repeat(6, 1fr);
-    grid-template-rows: repeat(3    , 1fr);
     padding: 32px;
     gap: 24px;
     align-content: start;
     justify-items: center;
+    gap: 40px   ;
 }
 
 .data-card {
@@ -169,7 +177,8 @@ body {
 }
 
 .data-card:hover {
-    transform: translateY(-4px);
+    /* transform,祸害中的祸害，会导致创建层叠上下文，会成为postion:fix的包含块，影响我的坐标计算 */
+    /* transform: translateY(-4px); */
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 
@@ -199,7 +208,7 @@ body {
 
 .data-detail-showing{
     position: fixed;
-    height: 100px;
+    height: 500px;
     width: 100px;
     display: flex;
     flex-direction: column;
@@ -210,6 +219,6 @@ body {
     z-index: 100;
     left: 0;
     top: 0;
-    background-color: red;
+    background-color: rgb(84, 194, 65);
 }
 

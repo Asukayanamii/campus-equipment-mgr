@@ -1,7 +1,7 @@
-const PAGE_SIZE = 18;
+const PAGE_SIZE = 24;
 const DEFAULT_NAME = '代文秋'
-const OFF_SETX = 15
-const OFF_SETY = 15
+const OFF_SETX = 0
+const OFF_SETY = 0
 const dataShowing = document.getElementById(`data-showing`)
 
 const profileName = document.getElementById('profileName')
@@ -15,7 +15,6 @@ const aft1 = document.getElementById('aft-1')
 const aft2 = document.getElementById('aft-2')
 const end = document.getElementById('end')
 
-const dataDetailShowing = document.getElementById('data-detail-showing')
 const dataCard = document.getElementById('data-showing') 
 
 let pageNow = 1;
@@ -28,29 +27,40 @@ const defaultQueryData = new QueryData({
 
 // 检查按钮重复，务必在pageAll有数值的时候使用
 function checkButton(){
-
-    switch (cur.innerHTML){
+    start.style.display = 'block'
+    pre2.style.display = 'block'
+    pre1.style.display = 'block'
+    end.style.display = 'block'
+    aft2.style.display = 'block'
+    aft1.style.display = 'block'
+    switch (Number(cur.innerHTML)){
         case 1 :
             start.style.display = 'none'
             pre2.style.display = 'none'
             pre1.style.display = 'none'
+            break
         case 2 :
             pre2.style.display = 'none'
             pre1.style.display = 'none'
+            break
         case 3 :
-            pre1.style.display = 'none'
+            pre2.style.display = 'none'
+            break
     }
 
-    switch(cur.innerText){
-        case pageAll - 2:
+    switch(Number(cur.innerText)){
+        case pageAll -2:
             end.style.display = 'none'
+            break
         case pageAll - 1:
             end.style.display = 'none'
             aft2.style.display = 'none'
+            break
         case pageAll :
             end.style.display = 'none'
             aft2.style.display = 'none'
             aft1.style.display = 'none'
+            break
     }
     
 
@@ -65,34 +75,51 @@ function renderButton(){
     aft1.innerText = pageNow + 1
     aft2.innerText = pageNow + 2
     end.innerText = pageAll
+    cur.style.backgroundColor = 'red'
 }
 
 // 渲染数据
 function renderData(QueryData = {}){
     getData(QueryData).then(res => {
         const list = res.data.items;
+        dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card">
+                <div class="data-card" style = " background-image: url(${i.coverImg})">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">
-                        <p>6</p>
+                        <p>设备 ID${i.id}</p>
+                        <p>设备编号${i.equipmentNo}</p>
+                        <p>设备分类名称${i.categoryName}</p>
+                        <p>设备规格型号 ID${i.spec}</p>
+                        <p>设备品牌${i.brand}</p>
+                        <p>计量单位${i.unit}</p>
+                        <p>采购日期${i.purchaseDate}</p>
+                        <p>采购价格${i.price}</p>
+                        <p>设备状态${i.status}</p>
+                        <p>备注${i.remark}</p>
+                        <p>创建时间${i.creatTime}</p>
+                        <p>更新时间${i.updateTime}</p>
+                        <p> ${i.coverImg}</p>
                     </div>
                 </div>
             `)
-            pageAll = res.data.pages;
             
-            renderButton()
-            checkButton()
+            
+            
         });
-        
+        pageAll = res.data.pages;
+        renderButton()
+        checkButton()
     })
 }
 
 // 渲染个人信息
 function renderPersonalData(){
     const personalData = getPersonalData(apiChoose())
+
+
 
     if(!profileName.innerText){
         profileName.innerText = `${DEFAULT_NAME}`
@@ -105,58 +132,72 @@ function renderPersonalData(){
 }
 
 
-
-
 start.addEventListener('click', () =>{
      defaultQueryData.page = 1;
+     pageNow = 1
      renderData(defaultQueryData)
 })
 
 end.addEventListener('click',() => {
     defaultQueryData.page = pageAll
+    pageNow = pageAll
     renderData(defaultQueryData)
 })
 
 pre2.addEventListener('click' ,() => {
     defaultQueryData.page = pre2.innerText
+    pageNow = pageNow - 2
     renderData(defaultQueryData)
 })
 
 pre1.addEventListener('click' ,() => {
     defaultQueryData.page = pre1.innerText
+    pageNow = pageNow - 1
     renderData(defaultQueryData)
 })
 
 cur.addEventListener('click' ,() => {
     defaultQueryData.page = cur.innerText
+    pageNow = pageNow
     renderData(defaultQueryData)
 })
 
 aft1.addEventListener('click' ,() => {
     defaultQueryData.page = aft1.innerText
+    pageNow = pageNow + 1
     renderData(defaultQueryData)
 })
 
 aft2.addEventListener('click' ,() => {
     defaultQueryData.page = aft2.innerText
+    pageNow = pageNow + 2
     renderData(defaultQueryData)
 })
 
-// dataCard.addEventListener('mousemove', (e) => {
-//     dataDetailShowing.style.left = (e.clientX + OFF_SETX) +'px'
-//     dataDetailShowing.style.top = (e.clientY + OFF_SETY) +'px'
-// })
-
 dataCard.addEventListener('mousemove', (e) => {
-      const card = e.target.closest('.data-card')
-      if (!card) return
-      const detail = card.querySelector('.data-detail-showing')
-      if (!detail) return
-      detail.style.left = (e.clientX  + OFF_SETX) + 'px'
-      detail.style.top = (e.clientY + OFF_SETY) + 'px'
-  })
+    const card = e.target.closest('.data-card')
+    if (!card) return 
+    const dataDetailShowing = card.querySelector('.data-detail-showing')
+    // TODO:硬编码问题，有时间我就来修
+    const maxWidth = window.innerWidth
+    const maxHeigt = window.innerHeight
+    if(e.clientX + OFF_SETX +100> maxWidth){
+        dataDetailShowing.style.left = ( e.clientX + OFF_SETX -100) + 'px'
+    }else{
+        dataDetailShowing.style.left = (e.clientX + OFF_SETX ) +'px'
+    }
+    if(e.clientY + OFF_SETY +500> maxHeigt){
+        dataDetailShowing.style.top = (e.clientY + OFF_SETY -500) + 'px'
+    }else{
+        dataDetailShowing.style.top = (e.clientY + OFF_SETY ) +'px'
+    }
+    
+    
+})
+
 
 renderData(defaultQueryData)
+renderPersonalData()
 
 
 

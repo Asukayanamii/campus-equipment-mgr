@@ -1,29 +1,29 @@
 // 重写fetch，实现拦截器
-// const originalFetch = window.fetch;
-// let isRedirecting = false;
-// window.fetch = async function (input , init ){
+const originalFetch = window.fetch;
+let isRedirecting = false;
+window.fetch = async function (input , init ){
 
-//     if(window.location.pathname.includes(`/login`) || window.location.pathname.includes(`/index`)){
-//         return originalFetch.call(this,input,init)
-//     }
+    if(window.location.pathname.includes(`/login`) || window.location.pathname.includes(`/index`)){
+        return originalFetch.call(this,input,init)
+    }
 
-//     const response = await originalFetch.call(this,input,init);
+    const response = await originalFetch.call(this,input,init);
 
 
-//     if(response.status !== 200){
-//         if(isRedirecting === false){
-//             isRedirecting = true;
-//             sessionStorage.removeItem('token');
-//             window.location.replace(`campus-equipment-mgr/frontend/login.html`);
-//         }
-//     }
+    if(response.status !== 200){
+        if(isRedirecting === false){
+            isRedirecting = true;
+            sessionStorage.removeItem('token');
+            window.location.replace(`/campus-equipment-mgr/frontend/login.html`);
+        }
+    }
 
-//     if(response.status !== 200){
-//         console.error(response.message);
-//     }
+    if(response.status !== 200){
+        console.error(response.message);
+    }
 
-//     return response
-// }
+    return response
+}
 // 身份映射到接口
 function apiChoose(){
     if(identity === 1){

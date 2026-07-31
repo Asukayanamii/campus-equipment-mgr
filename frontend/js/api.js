@@ -1,4 +1,4 @@
-const BASE_URL = 'http://127.0.0.1:4523/m1/8634384-8414797-default'
+const BASE_URL = `https://frp-put.com:58235`
 
 
 // 跳转
