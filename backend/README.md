@@ -158,6 +158,23 @@ token: <login-response.data.token>
 | GET | `/admin/equipment/page` | 管理端设备分页查询 |
 | GET | `/repair/equipment/page` | 维修端设备分页查询 |
 
+### 设备详情与管理
+
+三端均可根据设备 ID 查询未删除设备的详情，端点均需使用对应端的 `token`：
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| GET | `/user/equipment/{equipmentId}` | 学生端设备详情 |
+| GET | `/admin/equipment/{equipmentId}` | 管理端设备详情 |
+| GET | `/repair/equipment/{equipmentId}` | 维修端设备详情 |
+| POST | `/admin/equipment/` | 管理端新增设备 |
+| PUT | `/admin/equipment/{equipmentId}` | 管理端更新设备，未传字段保持原值 |
+| DELETE | `/admin/equipment/{equipmentId}` | 管理端逻辑删除设备 |
+
+新增设备请求体至少包含 `equipmentNo` 和 `equipmentName`。`status` 默认为 `available`；可选状态值为
+`available`、`pending_borrow`、`borrowed`、`pending_return`、`damaged`、`repair_pending`、`repairing`、
+`repaired`、`scrapped`、`offline`。设备编号全局唯一。
+
 可用查询参数包括：
 
 | 参数 | 说明 | 默认值 |

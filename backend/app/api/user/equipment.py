@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Path, Query
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
@@ -8,10 +8,10 @@ from app.db.session import get_db
 from app.result.result import Result
 from app.schema.equipment_schema import EquipmentOut
 from app.schema.page_schema import PageResp
-from app.service.equipment_service import query_equipment_service
+from app.service.equipment_service import get_equipment_service, query_equipment_service
 from app.schema.equipment_schema import EquipQuery
 
-router = APIRouter(prefix="/user/equipment", tags=["学生端"],dependencies=[Depends(user_verity)])
+router = APIRouter(prefix="/user/equipment", tags=["学生端/设备相关"],dependencies=[Depends(user_verity)])
 
 # @router.get("/equipments",response_model=Result[PageResp[EquipmentOut]],name="获取所有设备")
 # def all_equipments(db: Session = Depends(get_db)):
@@ -24,3 +24,12 @@ def page_equipments(query: EquipQuery = Query(),db: Session = Depends(get_db)):
     logger.info("分页条件查询设备")
     res = query_equipment_service(db, query)
     return Result.success(res)
+
+
+@router.get("/{equipmentId}", response_model=Result[EquipmentOut], name="根据 ID 查询设备详情")
+def get_equipment(
+    equipment_id: int = Path(..., alias="equipmentId", ge=1),
+    db: Session = Depends(get_db),
+):
+    logger.info("学生端根据 ID 查询设备详情，设备 ID：%s", equipment_id)
+    return Result.success(get_equipment_service(db, equipment_id))

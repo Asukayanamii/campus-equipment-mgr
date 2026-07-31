@@ -9,11 +9,41 @@ from app.schema.equipment_schema import EquipQuery
 
 
 def get_equipment_by_id(session:Session,id:int) -> Equipment | None:
-    stmt = select(Equipment).where(Equipment.id == id)
+    stmt = select(Equipment).where(Equipment.id == id, Equipment.is_deleted == 0)
     return session.scalar(stmt)
 
+
+def get_equipment_detail_by_id(session: Session, id: int) -> tuple[Equipment, EquipmentCategory | None] | None:
+    stmt = (
+        select(Equipment, EquipmentCategory)
+        .outerjoin(EquipmentCategory, Equipment.category_id == EquipmentCategory.id)
+        .where(Equipment.id == id, Equipment.is_deleted == 0)
+    )
+    return session.execute(stmt).one_or_none()
+
+
+def get_equipment_by_no(session: Session, equipment_no: str) -> Equipment | None:
+    stmt = select(Equipment).where(Equipment.equipment_no == equipment_no)
+    return session.scalar(stmt)
+
+
+def add_equipment(equipment: Equipment, session: Session) -> None:
+    session.add(equipment)
+    session.flush()
+
+
+def update_equipment(equipment: Equipment, values: dict, session: Session) -> None:
+    for field, value in values.items():
+        setattr(equipment, field, value)
+    session.flush()
+
+
+def delete_equipment(equipment: Equipment, session: Session) -> None:
+    equipment.is_deleted = 1
+    session.flush()
+
 def list_all_equipment(session:Session) -> list[Equipment]:
-    stmt = select(Equipment)
+    stmt = select(Equipment).where(Equipment.is_deleted == 0)
     return session.scalars(stmt).all()
 
 # def get_all_equipment_out(session:Session) -> list[tuple[Equipment,EquipmentCategory]]:
@@ -24,7 +54,8 @@ def list_all_equipment(session:Session) -> list[Equipment]:
 def query_equipment(session:Session,query:EquipQuery) -> Page[tuple[Equipment, EquipmentCategory]]:
     #拼接查询语句
     stmt = (select(Equipment,EquipmentCategory)
-            .outerjoin(EquipmentCategory,Equipment.category_id==EquipmentCategory.id))
+            .outerjoin(EquipmentCategory,Equipment.category_id==EquipmentCategory.id)
+            .where(Equipment.is_deleted == 0))
     if query.category_id:
         stmt = stmt.where(Equipment.category_id==query.category_id)
     if query.status:

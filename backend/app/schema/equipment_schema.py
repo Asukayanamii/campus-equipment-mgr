@@ -2,8 +2,9 @@ from datetime import date, datetime
 from decimal import Decimal
 
 from fastapi_pagination import Params
-from pydantic import field_serializer, Field, field_validator
+from pydantic import field_serializer, Field, field_validator, model_validator
 
+from app.constant.status_constant import ITEM_STATUS_CODES
 from app.schema.base_schema import BaseSchema
 from app.schema.common_schema import PageQuery
 
@@ -36,6 +37,56 @@ class EquipmentOut(BaseSchema):
     @field_serializer("purchase_date")
     def serialize_date(self, v: date | None):
         return v.strftime("%Y-%m-%d") if v else None
+
+
+class EquipmentCreate(BaseSchema):
+    """新增设备请求模型"""
+    equipment_no: str = Field(..., min_length=1, max_length=60, description="设备编号")
+    equipment_name: str = Field(..., min_length=1, max_length=100, description="设备名称")
+    category_id: int | None = Field(None, ge=1, description="设备分类 ID")
+    spec: str | None = Field(None, max_length=200, description="设备规格型号")
+    brand: str | None = Field(None, max_length=80, description="设备品牌")
+    unit: str | None = Field(None, max_length=20, description="计量单位")
+    location: str | None = Field(None, max_length=100, description="设备存放位置")
+    purchase_date: date | None = Field(None, description="采购日期")
+    price: Decimal | None = Field(None, ge=0, max_digits=10, decimal_places=2, description="采购价格")
+    cover_img: str | None = Field(None, max_length=255, description="设备封面图片")
+    status: str = Field("available", description="设备状态")
+    remark: str | None = Field(None, description="备注")
+
+    @field_validator("status")
+    def validate_status(cls, value: str):
+        if value not in ITEM_STATUS_CODES:
+            raise ValueError("设备状态不合法")
+        return value
+
+
+class EquipmentUpdate(BaseSchema):
+    """更新设备请求模型，未传字段保持原值不变"""
+    equipment_no: str | None = Field(None, min_length=1, max_length=60, description="设备编号")
+    equipment_name: str | None = Field(None, min_length=1, max_length=100, description="设备名称")
+    category_id: int | None = Field(None, ge=1, description="设备分类 ID")
+    spec: str | None = Field(None, max_length=200, description="设备规格型号")
+    brand: str | None = Field(None, max_length=80, description="设备品牌")
+    unit: str | None = Field(None, max_length=20, description="计量单位")
+    location: str | None = Field(None, max_length=100, description="设备存放位置")
+    purchase_date: date | None = Field(None, description="采购日期")
+    price: Decimal | None = Field(None, ge=0, max_digits=10, decimal_places=2, description="采购价格")
+    cover_img: str | None = Field(None, max_length=255, description="设备封面图片")
+    status: str | None = Field(None, description="设备状态")
+    remark: str | None = Field(None, description="备注")
+
+    @field_validator("status")
+    def validate_status(cls, value: str | None):
+        if value is not None and value not in ITEM_STATUS_CODES:
+            raise ValueError("设备状态不合法")
+        return value
+
+    @model_validator(mode="after")
+    def validate_update_fields(self):
+        if not self.model_fields_set:
+            raise ValueError("至少传入一个需要更新的字段")
+        return self
 
 #继承paginate依赖的参数类
 class EquipQuery(BaseSchema,Params):
