@@ -4,7 +4,9 @@ const OFF_SETX = 0
 const OFF_SETY = 0
 const dataShowing = document.getElementById(`data-showing`)
 
-const profileName = document.getElementById('profileName')
+const profilePictureBox = document.getElementById('profile-picture-box')
+
+const profileName = document.getElementById('profile-name')
 const profilePicture = document.getElementById('profile-picture')
 
 const start = document.getElementById('start')
@@ -116,19 +118,40 @@ function renderData(QueryData = {}){
 }
 
 // 渲染个人信息
-function renderPersonalData(){
-    const personalData = getPersonalData(apiChoose())
+async function renderPersonalData(){
+    const personalData = await getPersonalData(apiChoose())
 
 
 
-    if(!profileName.innerText){
+    if(!personalData.name){
         profileName.innerText = `${DEFAULT_NAME}`
     }else{
         profileName.innerText = personalData.name
     }
     
-    profilePicture.src = personalData.image
-    
+    if(!personalData.image){
+        profilePicture.src = '../assets/images/all-icon..png'
+    }else{
+        profilePicture.src = personalData.image
+    }
+}
+
+// 渲染详情和修改面板
+async function renderChangePanel(){
+    const personalData = await getPersonalData(apiChoose())
+    document.body.insertAdjacentHTML('beforeend',`
+        <div class="change-panel">
+        <div class="profile-detail-showing">
+            <img src="${personalData.image}" alt="你的头像">
+            <p>你的id:${personalData.id}</p>
+            <p>你的昵称:${personalData.name}</p>
+            <p>你的账号:${personalData.username}</p>
+            <p>你的邮箱:${personalData.email}</p>
+            <p>上传更新时间:${personalData.updateTime}</p>
+            <p>账号创建时间:${personalData.createTime}</p>
+        </div>
+    </div>
+        `)
 }
 
 
@@ -195,6 +218,14 @@ dataCard.addEventListener('mousemove', (e) => {
     
 })
 
+profilePictureBox.addEventListener('click',() => {
+    renderChangePanel().then(() => {
+        document.body.insertAdjacentHTML('beforeend',`
+            <div class="dim-overlay"></div>
+            `)
+    })
+
+})
 
 renderData(defaultQueryData)
 renderPersonalData()
