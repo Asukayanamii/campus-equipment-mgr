@@ -25,6 +25,7 @@ def register_by_password(register_in: RegisterIn, db: Session):
         register_in.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt).decode('utf-8')
         user = User(**register_in.model_dump())
         user.name = 'user'+ uuid.uuid5(uuid.NAMESPACE_DNS, register_in.username).hex[:5]
+        user.image = settings.DEFAULT_PROFILE_IMAGE_URL
         user_crud.add_user(user, db)
         return None
 

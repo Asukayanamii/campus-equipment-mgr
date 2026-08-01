@@ -25,6 +25,7 @@ def register_by_password(register_in: RegisterIn, db: Session):
         register_in.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt).decode('utf-8')
         repair = RepairUser(**register_in.model_dump())
         repair.name = 'repair'+ uuid.uuid5(uuid.NAMESPACE_DNS, register_in.username).hex[:5]
+        repair.image = settings.DEFAULT_PROFILE_IMAGE_URL
         repair_user_crud.add_repair_user(repair, db)
         return None
 

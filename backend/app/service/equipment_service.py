@@ -1,6 +1,7 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
 from app.core.exceptions import BussinessException
 from app.crud import equipment_crud
 from app.db.models.equipment_model import Equipment
@@ -43,7 +44,10 @@ def create_equipment_service(session: Session, equipment_in: EquipmentCreate) ->
     with session.begin():
         if equipment_crud.get_equipment_by_no(session, equipment_in.equipment_no):
             raise BussinessException("设备编号已存在", status_code=409)
-        equipment_crud.add_equipment(Equipment(**equipment_in.model_dump()), session)
+        equipment_data = equipment_in.model_dump()
+        if not equipment_data["cover_img"]:
+            equipment_data["cover_img"] = settings.DEFAULT_EQUIPMENT_IMAGE_URL
+        equipment_crud.add_equipment(Equipment(**equipment_data), session)
 
 
 def update_equipment_service(session: Session, equipment_id: int, equipment_in: EquipmentUpdate) -> None:

@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     #图片上传配置
     IMAGE_MAX_SIZE: int = Field(..., description="图片上传大小上限")
     IMAGE_ALLOWED_EXTENSIONS: str = Field(..., description="允许上传的图片扩展名")
+    DEFAULT_EQUIPMENT_IMAGE_URL: str = Field(..., description="新增设备的默认图片 URL")
+    DEFAULT_PROFILE_IMAGE_URL: str = Field(..., description="新账号的默认头像 URL")
 
 
     @property
