@@ -1,3 +1,9 @@
+const ACCOUNT_RULE = /^[a-zA-Z0-9_]{6,24}$/
+const ACCOUNT_RULE_DESCRIPTION = "字母或数字或下划线 ，长度在6-24"
+const PASSWORD_RULE = /^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9_\!@#\$%\^&\*\(\)\-=]{6,24}$/
+const PASSWORD_RULE_DESCRIPTION = "6-24 位，至少 1 个字母、至少 1 个数字，支持常用符号"
+
+
 // 重写fetch，实现拦截器
 const originalFetch = window.fetch;
 let isRedirecting = false;
@@ -33,6 +39,36 @@ function apiChoose(){
     }else if(identity === 3){
         return `repair`
     }
+}
+
+//验证账号是否合规
+/**
+ * 
+ * @param {HTMLHtmlElement} account 
+ * @returns 
+ */
+function checkAccount(account){
+    const stringAccount = account.value;
+    if(ACCOUNT_RULE.test(stringAccount) === false){
+        alert(`您提交的账号不符合要求，必须满足${ACCOUNT_RULE_DESCRIPTION}`);
+        return false;
+    }
+    return stringAccount;
+}
+
+//验证密码是否合规
+/**
+ * 
+ * @param {HTMLElement} password 
+ * @returns 
+ */
+function checkPassword(password){
+    const stringPassword = password.value;
+    if(PASSWORD_RULE.test(stringPassword) === false){
+        alert(`您提交的密码不符合要求，必须满足${PASSWORD_RULE_DESCRIPTION}`);
+        return false;
+    }
+    return stringPassword;
 }
 
 class EquipmentOut{

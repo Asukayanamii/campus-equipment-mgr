@@ -5,19 +5,6 @@
     z-index: 400;
 }
 
-.shutdown-button{
-    position: relative;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 20px;
-    height: 20px;
-    right: -107%;
-    top: -20%;
-    background-color: red;
-    flex-shrink: 0;
-}
-
 :root {
     --nav-bg: #1e293b;
     --nav-text: #e2e8f0;
@@ -107,6 +94,7 @@ body {
 .profile-picture-box{
     height: 70px;
     width: 70px;
+    border-radius: 50%;
 }
 
 
@@ -228,8 +216,8 @@ body {
 
 .data-detail-showing{
     position: fixed;
-    height: 500px;
-    width: 100px;
+    height: 300px;
+    width: 200px;
     display: flex;
     flex-direction: column;
     pointer-events: none;
@@ -239,7 +227,7 @@ body {
     z-index: 100;
     left: 0;
     top: 0;
-    background-color: rgb(84, 194, 65);
+    background-color: rgb(179, 194, 65);
 }
 
 .change-panel{
@@ -249,7 +237,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 70px;
+    padding: 30px;
+    padding-top: 10px;
     width: 600px;
     height: 400px;
     background-color: rgb(203, 231, 188);
@@ -258,10 +247,89 @@ body {
     margin: auto;
 }
 
+.close-button {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  right: -100%;
+  top: 0%;
+  background-color: red;
+  flex-shrink: 0;
+  z-index: 500;
+}
+.close-button-plus {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+  right: -47%;
+  top: 0%;
+  background-color: red;
+  flex-shrink: 0;
+  z-index: 600;
+}
+
+.change-profile-submit-window{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    background-color: rgb(140, 202, 139);
+    width: 400px;
+    height: 250px;
+    inset: 0;
+    margin: auto;
+    z-index: 700;
+    border-radius: 20px;
+}
+
+.change-profile-submit-window-password{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.change-profile-submit-window-button{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    width: 100px;
+    background-color: rgb(193, 213, 228);
+    border-radius: 10px;
+}
+
+.change-profile-submit-window input{
+    border-style: solid;
+    border-width: 1px;
+    width: 200px;
+}
+
 .profile-detail-showing{
     display: flex;
     width: 100%;
     flex-direction: column;
-    gap: 20px;
+    gap: 10px;
     opacity: 1;
+}
+
+.profile-picture-change-box{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.profile-picture-update-box{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 200px;
 }

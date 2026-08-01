@@ -2,10 +2,6 @@
 const DEFAULT_COLOR = ''
 // 点击后颜色
 const DEFAULT_TARGET_COLOR = 'green'
-const ACCOUNT_RULE = /^[a-zA-Z0-9_]{6,24}$/
-const ACCOUNT_RULE_DESCRIPTION = "字母或数字或下划线 ，长度在6-24"
-const PASSWORD_RULE = /^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9_\!@#\$%\^&\*\(\)\-=]{6,24}$/
-const PASSWORD_RULE_DESCRIPTION = "6-24 位，至少 1 个字母、至少 1 个数字，支持常用符号"
 
 const studentLogin  = document.getElementById('student-choose')
 const adminLogin = document.getElementById('admin-choose');
@@ -57,32 +53,12 @@ function chooseIdentity(target){
     identity = showIdentity(target);
 }
 
-//验证账号是否合规
-function checkAccount(){
-    const stringAccount = account.value;
-    if(ACCOUNT_RULE.test(stringAccount) === false){
-        alert(`您提交的账号不符合要求，必须满足${ACCOUNT_RULE_DESCRIPTION}`);
-        return false;
-    }
-    return stringAccount;
-}
-
-//验证密码是否合规
-function checkPassword(){
-    const stringPassword = password.value;
-    if(PASSWORD_RULE.test(stringPassword) === false){
-        alert(`您提交的密码不符合要求，必须满足${PASSWORD_RULE_DESCRIPTION}`);
-        return false;
-    }
-    return stringPassword;
-}
-
 
 // 注册 
 async function register(){
 
-    if(checkAccount() !==false && checkPassword() !== false){
-        return  await sendRegister(checkAccount(),checkPassword(),apiChoose());
+    if(checkAccount(account) !==false && checkPassword(password) !== false){
+        return  await sendRegister(checkAccount(account),checkPassword(password),apiChoose());
     }else{
         return false;
     }

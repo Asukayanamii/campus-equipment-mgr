@@ -113,7 +113,7 @@ async function sendSubmit(username , password ,identity){
             if(res.code !== 0){
                 alert(`登录失败，${res.message}`)
             }
-            console.log(`注册失败,错误码:${response.status},code ${res.code}`)
+            console.log(`登录失败,错误码:${response.status},code ${res.code}`)
             return false
         }
         
