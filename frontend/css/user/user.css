@@ -5,6 +5,19 @@
     z-index: 400;
 }
 
+.shutdown-button{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    right: -107%;
+    top: -20%;
+    background-color: red;
+    flex-shrink: 0;
+}
+
 :root {
     --nav-bg: #1e293b;
     --nav-text: #e2e8f0;

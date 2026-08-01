@@ -141,16 +141,17 @@ async function renderChangePanel(){
     const personalData = await getPersonalData(apiChoose())
     document.body.insertAdjacentHTML('beforeend',`
         <div class="change-panel">
-        <div class="profile-detail-showing">
-            <img src="${personalData.image}" alt="你的头像">
-            <p>你的id:${personalData.id}</p>
-            <p>你的昵称:${personalData.name}</p>
-            <p>你的账号:${personalData.username}</p>
-            <p>你的邮箱:${personalData.email}</p>
-            <p>上传更新时间:${personalData.updateTime}</p>
-            <p>账号创建时间:${personalData.createTime}</p>
+            <button class="shutdown-button">X</button>
+            <div class="profile-detail-showing">
+                <img src="${personalData.image}" alt="你的头像">
+                <p>你的id:${personalData.id}</p>
+                <p>你的昵称:${personalData.name}</p>
+                <p>你的账号:${personalData.username}</p>
+                <p>你的邮箱:${personalData.email}</p>
+                <p>上传更新时间:${personalData.updateTime}</p>
+                <p>账号创建时间:${personalData.createTime}</p>
+            </div>
         </div>
-    </div>
         `)
 }
 
@@ -226,6 +227,9 @@ profilePictureBox.addEventListener('click',() => {
     })
 
 })
+
+
+
 
 renderData(defaultQueryData)
 renderPersonalData()
