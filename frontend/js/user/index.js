@@ -211,12 +211,12 @@ function renderChangeProfileSubmitWindow(){
         const changeProfileSubmitWindow = document.body.querySelector('.change-profile-submit-window')
         changeProfileSubmitWindow.remove()
     })
-    changeProfileSubmitWindowButton.addEventListener('click',() => {
+    changeProfileSubmitWindowButton.addEventListener('click',async () => {
         if(checkPassword(newPasswordFirst)){
             const originPasswordString = originPassword.value
             const newPasswordFirstString  = newPasswordFirst.value
             const newPasswordSecondString = newPasswordSecond.value
-            if(!originPassword){
+            if(!originPasswordString){
                 console.log('原密码不能为空')
                 return
             }
@@ -231,17 +231,21 @@ function renderChangeProfileSubmitWindow(){
                 alert("两次密码输入不一致")
                 return
             }
-            const temUserName = getPersonalData(apiChoose()).username
-            if(!sendSubmit(temUserName,originPasswordString,apiChoose())){
+
+            const temUserName = (await getPersonalData(apiChoose())).username
+            if(!await sendSubmit(temUserName,originPasswordString,apiChoose())){
                 alert('原密码输入错误')
                 return
             }
 
-            if(!changePersonalData({
-                name : changedName.value || getPersonalData(identity).name, 
-                password : newPasswordFirst
+            const temName = (await getPersonalData(apiChoose())).name
+            if(await changePersonalData({
+                name : changedName.value || temName,
+                password : newPasswordFirst.value
             },apiChoose())){
                 alert('修改失败')
+            }else{
+                alert('修改成功')
             }
         }
     })

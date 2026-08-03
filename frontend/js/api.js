@@ -176,9 +176,9 @@ async function changePersonalData(UpdateInDTO,identity){
                 'Content-Type' : 'application/json',
                 'token' : sessionStorage.getItem('token')
             },
-            body : JSON.stringify({
+            body : JSON.stringify(
                 UpdateInDTO
-            }) 
+            ) 
         })
 
         const res = await response.json();
