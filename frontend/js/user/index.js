@@ -4,7 +4,7 @@ const OFF_SETX = 0
 const OFF_SETY = 0
 const DEFAULT_PICTURE_URL = '../assets/images/all-icon..png'
 const DEFAULT_EMAIL_DECRIPTION = "您当前未绑定邮箱"
-
+const UNDINESE_EXPLAINATION = '未知'
 
 const dataShowing = document.getElementById(`data-showing`)
 
@@ -105,8 +105,8 @@ function renderData(QueryData = {}){
                         <p>采购价格:${i.price}</p>
                         <p>设备状态:${i.status}</p>
                         <p>备注:${i.remark}</p>
-                        <p>创建时间:${i.creatTime}</p>
-                        <p>更新时间:${i.updateTime}</p>
+                        <p>创建时间:${i.creatTime || UNDINESE_EXPLAINATION}</p>
+                        <p>更新时间:${i.updateTime || UNDINESE_EXPLAINATION}</p>
                     </div>
                 </div>
             `)
@@ -179,7 +179,7 @@ function closePanel(){
       }
       dimOverlay.remove()
       changePanel.remove()
-    }
+}
 
 // 召唤修改面板
 function renderChangeProfileSubmitWindow(){
