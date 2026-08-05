@@ -6,10 +6,12 @@ const DEFAULT_PICTURE_URL = '../assets/images/all-icon..png'
 const DEFAULT_EMAIL_DECRIPTION = "您当前未绑定邮箱"
 const UNDINESE_EXPLAINATION = '未知'
 
+const search = document.querySelector('#search')
+const searchWayChoose = document.querySelector('#search-way-choose')
+
 const dataShowing = document.getElementById(`data-showing`)
 
 const profilePictureBox = document.getElementById('profile-picture-box')
-
 const profileName = document.getElementById('profile-name')
 const profilePicture = document.getElementById('profile-picture')
 
@@ -25,11 +27,20 @@ const dataCard = document.getElementById('data-showing')
 
 let pageNow = 1;
 let pageAll = 1;
+let queryDataYouChange  = ''
 const identity = 1
-const defaultQueryData = new QueryData({
+let defaultQueryData = new QueryData({
     page : pageNow,
     size : PAGE_SIZE
 });
+
+// 重置查询数据
+function resetQueryData(){
+    defaultQueryData = {
+        page : pageNow,
+        size : PAGE_SIZE
+    }
+}
 
 // 检查按钮重复，务必在pageAll有数值的时候使用
 function checkButton(){
@@ -324,9 +335,76 @@ profilePictureBox.addEventListener('click',() => {
 
 })
 
+searchWayChoose.addEventListener('change',(e) =>{
+    switch (e.target.value){
+        case 'no':
+            break
+        case 'reset':
+            resetQueryData()
+            queryDataYouChange = ''
+            search.value = ''
+            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID'
+            searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态'
+            searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称'
+            searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号'
+            searchWayChoose.querySelector('option[value="location"]').textContent = '设备存放位置'
+            searchWayChoose.querySelector('option[value="brand"]').textContent = '设备品牌'
+            searchWayChoose.querySelector('option[value="spec"]').textContent = '设备规格型号'
+            searchWayChoose.querySelector('option[value="startTime"]').textContent = '设备采购开始时间'
+            searchWayChoose.querySelector('option[value="endTime"]').textContent = '设备采购结束时间'
+            renderData(defaultQueryData)
+            break
+        case 'categoryId':
+            queryDataYouChange  = 'categoryId'
+            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID（已指定）'
+            break
+        case 'status':
+            queryDataYouChange  = 'status'
+            searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态（已指定）'
+            break
+        case 'equipmentName':
+            queryDataYouChange  = 'equipmentName'
+            searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称（已指定）'
+            break
+        case 'equipmentNo':
+            queryDataYouChange  = 'equipmentNo'
+            searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号（已指定）'
+            break
+        case 'location':
+            queryDataYouChange  = 'location'
+            searchWayChoose.querySelector('option[value="location"]').textContent = '设备存放位置（已指定）'
+            break
+        case 'brand':
+            queryDataYouChange  = 'brand'
+            searchWayChoose.querySelector('option[value="brand"]').textContent = '设备品牌（已指定）'
+            break
+        case 'spec':
+            queryDataYouChange  = 'spec'
+            searchWayChoose.querySelector('option[value="spec"]').textContent = '设备规格型号（已指定）'
+            break
+        case 'startTime':
+            queryDataYouChange  = 'startTime'
+            searchWayChoose.querySelector('option[value="startTime"]').textContent = '设备采购开始时间（已指定）'
+            break
+        case 'endTime':
+            queryDataYouChange  = 'endTime'
+            searchWayChoose.querySelector('option[value="endTime"]').textContent = '设备采购结束时间（已指定）'
+            break
+    }
+})
 
-
-
+search.addEventListener('keydown',(e) =>{
+    if(e.key === 'Enter'){
+        if(!queryDataYouChange){
+            alert('请选择搜索类型')
+            return
+        }
+        defaultQueryData[queryDataYouChange]  = e.target.value
+        defaultQueryData.page = 1
+        pageNow = 1;
+        renderData(defaultQueryData)
+    }
+})
 renderData(defaultQueryData)
 renderPersonalData()
 

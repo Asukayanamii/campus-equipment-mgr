@@ -196,3 +196,8 @@ async function changePersonalData(UpdateInDTO,identity){
         return false
     }
 }
+
+// 管理端新增设备
+// async function(){
+
+// }

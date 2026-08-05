@@ -138,6 +138,14 @@ body {
     border-radius: 20px;
 }
 
+.search-way-choose{
+    background-color: rgb(243, 243, 106);
+    margin-left: 20px;
+    border-radius: 20px;
+    padding-left: 5px;
+    /* padding-right: 5px; */
+}
+
 .data-showing {
     flex: 1;
     display: flex;
