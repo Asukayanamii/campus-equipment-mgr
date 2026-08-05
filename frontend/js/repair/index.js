@@ -28,7 +28,7 @@ const dataCard = document.getElementById('data-showing')
 let pageNow = 1;
 let pageAll = 1;
 let queryDataYouChange  = ''
-const identity = 2
+const identity = 3
 let defaultQueryData = new QueryData({
     page : pageNow,
     size : PAGE_SIZE

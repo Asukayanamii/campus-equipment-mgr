@@ -5,7 +5,7 @@ const DEFAULT_TARGET_COLOR = 'green'
 
 const studentLogin  = document.getElementById('student-choose')
 const adminLogin = document.getElementById('admin-choose');
-const maintainerLogin = document.getElementById('maintainer-choose');
+const repairLogin = document.getElementById('repair-choose');
 
 const registerButton = document.getElementById('register-button')
 const submitButton = document.getElementById('submit-button');
@@ -20,7 +20,7 @@ studentLogin.style.backgroundColor = `${DEFAULT_TARGET_COLOR}`;
 function resetIdentity(){
     studentLogin.style.backgroundColor = `${DEFAULT_COLOR}`
     adminLogin.style.backgroundColor = `${DEFAULT_COLOR}`
-    maintainerLogin.style.backgroundColor = `${DEFAULT_COLOR}`
+    repairLogin.style.backgroundColor = `${DEFAULT_COLOR}`
 }
 
 // 完成字符 -> 身份映射
@@ -73,7 +73,7 @@ async function submit(){
 
 
 studentLogin.addEventListener('click',async () => chooseIdentity(studentLogin))
-maintainerLogin.addEventListener('click',async () => chooseIdentity(maintainerLogin))
+repairLogin.addEventListener('click',async () => chooseIdentity(repairLogin))
 adminLogin.addEventListener('click',async () => chooseIdentity(adminLogin))
 
 registerButton.addEventListener('click',async () => {

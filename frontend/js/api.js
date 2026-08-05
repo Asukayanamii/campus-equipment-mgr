@@ -28,7 +28,7 @@ async function getData (QueryData = {}){
             }
         }
 
-        const data = await fetch(`${BASE_URL}/user/equipment/page?${params.toString()}`,{
+        const data = await fetch(`${BASE_URL}/${apiChoose()}/equipment/page?${params.toString()}`,{
         method : 'GET',
         headers : {
             'content-type' : 'application/json',
