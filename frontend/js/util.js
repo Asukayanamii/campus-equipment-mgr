@@ -209,3 +209,65 @@ class Result_Page_EquipmentOut{
         this.data = data
     }
 }
+
+class EquipmentCreate{
+    constructor({
+        equipmentNo,
+        equipmentName,
+        categoryId, 
+        spec,
+        brand,
+        unit,
+        location,
+        purchaseDate,
+        price,
+        coverImg,
+        status,
+        remark,
+    } = {}){
+        this.equipmentNo = equipmentNo;
+        this.equipmentName = equipmentName;
+        this.categoryId = categoryId;
+        this.spec = spec;
+        this.brand = brand;
+        this.unit = unit;
+        this.location = location;
+        this.purchaseDate = purchaseDate;
+        this.price = price;
+        this.coverImg = coverImg;
+        this.status = status;
+        this.remark = remark;
+    }
+}
+
+class CategoryResp{
+    constructor( {
+        id,
+        categoryName,
+        sort,
+        isDeleted,
+        createTime,
+        updateTime
+    } = {}){
+        this.id = id;
+        this.categoryName = categoryName;
+        this.sort = sort;
+        this.isDeleted = isDeleted;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+    }
+}
+
+class Page_CategoryResp{
+    constructor({
+        items,
+        page,
+        size,
+        pages
+    }={}){
+        this.items = items;
+        this.page = page;
+        this.size = size;
+        this.pages = pages;
+    }
+}

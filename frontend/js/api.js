@@ -190,7 +190,8 @@ async function changePersonalData(UpdateInDTO,identity){
             console.log(`修改个人信息失败,错误码:${response.status},code ${res.code}`)
             return false
         }
-        
+
+        return true
     }catch{
         console.error(`修改个人信息失败`)
         return false
@@ -198,6 +199,44 @@ async function changePersonalData(UpdateInDTO,identity){
 }
 
 // 管理端新增设备
-// async function(){
+/**
+ * 
+ * @param {EquipmentCreate} EquipmentCreate 
+ * @param {String} identity 
+ * @returns {boolean}
+ */
+async function addNewEquipment(EquipmentCreate,identity){
+    if(identity !== 'admin'){
+        alert('你无权新增设备！')
+        return false
+    }
+    try {
+        const response = await fetch(`${BASE_URL}/admin/equipment/`,{
+            method : 'POST',
+            headers :{
+                'Content-Type' : 'application/json',
+                'token' : sessionStorage.getItem('token')
+            },
+            body : JSON.stringify(
+                EquipmentCreate
+            )
+        })
 
-// }
+        const res = await response.json();
+
+        if(response.ok !== true || res.code !== 0){
+            if(res.code !== 0){
+                alert(`新增设备失败，${res.message}`)
+            }
+            console.log(`新增设备失败,错误码:${response.status},code ${res.code}`)
+            return false
+        }
+
+        return true
+
+    } catch (error) {
+        console.error('新增设备失败')
+        return false
+    }
+}
+
