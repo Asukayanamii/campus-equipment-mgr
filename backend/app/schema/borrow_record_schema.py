@@ -41,6 +41,18 @@ class BorrowRecordPageOut(BorrowRecordStatusOut):
     create_time: datetime = Field(..., description="创建时间")
 
 
+class BorrowRecordCreateOut(BorrowRecordStatusOut):
+    """借用记录新增响应模型"""
+    id: int = Field(..., description="借用记录 ID")
+    user_id: int = Field(..., description="借用用户 ID")
+    equipment_id: int = Field(..., description="设备 ID")
+    borrow_start_time: datetime = Field(..., description="借用开始时间")
+    borrow_end_time: datetime = Field(..., description="借用结束时间")
+    purpose: str | None = Field(None, description="借用用途")
+    create_time: datetime = Field(..., description="创建时间")
+    update_time: datetime = Field(..., description="更新时间")
+
+
 class BorrowRecordOut(BorrowRecordStatusOut):
     """借用记录详情响应模型"""
     id: int = Field(..., description="借用记录 ID")

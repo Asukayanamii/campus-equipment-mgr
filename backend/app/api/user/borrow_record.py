@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Path, Query
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
@@ -6,8 +6,8 @@ from app.core.auth import user_verity
 from app.core.logger import logger
 from app.db.session import get_db
 from app.result.result import Result
-from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordOut, BorrowRecordPageOut, BorrowRecordQuery
-from app.service.borrow_record_service import create_borrow_record_service, query_borrow_record_by_user_service
+from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordCreateOut, BorrowRecordOut, BorrowRecordPageOut, BorrowRecordQuery
+from app.service.borrow_record_service import create_borrow_record_service, get_borrow_record_detail_by_user_service, query_borrow_record_by_user_service
 
 router = APIRouter(prefix="/user/borrow-records", tags=["学生端/借用记录相关"], dependencies=[Depends(user_verity)])
 
@@ -23,7 +23,18 @@ def page_borrow_records(
     return Result.success(res)
 
 
-@router.post("", response_model=Result[BorrowRecordOut], name="提交借用申请")
+@router.get("/{borrowRecordId}", response_model=Result[BorrowRecordOut], name="查看本人借用记录详情")
+def get_borrow_record_detail(
+    borrow_record_id: int = Path(..., alias="borrowRecordId", ge=1),
+    info: dict = Depends(user_verity),
+    db: Session = Depends(get_db),
+):
+    logger.info("学生端查看本人借用记录详情，借用记录 ID：%s", borrow_record_id)
+    res = get_borrow_record_detail_by_user_service(db, borrow_record_id, info["id"])
+    return Result.success(res)
+
+
+@router.post("", response_model=Result[BorrowRecordCreateOut], name="提交借用申请")
 def create_borrow_record(
     borrow_record_in: BorrowRecordCreate,
     info: dict = Depends(user_verity),
