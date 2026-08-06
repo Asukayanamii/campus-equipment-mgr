@@ -6,24 +6,16 @@ const DEFAULT_PICTURE_URL = '../assets/images/all-icon..png'
 const DEFAULT_EMAIL_DECRIPTION = "您当前未绑定邮箱"
 const UNDINESE_EXPLAINATION = '未知'
 
-const search = document.querySelector('#search')
-const searchWayChoose = document.querySelector('#search-way-choose')
+const rightSide = document.querySelector('#right-side')
 
-const dataShowing = document.getElementById(`data-showing`)
+
 
 const profilePictureBox = document.getElementById('profile-picture-box')
 const profileName = document.getElementById('profile-name')
 const profilePicture = document.getElementById('profile-picture')
 
-const start = document.getElementById('start')
-const pre2 = document.getElementById('pre-2')
-const pre1 = document.getElementById('pre-1')
-const cur = document.getElementById('cur')
-const aft1 = document.getElementById('aft-1')
-const aft2 = document.getElementById('aft-2')
-const end = document.getElementById('end')
 
-const dataCard = document.getElementById('data-showing') 
+
 
 let pageNow = 1;
 let pageAll = 1;
@@ -44,6 +36,13 @@ function resetQueryData(){
 
 // 检查按钮重复，务必在pageAll有数值的时候使用
 function checkButton(){
+    const start = document.getElementById('start')
+    const pre2 = document.getElementById('pre-2')
+    const pre1 = document.getElementById('pre-1')
+    const cur = document.getElementById('cur')
+    const aft1 = document.getElementById('aft-1')
+    const aft2 = document.getElementById('aft-2')
+    const end = document.getElementById('end')
     start.style.display = 'block'
     pre2.style.display = 'block'
     pre1.style.display = 'block'
@@ -83,8 +82,15 @@ function checkButton(){
 
 }
 
-// 给按钮赋值，务必在pageAll有数值的时候使用
+// 给按钮赋值，务必在pageAll有数值和几个按钮已被获取的时候使用
 function renderButton(){
+    const start = document.getElementById('start')
+    const pre2 = document.getElementById('pre-2')
+    const pre1 = document.getElementById('pre-1')
+    const cur = document.getElementById('cur')
+    const aft1 = document.getElementById('aft-1')
+    const aft2 = document.getElementById('aft-2')
+    const end = document.getElementById('end')
     start.innerText = 1
     pre2.innerText = pageNow - 2
     pre1.innerText = pageNow - 1
@@ -97,6 +103,7 @@ function renderButton(){
 
 // 渲染数据
 function renderData(QueryData = {}){
+    const dataShowing = document.getElementById(`data-showing`)
     getData(QueryData).then(res => {
         const list = res.data.items;
         dataShowing.innerHTML = ''
@@ -192,7 +199,7 @@ function closePanel(){
       changePanel.remove()
 }
 
-// 召唤修改面板
+// 召唤渲染修改面板
 function renderChangeProfileSubmitWindow(){
     document.body.insertAdjacentHTML('beforeend',`
         <div class="change-profile-submit-window">
@@ -262,69 +269,196 @@ function renderChangeProfileSubmitWindow(){
     })
 }
 
+// 召唤数据展示面板
+function callDataShowing(){
+    rightSide.insertAdjacentHTML('beforeend',`
+        <!-- 搜索框 -->
+         <div class="search-box">
+            <p>搜索：<input type="text" class="search" id="search"></p>
+            <select id="search-way-choose" class="search-way-choose">
+                <option value="no">请选择查询方式（支持联查）</option>
+                <option value="reset">重置搜索</option>
+                <option value="categoryId">设备分类ID</option>
+                <option value="status">设备状态</option>
+                <option value="equipmentName">设备名称</option>
+                <option value="equipmentNo">设备编号</option>
+                <option value="location">设备存放位置</option>
+                <option value="brand">设备品牌</option>
+                <option value="spec">设备规格型号</option>
+                <option value="startTime">设备采购开始时间</option>
+                <option value="endTime">设备采购结束时间</option>
+            </select>
+         </div>
+        <!-- 数据展示 -->
+        <div class="data-showing" id="data-showing">
+            
+        </div>
 
-start.addEventListener('click', () =>{
-     defaultQueryData.page = 1;
-     pageNow = 1
-     renderData(defaultQueryData)
-})
+        <!-- 页码选择 -->
+        <div class="page-choose-box">
+            <button id="start"></button>
+            <button id="pre-2"></button>
+            <button id="pre-1"></button>
+            <button id="cur"></button>
+            <button id="aft-1"></button>
+            <button id="aft-2"></button>
+            <button id="end"></button>
+        </div>`
+    )
+    attachEventsForPageButton()
+    attachEventsForDataCard()
+    attachEventsForSearchWayChoose()
+}
 
-end.addEventListener('click',() => {
-    defaultQueryData.page = pageAll
-    pageNow = pageAll
-    renderData(defaultQueryData)
-})
+// 给所有转换页码的按钮绑定事件
+function attachEventsForPageButton(){
+    const start = document.getElementById('start')
+    const pre2 = document.getElementById('pre-2')
+    const pre1 = document.getElementById('pre-1')
+    const cur = document.getElementById('cur')
+    const aft1 = document.getElementById('aft-1')
+    const aft2 = document.getElementById('aft-2')
+    const end = document.getElementById('end')
+    start.addEventListener('click', () => {
+        defaultQueryData.page = 1;
+        pageNow = 1
+        renderData(defaultQueryData)
+    })
 
-pre2.addEventListener('click' ,() => {
-    defaultQueryData.page = pre2.innerText
-    pageNow = pageNow - 2
-    renderData(defaultQueryData)
-})
+    end.addEventListener('click',() => {
+        defaultQueryData.page = pageAll
+        pageNow = pageAll
+        renderData(defaultQueryData)
+    })
 
-pre1.addEventListener('click' ,() => {
-    defaultQueryData.page = pre1.innerText
-    pageNow = pageNow - 1
-    renderData(defaultQueryData)
-})
+    pre2.addEventListener('click' ,() => {
+        defaultQueryData.page = pre2.innerText
+        pageNow = pageNow - 2
+        renderData(defaultQueryData)
+    })
 
-cur.addEventListener('click' ,() => {
-    defaultQueryData.page = cur.innerText
-    pageNow = pageNow
-    renderData(defaultQueryData)
-})
+    pre1.addEventListener('click' ,() => {
+        defaultQueryData.page = pre1.innerText
+        pageNow = pageNow - 1
+        renderData(defaultQueryData)
+    })
 
-aft1.addEventListener('click' ,() => {
-    defaultQueryData.page = aft1.innerText
-    pageNow = pageNow + 1
-    renderData(defaultQueryData)
-})
+    cur.addEventListener('click' ,() => {
+        defaultQueryData.page = cur.innerText
+        pageNow = pageNow
+        renderData(defaultQueryData)
+    })
 
-aft2.addEventListener('click' ,() => {
-    defaultQueryData.page = aft2.innerText
-    pageNow = pageNow + 2
-    renderData(defaultQueryData)
-})
+    aft1.addEventListener('click' ,() => {
+        defaultQueryData.page = aft1.innerText
+        pageNow = pageNow + 1
+        renderData(defaultQueryData)
+    })
 
-dataCard.addEventListener('mousemove', (e) => {
-    const card = e.target.closest('.data-card')
-    if (!card) return 
-    const dataDetailShowing = card.querySelector('.data-detail-showing')
-    // TODO:硬编码问题，有时间我就来修,这里的几个数字其实是data-detail-showing的大小
-    const maxWidth = window.innerWidth
-    const maxHeigt = window.innerHeight
-    if(e.clientX + OFF_SETX + 200> maxWidth){
-        dataDetailShowing.style.left = ( e.clientX + OFF_SETX -200) + 'px'
-    }else{
-        dataDetailShowing.style.left = (e.clientX + OFF_SETX ) +'px'
-    }
-    if(e.clientY + OFF_SETY +300> maxHeigt){
-        dataDetailShowing.style.top = (e.clientY + OFF_SETY -300) + 'px'
-    }else{
-        dataDetailShowing.style.top = (e.clientY + OFF_SETY ) +'px'
-    }
-    
-    
-})
+    aft2.addEventListener('click' ,() => {
+        defaultQueryData.page = aft2.innerText
+        pageNow = pageNow + 2
+        renderData(defaultQueryData)
+    })
+}
+
+// 给数据展示卡片绑定事件
+function attachEventsForDataCard(){
+    const dataCard = document.getElementById('data-showing') 
+    dataCard.addEventListener('mousemove', (e) => {
+        const card = e.target.closest('.data-card')
+        if (!card) return 
+        const dataDetailShowing = card.querySelector('.data-detail-showing')
+        // TODO:硬编码问题，有时间我就来修,这里的几个数字其实是data-detail-showing的大小
+        const maxWidth = window.innerWidth
+        const maxHeigt = window.innerHeight
+        if(e.clientX + OFF_SETX + 200> maxWidth){
+            dataDetailShowing.style.left = ( e.clientX + OFF_SETX -200) + 'px'
+        }else{
+            dataDetailShowing.style.left = (e.clientX + OFF_SETX ) +'px'
+        }
+        if(e.clientY + OFF_SETY +300> maxHeigt){
+            dataDetailShowing.style.top = (e.clientY + OFF_SETY -300) + 'px'
+        }else{
+            dataDetailShowing.style.top = (e.clientY + OFF_SETY ) +'px'
+        }
+    })
+}
+
+// 给下拉表单和搜索框绑定事件
+function attachEventsForSearchWayChoose(){
+    const search = document.querySelector('#search')
+    search.addEventListener('keydown',(e) =>{
+        if(e.key === 'Enter'){
+            if(!queryDataYouChange){
+                alert('请选择搜索类型')
+                return
+            }
+            defaultQueryData[queryDataYouChange]  = e.target.value
+            defaultQueryData.page = 1
+            pageNow = 1;
+            renderData(defaultQueryData)
+        }
+    })
+    const searchWayChoose = document.querySelector('#search-way-choose')
+    searchWayChoose.addEventListener('change',(e) =>{
+        switch (e.target.value){
+            case 'no':
+                break
+            case 'reset':
+                resetQueryData()
+                queryDataYouChange = ''
+                search.value = ''
+                searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID'
+                searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态'
+                searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称'
+                searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号'
+                searchWayChoose.querySelector('option[value="location"]').textContent = '设备存放位置'
+                searchWayChoose.querySelector('option[value="brand"]').textContent = '设备品牌'
+                searchWayChoose.querySelector('option[value="spec"]').textContent = '设备规格型号'
+                searchWayChoose.querySelector('option[value="startTime"]').textContent = '设备采购开始时间'
+                searchWayChoose.querySelector('option[value="endTime"]').textContent = '设备采购结束时间'
+                renderData(defaultQueryData)
+                break
+            case 'categoryId':
+                queryDataYouChange  = 'categoryId'
+                searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID（已指定）'
+                break
+            case 'status':
+                queryDataYouChange  = 'status'
+                searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态（已指定）'
+                break
+            case 'equipmentName':
+                queryDataYouChange  = 'equipmentName'
+                searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称（已指定）'
+                break
+            case 'equipmentNo':
+                queryDataYouChange  = 'equipmentNo'
+                searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号（已指定）'
+                break
+            case 'location':
+                queryDataYouChange  = 'location'
+                searchWayChoose.querySelector('option[value="location"]').textContent = '设备存放位置（已指定）'
+                break
+            case 'brand':
+                queryDataYouChange  = 'brand'
+                searchWayChoose.querySelector('option[value="brand"]').textContent = '设备品牌（已指定）'
+                break
+            case 'spec':
+                queryDataYouChange  = 'spec'
+                searchWayChoose.querySelector('option[value="spec"]').textContent = '设备规格型号（已指定）'
+                break
+            case 'startTime':
+                queryDataYouChange  = 'startTime'
+                searchWayChoose.querySelector('option[value="startTime"]').textContent = '设备采购开始时间（已指定）'
+                break
+            case 'endTime':
+                queryDataYouChange  = 'endTime'
+                searchWayChoose.querySelector('option[value="endTime"]').textContent = '设备采购结束时间（已指定）'
+                break
+        }
+    })
+}
 
 profilePictureBox.addEventListener('click',() => {
     renderChangePanel().then(() => {
@@ -335,76 +469,24 @@ profilePictureBox.addEventListener('click',() => {
 
 })
 
-searchWayChoose.addEventListener('change',(e) =>{
-    switch (e.target.value){
-        case 'no':
-            break
-        case 'reset':
-            resetQueryData()
-            queryDataYouChange = ''
-            search.value = ''
-            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID'
-            searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态'
-            searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称'
-            searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号'
-            searchWayChoose.querySelector('option[value="location"]').textContent = '设备存放位置'
-            searchWayChoose.querySelector('option[value="brand"]').textContent = '设备品牌'
-            searchWayChoose.querySelector('option[value="spec"]').textContent = '设备规格型号'
-            searchWayChoose.querySelector('option[value="startTime"]').textContent = '设备采购开始时间'
-            searchWayChoose.querySelector('option[value="endTime"]').textContent = '设备采购结束时间'
-            renderData(defaultQueryData)
-            break
-        case 'categoryId':
-            queryDataYouChange  = 'categoryId'
-            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID（已指定）'
-            break
-        case 'status':
-            queryDataYouChange  = 'status'
-            searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态（已指定）'
-            break
-        case 'equipmentName':
-            queryDataYouChange  = 'equipmentName'
-            searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称（已指定）'
-            break
-        case 'equipmentNo':
-            queryDataYouChange  = 'equipmentNo'
-            searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号（已指定）'
-            break
-        case 'location':
-            queryDataYouChange  = 'location'
-            searchWayChoose.querySelector('option[value="location"]').textContent = '设备存放位置（已指定）'
-            break
-        case 'brand':
-            queryDataYouChange  = 'brand'
-            searchWayChoose.querySelector('option[value="brand"]').textContent = '设备品牌（已指定）'
-            break
-        case 'spec':
-            queryDataYouChange  = 'spec'
-            searchWayChoose.querySelector('option[value="spec"]').textContent = '设备规格型号（已指定）'
-            break
-        case 'startTime':
-            queryDataYouChange  = 'startTime'
-            searchWayChoose.querySelector('option[value="startTime"]').textContent = '设备采购开始时间（已指定）'
-            break
-        case 'endTime':
-            queryDataYouChange  = 'endTime'
-            searchWayChoose.querySelector('option[value="endTime"]').textContent = '设备采购结束时间（已指定）'
-            break
-    }
+
+
+document.querySelector('#data-showing-button').addEventListener('click',() =>{
+    rightSide.innerHTML = ''
+    callDataShowing()
+    renderData(defaultQueryData)
 })
 
-search.addEventListener('keydown',(e) =>{
-    if(e.key === 'Enter'){
-        if(!queryDataYouChange){
-            alert('请选择搜索类型')
-            return
-        }
-        defaultQueryData[queryDataYouChange]  = e.target.value
-        defaultQueryData.page = 1
-        pageNow = 1;
-        renderData(defaultQueryData)
-    }
+document.querySelector('#admin-equipment-button').addEventListener('click',() =>{
+    
+    rightSide.innerHTML = ''
 })
+
+document.querySelector('#my-record-button').addEventListener('click',() =>{
+    rightSide.innerHTML = ''
+})
+
+callDataShowing()
 renderData(defaultQueryData)
 renderPersonalData()
 

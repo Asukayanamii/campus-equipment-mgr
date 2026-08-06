@@ -69,7 +69,7 @@ body {
     gap: 4px;
 }
 
-.nav-options a {
+.nav-options button {
     display: block;
     padding: 10px 16px;
     border-radius: 8px;
@@ -80,7 +80,7 @@ body {
     text-align: left;
 }
 
-.nav-options a:hover {
+.nav-options button:hover {
     background-color: rgba(59, 130, 246, 0.12);
     color: var(--nav-accent);
 }
