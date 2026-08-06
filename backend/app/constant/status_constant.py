@@ -21,18 +21,50 @@ class ItemStatus:
     # 已下架
     OFFLINE = "已下架"
 
+
+class ItemStatusCode:
+    AVAILABLE = "available"
+    PENDING_BORROW = "pending_borrow"
+    BORROWED = "borrowed"
+    PENDING_RETURN = "pending_return"
+    DAMAGED = "damaged"
+    REPAIR_PENDING = "repair_pending"
+    REPAIRING = "repairing"
+    REPAIRED = "repaired"
+    SCRAPPED = "scrapped"
+    OFFLINE = "offline"
+
+
+class BorrowRecordStatus:
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    BORROWED = "borrowed"
+    PENDING_RETURN = "pending_return"
+    COMPLETED = "completed"
+
+
+BORROW_RECORD_STATUS_MAP = {
+    BorrowRecordStatus.PENDING: "待审核",
+    BorrowRecordStatus.APPROVED: "审核通过",
+    BorrowRecordStatus.REJECTED: "审核驳回",
+    BorrowRecordStatus.BORROWED: "已借出",
+    BorrowRecordStatus.PENDING_RETURN: "待确认归还",
+    BorrowRecordStatus.COMPLETED: "已完成",
+}
+
 # 可选：生成状态映射字典，用于前端/数据库转换
 ITEM_STATUS_MAP = {
-    "available": ItemStatus.AVAILABLE,
-    "pending_borrow": ItemStatus.PENDING_BORROW,
-    "borrowed": ItemStatus.BORROWED,
-    "pending_return": ItemStatus.PENDING_RETURN,
-    "damaged": ItemStatus.DAMAGED,
-    "repair_pending": ItemStatus.REPAIR_PENDING,
-    "repairing": ItemStatus.REPAIRING,
-    "repaired": ItemStatus.REPAIRED,
-    "scrapped": ItemStatus.SCRAPPED,
-    "offline": ItemStatus.OFFLINE,
+    ItemStatusCode.AVAILABLE: ItemStatus.AVAILABLE,
+    ItemStatusCode.PENDING_BORROW: ItemStatus.PENDING_BORROW,
+    ItemStatusCode.BORROWED: ItemStatus.BORROWED,
+    ItemStatusCode.PENDING_RETURN: ItemStatus.PENDING_RETURN,
+    ItemStatusCode.DAMAGED: ItemStatus.DAMAGED,
+    ItemStatusCode.REPAIR_PENDING: ItemStatus.REPAIR_PENDING,
+    ItemStatusCode.REPAIRING: ItemStatus.REPAIRING,
+    ItemStatusCode.REPAIRED: ItemStatus.REPAIRED,
+    ItemStatusCode.SCRAPPED: ItemStatus.SCRAPPED,
+    ItemStatusCode.OFFLINE: ItemStatus.OFFLINE,
 }
 
 # 可选：所有状态英文列表，用于参数校验

@@ -63,7 +63,7 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=720
 ```
 
-数据库使用 MySQL。当前仓库没有迁移或初始化建表脚本，启动前需要先创建数据库及当前 ORM 对应的数据表：`user`、`admin`、`repair_user`、`equipment`、`equipment_category`。
+数据库使用 MySQL。当前仓库没有迁移或初始化建表脚本，启动前需要先创建数据库及当前 ORM 对应的数据表：`user`、`admin`、`repair_user`、`equipment`、`equipment_category`、`borrow_record`。
 
 ### 3. 启动服务
 

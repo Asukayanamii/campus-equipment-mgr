@@ -1,0 +1,43 @@
+from sqlalchemy.orm import Session
+
+from app.constant.status_constant import BorrowRecordStatus, BORROW_RECORD_STATUS_MAP, ItemStatusCode
+from app.core.exceptions import BussinessException
+from app.crud import borrow_record_crud, equipment_crud
+from app.db.models.borrow_record_model import BorrowRecord
+from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordOut
+
+
+def create_borrow_record_service(
+    session: Session,
+    user_id: int,
+    borrow_record_in: BorrowRecordCreate,
+) -> BorrowRecordOut:
+    with session.begin():
+        equipment = equipment_crud.get_equipment_by_id_for_update(session, borrow_record_in.equipment_id)
+        if not equipment:
+            raise BussinessException("设备不存在", status_code=404)
+        if equipment.status != ItemStatusCode.AVAILABLE:
+            raise BussinessException("当前设备不可借用", status_code=400)
+
+        borrow_record = borrow_record_crud.get_borrow_record_by_equipment_time(
+            session,
+            borrow_record_in.equipment_id,
+            borrow_record_in.borrow_start_time,
+            borrow_record_in.borrow_end_time,
+        )
+        if borrow_record:
+            raise BussinessException("该时间段内设备已被申请借用", status_code=409)
+
+        borrow_record = BorrowRecord(
+            **borrow_record_in.model_dump(),
+            user_id=user_id,
+            status=BorrowRecordStatus.PENDING,
+        )
+        borrow_record_crud.add_borrow_record(borrow_record, session)
+        equipment_crud.update_equipment(equipment, {"status": ItemStatusCode.PENDING_BORROW}, session)
+        borrow_record_out = BorrowRecordOut.model_validate(borrow_record)
+        borrow_record_out.status = BORROW_RECORD_STATUS_MAP.get(
+            borrow_record_out.status,
+            borrow_record_out.status,
+        )
+        return borrow_record_out

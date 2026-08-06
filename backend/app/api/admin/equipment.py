@@ -34,7 +34,7 @@ def get_equipment(
     return Result.success(get_equipment_service(db, equipment_id))
 
 
-@router.post("/", response_model=Result, name="新增设备")
+@router.post("", response_model=Result, name="新增设备")
 def create_equipment(equipment_in: EquipmentCreate, db: Session = Depends(get_db)):
     logger.info("管理端新增设备，设备编号：%s", equipment_in.equipment_no)
     create_equipment_service(db, equipment_in)

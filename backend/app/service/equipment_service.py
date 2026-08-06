@@ -1,6 +1,7 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
+from app.constant.status_constant import ITEM_STATUS_MAP
 from app.core.config import settings
 from app.core.exceptions import BussinessException
 from app.crud import equipment_crud
@@ -24,6 +25,7 @@ def query_equipment_service(session: Session, query: EquipQuery) -> Page[Equipme
     for e,c in res.items:
         equip_out = EquipmentOut.model_validate(e)
         equip_out.category_name = c.category_name if c else None
+        equip_out.status = ITEM_STATUS_MAP.get(equip_out.status, equip_out.status)
         list.append(equip_out)
     # 返回Page
     return Page(items=list, total=res.total, page=query.page, size=res.size, pages=res.pages)
@@ -37,6 +39,7 @@ def get_equipment_service(session: Session, equipment_id: int) -> EquipmentOut:
     equipment, category = equipment_detail
     equipment_out = EquipmentOut.model_validate(equipment)
     equipment_out.category_name = category.category_name if category else None
+    equipment_out.status = ITEM_STATUS_MAP.get(equipment_out.status, equipment_out.status)
     return equipment_out
 
 

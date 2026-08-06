@@ -13,6 +13,15 @@ def get_equipment_by_id(session:Session,id:int) -> Equipment | None:
     return session.scalar(stmt)
 
 
+def get_equipment_by_id_for_update(session: Session, id: int) -> Equipment | None:
+    stmt = (
+        select(Equipment)
+        .where(Equipment.id == id, Equipment.is_deleted == 0)
+        .with_for_update()
+    )
+    return session.scalar(stmt)
+
+
 def get_equipment_detail_by_id(session: Session, id: int) -> tuple[Equipment, EquipmentCategory | None] | None:
     stmt = (
         select(Equipment, EquipmentCategory)
