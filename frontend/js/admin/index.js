@@ -109,11 +109,11 @@ function renderData(QueryData = {}){
         dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card" id="data-card">
+                <div class="data-card" data-id="${i.id}">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">
-                        <p id="data-detail-showing-id">设备 ID:${i.id}</p>
+                        <p>设备 ID:${i.id}</p>
                         <p>设备编号:${i.equipmentNo}</p>
                         <p>设备分类名称:${i.categoryName}</p>
                         <p>设备规格型号 ID:${i.spec}</p>
@@ -138,10 +138,12 @@ function renderData(QueryData = {}){
         checkButton()
 
         // 管理端专属编辑设备
-        document.querySelectorAll('#data-card').forEach((e) => {
-            e.addEventListener('click',async(f) =>{
-            addBackgroundShadow()
-            callEquipmentDetailWindow(await getDataById(f.target.querySelector('#data-detail-showing-id'),apiChoose(identity)))
+        document.querySelectorAll('.data-card').forEach((card) => {
+            card.addEventListener('click', async () => {
+                const equipment = await getDataById(card.dataset.id, apiChoose())
+                if(!equipment) return        
+                addBackgroundShadow()
+                callEquipmentDetailWindow(equipment)
             })
         })
         
@@ -483,36 +485,40 @@ function callEquipmentDetailWindow(EquipmentOut){
         <div class="equipment-detail-window">
             <button class="close-button-equipment-detail-window" id="close-button-equipment-detail-window">X</button>
             <div class="equipment-detail-window-change">
-                <p>设备编号:<input type="text" id="equipment-no" placeholder="${EquipmentOut.equipmentNo}"></p>
-                <p>设备名称:<input type="text" id="equipment-name" placeholder="${EquipmentOut.equipmentName}"></p>
-                <p>分类ID:<input type="text" id="category-id" placeholder="${EquipmentOut.categoryId}"></p>
-                <p>规格:<input type="text" id="spec" placeholder="${EquipmentOut.spec}"></p>
-                <p>品牌:<input type="text" id="brand" placeholder="${EquipmentOut.brand}"></p>
-                <p>单位:<input type="text" id="unit" placeholder="${EquipmentOut.unit}"></p>
-                <p>位置:<input type="text" id="location" placeholder="${EquipmentOut.location}"></p>
-                <p>购买日期:<input type="text" id="purchase-date" placeholder="${EquipmentOut.purchaseDate}"></p>
-                <p>价格:<input type="text" id="price" placeholder="${EquipmentOut.price}"></p>
-                <p>封面图片:<input type="text" id="cover-img" placeholder="${EquipmentOut.coverImg}"></p>
-                <p>状态:<input type="text" id="status" placeholder="${EquipmentOut.status}"></p>
-                <p>备注:<input type="text" id="remark" placeholder="${EquipmentOut.remark}"></p>
+                <p>设备编号:<input type="text" id="equipmentNo" value="${EquipmentOut.equipmentNo ?? ''}"></p>
+                <p>设备名称:<input type="text" id="equipmentName" value="${EquipmentOut.equipmentName ?? ''}"></p>
+                <p>分类ID:<input type="text" id="categoryId" value="${EquipmentOut.categoryId ?? ''}"></p>
+                <p>规格:<input type="text" id="spec" value="${EquipmentOut.spec ?? ''}"></p>
+                <p>品牌:<input type="text" id="brand" value="${EquipmentOut.brand ?? ''}"></p>
+                <p>单位:<input type="text" id="unit" value="${EquipmentOut.unit ?? ''}"></p>
+                <p>位置:<input type="text" id="location" value="${EquipmentOut.location ?? ''}"></p>
+                <p>购买日期:<input type="text" id="purchaseDate" value="${EquipmentOut.purchaseDate ?? ''}"></p>
+                <p>价格:<input type="text" id="price" value="${EquipmentOut.price ?? ''}"></p>
+                <p>封面图片:<input type="text" id="coverImg" value="${EquipmentOut.coverImg ?? ''}"></p>
+                <p>状态:<input type="text" id="status" value="${EquipmentOut.status ?? ''}"></p>
+                <p>备注:<input type="text" id="remark" value="${EquipmentOut.remark ?? ''}"></p>
             </div>
             <button class="equipment-detail-window-submit-button" id="equipment-detail-window-submit-button">提交修改</button>
         </div>
         `)
     document.querySelector('#close-button-equipment-detail-window').addEventListener('click', () =>{
         document.querySelector('#equipment-detail-window').remove()
-        document.querySelector('#equipment-detail-window').remove()
         document.querySelector('.dim-overlay')?.remove()
     })
     document.querySelector('#equipment-detail-window-submit-button').addEventListener('click',async() =>{
-        let temEquipmentUpdate = new EquipmentUpdate()
+        const temEquipmentUpdate = new EquipmentUpdate()
         document.querySelectorAll('.equipment-detail-window-change p input').forEach( (e) =>{
             temEquipmentUpdate[e.id] = e.value
         })
-        if(await updateEquipment(EquipmentOut.id,temEquipmentUpdate,apiChoose())){
-            alert('更新设备成功')
-        }
-        callEquipmentDetailWindow()
+        const ok = await updateEquipment(EquipmentOut.id,temEquipmentUpdate,apiChoose())
+        if(!ok) return
+        alert('更新设备成功')
+        document.querySelector('#equipment-detail-window').remove()
+        document.querySelector('.dim-overlay')?.remove()
+        const fresh = await getDataById(EquipmentOut.id, apiChoose())
+        if(!fresh) return         
+        addBackgroundShadow()
+        callEquipmentDetailWindow(fresh)
     })
 }
 
