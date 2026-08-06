@@ -271,3 +271,33 @@ class Page_CategoryResp{
         this.pages = pages;
     }
 }
+
+class EquipmentUpdate{
+    constructor({
+        equipmentNo,
+        equipmentName,
+        categoryId,
+        spec,
+        brand,
+        unit,
+        location,
+        purchaseDate,
+        price,
+        coverImg,
+        status,
+        remark,
+    } = {}){
+        this.equipmentNo = equipmentNo;
+        this.equipmentName = equipmentName;
+        this.categoryId = categoryId;
+        this.spec = spec;
+        this.brand = brand;
+        this.unit = unit;
+        this.location = location;
+        this.purchaseDate = purchaseDate;
+        this.price = price;
+        this.coverImg = coverImg;
+        this.status = status;
+        this.remark = remark;
+    }
+}

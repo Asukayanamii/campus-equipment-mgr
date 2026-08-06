@@ -256,29 +256,27 @@ body {
 }
 
 .close-button {
-  position: relative;
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 20px;
   height: 20px;
-  right: -100%;
-  top: 0%;
+  top: 10px;
+  right: 10px;
   background-color: red;
-  flex-shrink: 0;
   z-index: 500;
 }
 .close-button-plus {
-  position: relative;
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 20px;
   height: 20px;
-  right: -47%;
-  top: 0%;
+  top: 0;
+  right: 0;
   background-color: red;
-  flex-shrink: 0;
   z-index: 600;
 }
 

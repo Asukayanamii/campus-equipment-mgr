@@ -44,6 +44,41 @@ async function getData (QueryData = {}){
     
 }
 
+// 根据id获取数据
+/**
+ * 
+ * @param {number} equipmentId 
+ * @param {String} identity
+ * @returns {EquipmentOut}
+ */
+async function getDataById(equipmentId,identity){
+    try {
+        const response = await fetch(`${BASE_URL}/${identity}/equipment/${equipmentId}`,{
+            method : 'GET',
+            headers : {
+                'Content-Type' : 'application/json',
+                'token' : sessionStorage.getItem(`token`)
+            }
+        })
+
+        const res = await response.json()
+
+        if(!response.ok || res.code !== 0){
+            if(res.code !== 0){
+                alert(`根据id获取数据失败，${res.message}`)
+            }
+            console.log(`根据id获取数据失败,错误码:${response.status},code ${res.code}`)
+            return false
+        }
+
+        return res.data
+    } catch (error) {
+        console.error('根据id获取数据失败')
+        return false
+    }
+    
+}
+
 // 注册
 /**
  * 
@@ -236,6 +271,46 @@ async function addNewEquipment(EquipmentCreate,identity){
 
     } catch (error) {
         console.error('新增设备失败')
+        return false
+    }
+}
+
+// 管理端根据id更新设备
+/**
+ * 
+ * @param {EquipmentUpdate} EquipmentUpdate 
+ * @param {String} identity
+ * 
+ */
+async function updateEquipment(equipmentId,EquipmentUpdate,identity){
+    if(identity !== 'admin'){
+        alert('你无权更新！')
+        return false
+    }
+    try {
+        const response = await fetch(`${BASE_URL}/${identity}/equipment/${equipmentId}`,{
+            method : 'PUT',
+            headers : {
+                'Content-Type' : 'application/json',
+                'token' : sessionStorage.getItem('token')
+            },
+            body : JSON.stringify(EquipmentUpdate)
+        })
+
+        const res = await response.json();
+
+        if(response.ok !== true || res.code !== 0){
+            if(res.code !== 0){
+                alert(`根据id更新设备失败，${res.message}`)
+            }
+            console.log(`根据id更新设备失败,错误码:${response.status},code ${res.code}`)
+            return false
+        }
+        
+        
+        return true
+    } catch (error) {
+        console.error('根据id更新设备失败')
         return false
     }
 }

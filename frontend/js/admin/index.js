@@ -102,18 +102,18 @@ function renderButton(){
 }
 
 // 渲染数据
-function renderData(QueryData = {}){
+function renderData(QueryData = {}){ 
     const dataShowing = document.getElementById(`data-showing`)
     getData(QueryData).then(res => {
         const list = res.data.items;
         dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card">
+                <div class="data-card" id="data-card">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">
-                        <p>设备 ID:${i.id}</p>
+                        <p id="data-detail-showing-id">设备 ID:${i.id}</p>
                         <p>设备编号:${i.equipmentNo}</p>
                         <p>设备分类名称:${i.categoryName}</p>
                         <p>设备规格型号 ID:${i.spec}</p>
@@ -136,6 +136,15 @@ function renderData(QueryData = {}){
         pageAll = res.data.pages;
         renderButton()
         checkButton()
+
+        // 管理端专属编辑设备
+        document.querySelectorAll('#data-card').forEach((e) => {
+            e.addEventListener('click',async(f) =>{
+            addBackgroundShadow()
+            callEquipmentDetailWindow(await getDataById(f.target.querySelector('#data-detail-showing-id'),apiChoose(identity)))
+            })
+        })
+        
     })
 }
 
@@ -203,19 +212,19 @@ function closePanel(){
 function renderChangeProfileSubmitWindow(){
     document.body.insertAdjacentHTML('beforeend',`
         <div class="change-profile-submit-window">
-        <button class="close-button-plus ">X</button>
-        <div>
-            <p>你修改用户名为：<input type="text" id="changed-name"></p>
-        </div>
-        <div class="change-profile-submit-window-password">
-            <p>请先输入原密码：<input type="password" id="origin-password"></p>
-            <p>请输入新的密码：<input type="password" id="new-password-first"></p>
-            <p>再次输入新密码：<input type="password" id="new-password-second"></p>
-        </div>
-        <div class="change-profile-submit-window-button">
-            <button>确定提交</button>
-        </div>
-    </div>`)
+            <button class="close-button-plus ">X</button>
+            <div>
+                <p>你修改用户名为：<input type="text" id="changed-name"></p>
+            </div>
+            <div class="change-profile-submit-window-password">
+                <p>请先输入原密码：<input type="password" id="origin-password"></p>
+                <p>请输入新的密码：<input type="password" id="new-password-first"></p>
+                <p>再次输入新密码：<input type="password" id="new-password-second"></p>
+            </div>
+            <div class="change-profile-submit-window-button">
+                <button>确定提交</button>
+            </div>
+        </div>`)
     const dimOverlay = document.querySelector('.dim-overlay')
     const closeButtonPlus = document.querySelector('.close-button-plus')
     const changeProfileSubmitWindowButton = document.querySelector('.change-profile-submit-window-button')
@@ -269,7 +278,7 @@ function renderChangeProfileSubmitWindow(){
     })
 }
 
-// 召唤数据展示面板
+// 召唤数据展示页
 function callDataShowing(){
     rightSide.insertAdjacentHTML('beforeend',`
         <!-- 搜索框 -->
@@ -460,11 +469,69 @@ function attachEventsForSearchWayChoose(){
     })
 }
 
+// 管理端特权:召唤并渲染可修改设备详情框
+/**
+ * 
+ * @param {EquipmentOut} EquipmentOut 
+ */
+function callEquipmentDetailWindow(EquipmentOut){
+    if(document.querySelector('.equipment-detail-window')){
+        console.log('已唤出可修改设备详情框，无需再次操作')
+        return
+    }
+    document.body.insertAdjacentHTML('beforeend',`
+        <div class="equipment-detail-window">
+            <button class="close-button-equipment-detail-window" id="close-button-equipment-detail-window">X</button>
+            <div class="equipment-detail-window-change">
+                <p>设备编号:<input type="text" id="equipment-no" placeholder="${EquipmentOut.equipmentNo}"></p>
+                <p>设备名称:<input type="text" id="equipment-name" placeholder="${EquipmentOut.equipmentName}"></p>
+                <p>分类ID:<input type="text" id="category-id" placeholder="${EquipmentOut.categoryId}"></p>
+                <p>规格:<input type="text" id="spec" placeholder="${EquipmentOut.spec}"></p>
+                <p>品牌:<input type="text" id="brand" placeholder="${EquipmentOut.brand}"></p>
+                <p>单位:<input type="text" id="unit" placeholder="${EquipmentOut.unit}"></p>
+                <p>位置:<input type="text" id="location" placeholder="${EquipmentOut.location}"></p>
+                <p>购买日期:<input type="text" id="purchase-date" placeholder="${EquipmentOut.purchaseDate}"></p>
+                <p>价格:<input type="text" id="price" placeholder="${EquipmentOut.price}"></p>
+                <p>封面图片:<input type="text" id="cover-img" placeholder="${EquipmentOut.coverImg}"></p>
+                <p>状态:<input type="text" id="status" placeholder="${EquipmentOut.status}"></p>
+                <p>备注:<input type="text" id="remark" placeholder="${EquipmentOut.remark}"></p>
+            </div>
+            <button class="equipment-detail-window-submit-button" id="equipment-detail-window-submit-button">提交修改</button>
+        </div>
+        `)
+    document.querySelector('#close-button-equipment-detail-window').addEventListener('click', () =>{
+        document.querySelector('#equipment-detail-window').remove()
+        document.querySelector('#equipment-detail-window').remove()
+        document.querySelector('.dim-overlay')?.remove()
+    })
+    document.querySelector('#equipment-detail-window-submit-button').addEventListener('click',async() =>{
+        let temEquipmentUpdate = new EquipmentUpdate()
+        document.querySelectorAll('.equipment-detail-window-change p input').forEach( (e) =>{
+            temEquipmentUpdate[e.id] = e.value
+        })
+        if(await updateEquipment(EquipmentOut.id,temEquipmentUpdate,apiChoose())){
+            alert('更新设备成功')
+        }
+        callEquipmentDetailWindow()
+    })
+}
+
+// 背景加阴影效果
+function addBackgroundShadow(){
+    if(document.querySelector('.dim-overlay')){
+        console.log('阴影效果已添加，无需再次操作')
+        return
+    }
+    document.body.insertAdjacentHTML('beforeend',`
+        <div class="dim-overlay"></div>
+        `)
+}
+
+
+// 点击头像时背景加阴影效果
 profilePictureBox.addEventListener('click',() => {
     renderChangePanel().then(() => {
-        document.body.insertAdjacentHTML('beforeend',`
-            <div class="dim-overlay"></div>
-            `)
+        addBackgroundShadow()
     })
 
 })
@@ -478,7 +545,7 @@ document.querySelector('#data-showing-button').addEventListener('click',() =>{
 })
 
 document.querySelector('#admin-equipment-button').addEventListener('click',() =>{
-    
+
     rightSide.innerHTML = ''
 })
 
@@ -486,8 +553,9 @@ document.querySelector('#my-record-button').addEventListener('click',() =>{
     rightSide.innerHTML = ''
 })
 
-callDataShowing()
-renderData(defaultQueryData)
+
+// callDataShowing()
+// renderData(defaultQueryData)
 renderPersonalData()
 
 

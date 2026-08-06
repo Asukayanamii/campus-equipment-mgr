@@ -205,6 +205,44 @@ body {
     visibility: visible;
 }
 
+.equipment-detail-window{
+    display: flex;
+    position: fixed;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    inset: 0;
+    margin: auto;
+    height: 500px;
+    width: 700px;
+    padding: 10px;
+    background-color: rgb(217, 189, 189);
+    z-index: 400;
+}    
+
+.equipment-detail-window-change{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
+    width: 100%;
+    height: 80%;
+    gap: 10px;
+    row-gap: 0px;
+}
+
+.equipment-detail-window .equipment-detail-window-change p input{
+    
+    height: 30px;
+    width: 100%;
+    background-color: rgb(147, 128, 128);
+}
+
+.equipment-detail-window-submit-button{
+    background-color: #719adc;
+    margin-top: 20px;
+    border-radius: 20px;
+    width: 20%;
+}
+
 .page-choose-box{
     display: flex;
     flex-direction: row;
@@ -256,31 +294,45 @@ body {
 }
 
 .close-button {
-  position: relative;
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 20px;
   height: 20px;
-  right: -100%;
-  top: 0%;
+  top: 10px;
+  right: 10px;
   background-color: red;
-  flex-shrink: 0;
   z-index: 500;
 }
+
 .close-button-plus {
-  position: relative;
+  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 20px;
   height: 20px;
-  right: -47%;
-  top: 0%;
+  top: 0;
+  right: 0;
   background-color: red;
-  flex-shrink: 0;
   z-index: 600;
 }
+
+.close-button-equipment-detail-window{
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 20px;
+    height: 20px;
+    top: 0;
+    right: 0;
+    background-color: red;
+    z-index: 400;
+}
+
+
 
 .change-profile-submit-window{
     position: fixed;
