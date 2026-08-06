@@ -55,6 +55,34 @@ BORROW_RECORD_STATUS_MAP = {
 
 BORROW_RECORD_STATUS_CODES = list(BORROW_RECORD_STATUS_MAP.keys())
 
+
+class BorrowReturnStatus:
+    NORMAL = "normal"
+    DAMAGED = "damaged"
+
+
+class ConfirmStatus:
+    PENDING = "pending"
+    CONFIRMED = "confirmed"
+    REJECTED = "rejected"
+
+
+class RepairReportStatus:
+    PENDING = "pending"
+    CONFIRMED = "confirmed"
+    REJECTED = "rejected"
+
+
+class RepairOrderStatus:
+    PENDING_ASSIGN = "pending_assign"
+    PENDING_REPAIR = "pending_repair"
+    REPAIRING = "repairing"
+    PENDING_CONFIRM = "pending_confirm"
+    COMPLETED = "completed"
+    UNREPAIRABLE = "unrepairable"
+    SCRAPPED = "scrapped"
+
+
 # 可选：生成状态映射字典，用于前端/数据库转换
 ITEM_STATUS_MAP = {
     ItemStatusCode.AVAILABLE: ItemStatus.AVAILABLE,
