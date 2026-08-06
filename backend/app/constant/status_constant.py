@@ -53,6 +53,8 @@ BORROW_RECORD_STATUS_MAP = {
     BorrowRecordStatus.COMPLETED: "已完成",
 }
 
+BORROW_RECORD_STATUS_CODES = list(BORROW_RECORD_STATUS_MAP.keys())
+
 # 可选：生成状态映射字典，用于前端/数据库转换
 ITEM_STATUS_MAP = {
     ItemStatusCode.AVAILABLE: ItemStatus.AVAILABLE,

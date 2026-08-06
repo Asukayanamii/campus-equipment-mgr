@@ -1,10 +1,11 @@
+from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import BorrowRecordStatus, BORROW_RECORD_STATUS_MAP, ItemStatusCode
+from app.constant.status_constant import BorrowRecordStatus, ItemStatusCode
 from app.core.exceptions import BussinessException
 from app.crud import borrow_record_crud, equipment_crud
 from app.db.models.borrow_record_model import BorrowRecord
-from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordOut
+from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordOut, BorrowRecordPageOut, BorrowRecordQuery
 
 
 def create_borrow_record_service(
@@ -35,9 +36,18 @@ def create_borrow_record_service(
         )
         borrow_record_crud.add_borrow_record(borrow_record, session)
         equipment_crud.update_equipment(equipment, {"status": ItemStatusCode.PENDING_BORROW}, session)
-        borrow_record_out = BorrowRecordOut.model_validate(borrow_record)
-        borrow_record_out.status = BORROW_RECORD_STATUS_MAP.get(
-            borrow_record_out.status,
-            borrow_record_out.status,
-        )
-        return borrow_record_out
+        return BorrowRecordOut.model_validate(borrow_record)
+
+
+def query_borrow_record_by_user_service(
+    session: Session,
+    user_id: int,
+    query: BorrowRecordQuery,
+) -> Page[BorrowRecordPageOut]:
+    list = []
+    res = borrow_record_crud.query_borrow_record_by_user(session, user_id, query)
+    for borrow_record, equipment in res.items:
+        borrow_record_out = BorrowRecordPageOut.model_validate(borrow_record)
+        borrow_record_out.equipment_name = equipment.equipment_name if equipment else None
+        list.append(borrow_record_out)
+    return Page(items=list, total=res.total, page=query.page, size=res.size, pages=res.pages)
