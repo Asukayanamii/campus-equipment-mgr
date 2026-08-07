@@ -1,0 +1,18 @@
+# 敏感环境变量
+.env
+.env
+.env.local
+.env.dev
+.env.prod
+
+# 接口测试文件
+*.http
+
+# python 缓存、编译文件
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+*.log
