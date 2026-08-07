@@ -502,7 +502,7 @@ function callEquipmentDetailWindow(EquipmentOut){
         </div>
         `)
     document.querySelector('#close-button-equipment-detail-window').addEventListener('click', () =>{
-        document.querySelector('#equipment-detail-window').remove()
+        document.querySelector('.equipment-detail-window').remove()
         document.querySelector('.dim-overlay')?.remove()
     })
     document.querySelector('#equipment-detail-window-submit-button').addEventListener('click',async() =>{
