@@ -16,6 +16,17 @@ def add_repair_report(repair_report: RepairReport, session: Session) -> None:
     session.flush()
 
 
+def get_repair_report_by_return_record_id(session: Session, return_record_id: int) -> RepairReport | None:
+    stmt = select(RepairReport).where(RepairReport.return_record_id == return_record_id)
+    return session.scalar(stmt)
+
+
+def update_repair_report(repair_report: RepairReport, values: dict, session: Session) -> None:
+    for field, value in values.items():
+        setattr(repair_report, field, value)
+    session.flush()
+
+
 def query_repair_report_by_user(
     session: Session,
     user_id: int,

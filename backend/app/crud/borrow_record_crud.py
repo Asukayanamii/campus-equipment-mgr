@@ -10,6 +10,9 @@ from app.constant.status_constant import BorrowRecordStatus
 from app.db.models.borrow_record_model import BorrowRecord
 from app.db.models.equipment_category_model import EquipmentCategory
 from app.db.models.equipment_model import Equipment
+from app.db.models.borrow_return_record_model import BorrowReturnRecord
+from app.db.models.user_model import User
+from app.schema.admin_borrow_record_schema import AdminBorrowRecordQuery
 from app.schema.borrow_record_schema import BorrowRecordQuery
 
 
@@ -51,6 +54,14 @@ def get_borrow_record_by_id_and_user_for_update(
         )
         .with_for_update()
     )
+    return session.scalar(stmt)
+
+
+def get_borrow_record_by_id_for_update(
+    session: Session,
+    borrow_record_id: int,
+) -> BorrowRecord | None:
+    stmt = select(BorrowRecord).where(BorrowRecord.id == borrow_record_id).with_for_update()
     return session.scalar(stmt)
 
 
@@ -97,3 +108,65 @@ def query_borrow_record_by_user(
         sort_column = getattr(BorrowRecord, to_snake(query.sort or "id"))
         stmt = stmt.order_by(desc(sort_column) if query.order == "desc" else asc(sort_column))
     return paginate(session, stmt, query)
+
+
+def query_borrow_record_by_admin(
+    session: Session,
+    query: AdminBorrowRecordQuery,
+) -> Page[tuple[BorrowRecord, User | None, Equipment | None, BorrowReturnRecord | None]]:
+    stmt = (
+        select(BorrowRecord, User, Equipment, BorrowReturnRecord)
+        .outerjoin(User, BorrowRecord.user_id == User.id)
+        .outerjoin(Equipment, BorrowRecord.equipment_id == Equipment.id)
+        .outerjoin(BorrowReturnRecord, BorrowRecord.id == BorrowReturnRecord.borrow_record_id)
+    )
+    if query.user_id:
+        stmt = stmt.where(BorrowRecord.user_id == query.user_id)
+    if query.equipment_id:
+        stmt = stmt.where(BorrowRecord.equipment_id == query.equipment_id)
+    if query.status:
+        stmt = stmt.where(BorrowRecord.status == query.status)
+    if query.keyword:
+        keyword = f"%{query.keyword}%"
+        stmt = stmt.where(
+            User.name.like(keyword)
+            | User.username.like(keyword)
+            | Equipment.equipment_name.like(keyword)
+            | Equipment.equipment_no.like(keyword)
+        )
+    if query.start_time:
+        stmt = stmt.where(BorrowRecord.borrow_start_time >= query.start_time)
+    if query.end_time:
+        stmt = stmt.where(BorrowRecord.borrow_end_time <= query.end_time)
+    if query.sort or query.order:
+        sort_column = getattr(BorrowRecord, to_snake(query.sort or "id"), BorrowRecord.id)
+        stmt = stmt.order_by(desc(sort_column) if query.order == "desc" else asc(sort_column))
+    return paginate(session, stmt, query)
+
+
+def get_borrow_record_detail_by_id_for_admin(
+    session: Session,
+    borrow_record_id: int,
+):
+    from app.db.models.repair_order_model import RepairOrder
+    from app.db.models.repair_report_model import RepairReport
+
+    stmt = (
+        select(
+            BorrowRecord,
+            User,
+            Equipment,
+            EquipmentCategory,
+            BorrowReturnRecord,
+            RepairReport,
+            RepairOrder,
+        )
+        .outerjoin(User, BorrowRecord.user_id == User.id)
+        .outerjoin(Equipment, BorrowRecord.equipment_id == Equipment.id)
+        .outerjoin(EquipmentCategory, Equipment.category_id == EquipmentCategory.id)
+        .outerjoin(BorrowReturnRecord, BorrowRecord.id == BorrowReturnRecord.borrow_record_id)
+        .outerjoin(RepairReport, BorrowReturnRecord.id == RepairReport.return_record_id)
+        .outerjoin(RepairOrder, RepairReport.id == RepairOrder.repair_report_id)
+        .where(BorrowRecord.id == borrow_record_id)
+    )
+    return session.execute(stmt).one_or_none()

@@ -120,6 +120,7 @@ class RepairOrderStatus:
     COMPLETED = "completed"
     UNREPAIRABLE = "unrepairable"
     SCRAPPED = "scrapped"
+    CANCELLED = "cancelled"
 
 
 REPAIR_ORDER_STATUS_MAP = {
@@ -130,9 +131,34 @@ REPAIR_ORDER_STATUS_MAP = {
     RepairOrderStatus.COMPLETED: "已完成",
     RepairOrderStatus.UNREPAIRABLE: "无法维修",
     RepairOrderStatus.SCRAPPED: "已报废",
+    RepairOrderStatus.CANCELLED: "已取消",
 }
 
 REPAIR_ORDER_STATUS_CODES = list(REPAIR_ORDER_STATUS_MAP.keys())
+
+
+class AuditBusinessType:
+    BORROW_RECORD = "borrow_record"
+
+
+AUDIT_BUSINESS_TYPE_MAP = {
+    AuditBusinessType.BORROW_RECORD: "借用记录",
+}
+
+AUDIT_BUSINESS_TYPE_CODES = list(AUDIT_BUSINESS_TYPE_MAP.keys())
+
+
+class AuditOperationType:
+    REVIEW = "review"
+    CONFIRM_RETURN = "confirm_return"
+
+
+AUDIT_OPERATION_TYPE_MAP = {
+    AuditOperationType.REVIEW: "审核借用申请",
+    AuditOperationType.CONFIRM_RETURN: "确认设备归还",
+}
+
+AUDIT_OPERATION_TYPE_CODES = list(AUDIT_OPERATION_TYPE_MAP.keys())
 
 
 

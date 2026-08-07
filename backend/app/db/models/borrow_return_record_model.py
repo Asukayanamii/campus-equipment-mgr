@@ -59,6 +59,12 @@ class BorrowReturnRecord(Base):
         comment="管理员确认状态"
     )
 
+    confirmed_status: Mapped[str | None] = mapped_column(
+        VARCHAR(30),
+        nullable=True,
+        comment="管理员最终确认的设备状态"
+    )
+
     confirm_remark: Mapped[str | None] = mapped_column(
         TEXT,
         nullable=True,
