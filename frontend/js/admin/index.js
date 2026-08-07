@@ -529,11 +529,13 @@ function callEquipmentDetailWindow(EquipmentOut){
         callEquipmentDetailWindow(fresh)
     })
     document.querySelector('.equipment-detail-window-delete-button').addEventListener('click',async() =>{
-        if(await deleteEquipment(EquipmentOut.id,apiChoose())){
+        if(confirm(`你确定要删除${EquipmentOut.equipmentName}吗，改操作不可逆`)){
+            if(await deleteEquipment(EquipmentOut.id,apiChoose())){
             alert('删除成功')
             document.querySelector('.equipment-detail-window').remove()
             document.querySelector('.dim-overlay')?.remove()
             renderData(defaultQueryData)
+        }
         }
     })
 }

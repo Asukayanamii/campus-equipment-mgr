@@ -16,7 +16,7 @@ window.fetch = async function (input , init ){
     const response = await originalFetch.call(this,input,init);
 
 
-    if(response.status !== 200){
+    if(response.status === 401){
         if(isRedirecting === false){
             isRedirecting = true;
             sessionStorage.removeItem('token');
