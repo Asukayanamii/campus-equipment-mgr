@@ -457,6 +457,42 @@ body {
     background-color: rgb(147, 128, 128);
 }
 
+/* 状态下拉框，与输入框保持统一 */
+.add-equipment-panel .add-equipment-panel-change p select,
+.equipment-detail-window .equipment-detail-window-change p select{
+    height: 30px;
+    width: 100%;
+    background-color: rgb(147, 128, 128);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 6px;
+    padding: 0 6px;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+}
+
+.add-equipment-panel .add-equipment-panel-change p select:focus,
+.equipment-detail-window .equipment-detail-window-change p select:focus{
+    border-color: #719adc;
+}
+
+/* 年月日下拉框，三个一行并排均分宽度 */
+.add-equipment-panel .add-equipment-panel-change p.date-choose-box,
+.equipment-detail-window .equipment-detail-window-change p.date-choose-box{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+}
+
+.add-equipment-panel .add-equipment-panel-change p.date-choose-box select,
+.equipment-detail-window .equipment-detail-window-change p.date-choose-box select{
+    width: 100%;
+    flex: 1;
+    min-width: 0;
+    padding: 0 4px;
+}
+
 .add-equipment-panel-buttons{
     display: flex;
     flex-direction: row;

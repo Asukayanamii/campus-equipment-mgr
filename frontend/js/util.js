@@ -4,6 +4,42 @@ const PASSWORD_RULE = /^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9_\!@#\$%\^&\*\(\)\-=]
 const PASSWORD_RULE_DESCRIPTION = "6-24 位，至少 1 个字母、至少 1 个数字，支持常用符号"
 
 
+// 设备状态编码与中文互转映射
+const EQUIPMENT_STATUS_MAP = {
+    available : '可用',
+    pending_borrow : '待借用',
+    borrowed : '借用中',
+    pending_return : '待归还',
+    damaged : '损坏',
+    repair_pending : '待维修',
+    repairing : '维修中',
+    repaired : '已维修',
+    scrapped : '已报废',
+    offline : '下架',
+}
+
+// 借用记录状态编码与中文互转映射
+const BORROW_RECORD_STATUS_MAP = {
+    pending : '待审核',
+    approved : '已通过',
+    rejected : '已驳回',
+    borrowed : '借用中',
+    pending_return : '待确认归还',
+    completed : '已完成',
+}
+
+// 维修工单状态编码与中文互转映射
+const REPAIR_ORDER_STATUS_MAP = {
+    pending_assign : '待派单',
+    pending_repair : '待维修',
+    repairing : '维修中',
+    pending_confirm : '待确认',
+    completed : '已完成',
+    unrepairable : '无法维修',
+    scrapped : '已报废',
+}
+
+
 // 重写fetch，实现拦截器
 const originalFetch = window.fetch;
 let isRedirecting = false;
@@ -69,6 +105,89 @@ function checkPassword(password){
         return false;
     }
     return stringPassword;
+}
+
+// 英文状态编码转中文，用于展示
+/**
+ *
+ * @param {Object} statusMap 状态映射对象
+ * @param {string} status 英文状态编码
+ * @returns {string}
+ */
+function statusToChinese(statusMap,status){
+    return statusMap[status] ?? status
+}
+
+// 中文状态转英文状态编码，用于提交
+/**
+ *
+ * @param {Object} statusMap 状态映射对象
+ * @param {string} chinese 中文状态
+ * @returns {string}
+ */
+function chineseToStatus(statusMap,chinese){
+    return Object.keys(statusMap).find(key => statusMap[key] === chinese) ?? chinese
+}
+
+// 根据映射生成状态下拉选项
+/**
+ *
+ * @param {Object} statusMap 状态映射对象
+ * @param {string} currentStatus 当前英文状态编码，用于默认选中
+ * @returns {string}
+ */
+function statusSelectOptions(statusMap,currentStatus){
+    return Object.entries(statusMap).map(([key,chinese]) =>
+        `<option value="${chinese}" ${key === currentStatus ? 'selected' : ''}>${chinese}</option>`
+    ).join('')
+}
+
+// 生成年份下拉选项
+/**
+ *
+ * @param {string} currentDate 当前日期字符串(如 2026-08-07)，缺省时默认今天
+ * @returns {string}
+ */
+function yearSelectOptions(currentDate){
+    const currentYear = new Date().getFullYear()
+    const selectedYear = currentDate ? Number(currentDate.slice(0,4)) : currentYear
+    const options = []
+    for(let y = currentYear; y >= 1990; y--){
+        options.push(`<option value="${y}" ${y === selectedYear ? 'selected' : ''}>${y}</option>`)
+    }
+    return options.join('')
+}
+
+// 生成月份下拉选项
+/**
+ *
+ * @param {string} currentDate 当前日期字符串(如 2026-08-07)，缺省时默认今天
+ * @returns {string}
+ */
+function monthSelectOptions(currentDate){
+    const selectedMonth = currentDate ? currentDate.slice(5,7) : String(new Date().getMonth() + 1).padStart(2,'0')
+    const options = []
+    for(let m = 1; m <= 12; m++){
+        const month = String(m).padStart(2,'0')
+        options.push(`<option value="${month}" ${month === selectedMonth ? 'selected' : ''}>${month}</option>`)
+    }
+    return options.join('')
+}
+
+// 生成日下拉选项
+/**
+ *
+ * @param {string} currentDate 当前日期字符串(如 2026-08-07)，缺省时默认今天
+ * @returns {string}
+ */
+function daySelectOptions(currentDate){
+    const selectedDay = currentDate ? currentDate.slice(8,10) : String(new Date().getDate()).padStart(2,'0')
+    const options = []
+    for(let d = 1; d <= 31; d++){
+        const day = String(d).padStart(2,'0')
+        options.push(`<option value="${day}" ${day === selectedDay ? 'selected' : ''}>${day}</option>`)
+    }
+    return options.join('')
 }
 
 class EquipmentOut{

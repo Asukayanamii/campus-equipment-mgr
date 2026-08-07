@@ -358,10 +358,14 @@ function addNewEquipmentPanel(){
                 <p>品牌:<input type="text" id="brand"></p>
                 <p>单位:<input type="text" id="unit"></p>
                 <p>位置:<input type="text" id="location"></p>
-                <p>购买日期:<input type="text" id="purchaseDate"></p>
+                <p class="date-choose-box">购买日期:
+                    <select id="purchaseDateYear">${yearSelectOptions()}</select>年
+                    <select id="purchaseDateMonth">${monthSelectOptions()}</select>月
+                    <select id="purchaseDateDay">${daySelectOptions()}</select>日
+                </p>
                 <p>价格:<input type="text" id="price"></p>
                 <p>封面图片:<input type="text" id="coverImg"></p>
-                <p>状态:<input type="text" id="status"></p>
+                <p>状态:<select id="status">${statusSelectOptions(EQUIPMENT_STATUS_MAP)}</select></p>
                 <p>备注:<input type="text" id="remark"></p>
             </div>
             <div class="add-equipment-panel-buttons">
@@ -374,9 +378,14 @@ function addNewEquipmentPanel(){
     closeButtonPlus.addEventListener('click',closeAddEquipmentPanel)
     addEquipmentPanelButton.addEventListener('click',async() =>{
         const temEquipmentCreate = new EquipmentCreate()
-        addEquipmentPanel.querySelectorAll('.add-equipment-panel-change p input').forEach( (e) =>{
-            temEquipmentCreate[e.id] = e.value
+        addEquipmentPanel.querySelectorAll('.add-equipment-panel-change p input, .add-equipment-panel-change p select').forEach( (e) =>{
+            if(e.id === 'status'){
+                temEquipmentCreate[e.id] = chineseToStatus(EQUIPMENT_STATUS_MAP,e.value)
+            }else if(e.id !== 'purchaseDateYear' && e.id !== 'purchaseDateMonth' && e.id !== 'purchaseDateDay'){
+                temEquipmentCreate[e.id] = e.value
+            }
         })
+        temEquipmentCreate.purchaseDate = `${addEquipmentPanel.querySelector('#purchaseDateYear').value}-${addEquipmentPanel.querySelector('#purchaseDateMonth').value}-${addEquipmentPanel.querySelector('#purchaseDateDay').value}`
 
         const ok = await addNewEquipment(temEquipmentCreate,apiChoose())
         if(!ok) return
@@ -570,10 +579,14 @@ function callEquipmentDetailWindow(EquipmentOut){
                 <p>品牌:<input type="text" id="brand" value="${EquipmentOut.brand ?? ''}"></p>
                 <p>单位:<input type="text" id="unit" value="${EquipmentOut.unit ?? ''}"></p>
                 <p>位置:<input type="text" id="location" value="${EquipmentOut.location ?? ''}"></p>
-                <p>购买日期:<input type="text" id="purchaseDate" value="${EquipmentOut.purchaseDate ?? ''}"></p>
+                <p class="date-choose-box">购买日期:
+                    <select id="purchaseDateYear">${yearSelectOptions(EquipmentOut.purchaseDate)}</select>年
+                    <select id="purchaseDateMonth">${monthSelectOptions(EquipmentOut.purchaseDate)}</select>月
+                    <select id="purchaseDateDay">${daySelectOptions(EquipmentOut.purchaseDate)}</select>日
+                </p>
                 <p>价格:<input type="text" id="price" value="${EquipmentOut.price ?? ''}"></p>
                 <p>封面图片:<input type="text" id="coverImg" value="${EquipmentOut.coverImg ?? ''}"></p>
-                <p>状态:<input type="text" id="status" value="${EquipmentOut.status ?? ''}"></p>
+                <p>状态:<select id="status">${statusSelectOptions(EQUIPMENT_STATUS_MAP, EquipmentOut.status)}</select></p>
                 <p>备注:<input type="text" id="remark" value="${EquipmentOut.remark ?? ''}"></p>
             </div>
             <div class="equipment-detail-window-buttons">
@@ -589,9 +602,14 @@ function callEquipmentDetailWindow(EquipmentOut){
     })
     document.querySelector('#equipment-detail-window-submit-button').addEventListener('click',async() =>{
         const temEquipmentUpdate = new EquipmentUpdate()
-        document.querySelectorAll('.equipment-detail-window-change p input').forEach( (e) =>{
-            temEquipmentUpdate[e.id] = e.value
+        document.querySelectorAll('.equipment-detail-window-change p input, .equipment-detail-window-change p select').forEach( (e) =>{
+            if(e.id === 'status'){
+                temEquipmentUpdate[e.id] = chineseToStatus(EQUIPMENT_STATUS_MAP,e.value)
+            }else if(e.id !== 'purchaseDateYear' && e.id !== 'purchaseDateMonth' && e.id !== 'purchaseDateDay'){
+                temEquipmentUpdate[e.id] = e.value
+            }
         })
+        temEquipmentUpdate.purchaseDate = `${document.querySelector('#purchaseDateYear').value}-${document.querySelector('#purchaseDateMonth').value}-${document.querySelector('#purchaseDateDay').value}`
 
         const ok = await updateEquipment(EquipmentOut.id,temEquipmentUpdate,apiChoose())
         if(!ok) return
