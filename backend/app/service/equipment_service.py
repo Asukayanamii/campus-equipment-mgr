@@ -1,11 +1,12 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import ITEM_STATUS_MAP
+from app.constant.status_constant import AuditBusinessType, ITEM_STATUS_MAP
 from app.core.config import settings
 from app.core.exceptions import BussinessException
-from app.crud import equipment_crud
+from app.crud import equipment_crud, equipment_status_record_crud
 from app.db.models.equipment_model import Equipment
+from app.db.models.equipment_status_record_model import EquipmentStatusRecord
 from app.schema.equipment_schema import EquipmentCreate, EquipmentOut, EquipmentUpdate, EquipQuery
 from app.schema.page_schema import PageResp
 
@@ -59,10 +60,46 @@ def create_equipment_service(session: Session, equipment_in: EquipmentCreate) ->
         equipment_crud.add_equipment(Equipment(**equipment_data), session)
 
 
-def update_equipment_service(session: Session, equipment_id: int, equipment_in: EquipmentUpdate) -> None:
+def change_equipment_status_service(
+    session: Session,
+    equipment: Equipment,
+    target_status: str,
+    business_type: str,
+    business_id: int,
+    admin_id: int,
+    reason: str | None = None,
+) -> bool:
+    """更新设备状态；仅状态实际变化时写入状态变更记录。"""
+    if equipment.status == target_status:
+        return False
+
+    # 保存变更前状态，并在当前事务中同步更新设备和状态历史。
+    before_status = equipment.status
+    equipment_crud.update_equipment(equipment, {"status": target_status}, session)
+    equipment_status_record_crud.add_equipment_status_record(
+        EquipmentStatusRecord(
+            equipment_id=equipment.id,
+            before_status=before_status,
+            after_status=target_status,
+            business_type=business_type,
+            business_id=business_id,
+            operator_id=admin_id,
+            reason=reason,
+        ),
+        session,
+    )
+    return True
+
+
+def update_equipment_service(
+    session: Session,
+    equipment_id: int,
+    equipment_in: EquipmentUpdate,
+    admin_id: int,
+) -> None:
     with session.begin():
         # 确认目标设备存在且未被逻辑删除。
-        equipment = equipment_crud.get_equipment_by_id(session, equipment_id)
+        equipment = equipment_crud.get_equipment_by_id_for_update(session, equipment_id)
         if not equipment:
             raise BussinessException("设备不存在", status_code=404)
 
@@ -73,8 +110,20 @@ def update_equipment_service(session: Session, equipment_id: int, equipment_in: 
             same_no_equipment = equipment_crud.get_equipment_by_no(session, equipment_no)
             if same_no_equipment and same_no_equipment.id != equipment_id:
                 raise BussinessException("设备编号已存在", status_code=409)
-        # 校验新资产编号后写入变更。
-        equipment_crud.update_equipment(equipment, values, session)
+        # 普通信息字段按原逻辑更新，不写设备状态变更历史。
+        target_status = values.pop("status", None)
+        if values:
+            equipment_crud.update_equipment(equipment, values, session)
+        # 仅请求状态实际改变时，统一更新设备状态并记录状态历史。
+        if target_status is not None:
+            change_equipment_status_service(
+                session=session,
+                equipment=equipment,
+                target_status=target_status,
+                business_type=AuditBusinessType.EQUIPMENT,
+                business_id=equipment.id,
+                admin_id=admin_id,
+            )
 
 
 def delete_equipment_service(session: Session, equipment_id: int) -> None:

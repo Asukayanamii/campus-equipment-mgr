@@ -139,10 +139,12 @@ REPAIR_ORDER_STATUS_CODES = list(REPAIR_ORDER_STATUS_MAP.keys())
 
 class AuditBusinessType:
     BORROW_RECORD = "borrow_record"
+    EQUIPMENT = "equipment"
 
 
 AUDIT_BUSINESS_TYPE_MAP = {
     AuditBusinessType.BORROW_RECORD: "借用记录",
+    AuditBusinessType.EQUIPMENT: "设备",
 }
 
 AUDIT_BUSINESS_TYPE_CODES = list(AUDIT_BUSINESS_TYPE_MAP.keys())
