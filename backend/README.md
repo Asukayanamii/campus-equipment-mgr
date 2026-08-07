@@ -2,7 +2,7 @@
 
 本目录是校园设备借用与维修管理系统的 FastAPI 后端。系统面向学生、管理员和维修人员三类角色，目标是覆盖设备查询、借用归还、损坏报修、维修派单及结果确认等流程。
 
-当前已实现三端的账号认证、个人信息维护和带条件的设备分页查询；借用、归还、报修和维修工单等核心流程仍需继续开发。
+当前已实现三端账号认证、个人信息维护、设备与分类管理、学生借用申请/归还/报修查询，以及管理员借用审核和归还确认。维修端工单处理和管理员维修工单管理仍待后续迭代。
 
 ## 技术栈
 
@@ -13,6 +13,7 @@
 - Pydantic v2 / pydantic-settings
 - JWT（PyJWT）+ bcrypt
 - fastapi-pagination
+- 阿里云 OSS（图片对象存储）
 
 ## 项目结构
 
@@ -63,7 +64,15 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=720
 ```
 
-数据库使用 MySQL。应用启动时会根据 ORM 模型创建缺失的数据表：`user`、`admin`、`repair_user`、`equipment`、`equipment_category`、`borrow_record`、`borrow_return_record`、`borrow_return_image`、`repair_report`、`repair_order`。
+数据库使用 MySQL。应用启动时会根据 ORM 模型创建缺失的数据表：`user`、`admin`、`repair_user`、`equipment`、`equipment_category`、`borrow_record`、`borrow_return_record`、`borrow_return_image`、`repair_report`、`repair_order`、`audit_record`、`equipment_status_record`。
+
+`Base.metadata.create_all()` 只会创建缺失的表，不能为既有表补列。已有数据库升级到当前版本时，需要执行一次：
+
+```sql
+ALTER TABLE borrow_return_record
+ADD COLUMN confirmed_status VARCHAR(30) NULL COMMENT '管理员最终确认的设备状态'
+AFTER confirm_status;
+```
 
 ### 3. 启动服务
 
@@ -101,6 +110,8 @@ token: <login-response.data.token>
 ```
 
 学生、管理员和维修人员使用彼此独立的 JWT 密钥，因此三个端的令牌不能混用。
+
+学生端的借用记录和报修记录查询会固定使用当前令牌中的用户 ID 过滤，不接受客户端指定其他学生的数据范围。
 
 ### 字段命名
 
@@ -175,6 +186,8 @@ token: <login-response.data.token>
 `available`、`pending_borrow`、`borrowed`、`pending_return`、`damaged`、`repair_pending`、`repairing`、
 `repaired`、`scrapped`、`offline`。设备编号全局唯一。
 
+更新设备时，名称、位置、品牌、封面等普通字段不会生成设备状态历史；仅在请求传入的 `status` 与数据库当前值不同时，系统才会写入一条 `equipment_status_record`。该记录关联 `businessType=equipment` 和当前设备 ID，操作人为当前管理员。
+
 ### 管理端设备分类
 
 以下接口均需管理员 `token`。删除为逻辑删除，列表与详情不会返回已删除分类。
@@ -210,6 +223,8 @@ GET /user/equipment/page?page=1&size=10&status=available&equipmentName=投影仪
 token: <student-token>
 ```
 
+图片通过 `POST /common/upload-image` 上传到阿里云 OSS。服务端根据环境变量校验图片扩展名白名单和文件大小，并生成随机对象名，避免使用客户端原始文件名作为存储对象名。
+
 ## 设备状态
 
 设备状态编码与业务含义如下，后续借用和维修流程应以此为准：
@@ -227,23 +242,50 @@ token: <student-token>
 | `scrapped` | 已报废 |
 | `offline` | 已下架 |
 
+## 借用、归还与报修接口
+
+以下接口均返回 `Result` 包装，受保护接口需在请求头携带对应角色的 `token`。
+
+| 方法 | 路径 | 说明 |
+| --- | --- | --- |
+| POST | `/user/borrow-records` | 学生提交借用申请；校验设备可借和时间冲突后，设备进入 `pending_borrow` |
+| GET | `/user/borrow-records/page` | 学生分页查看本人借用记录 |
+| GET | `/user/borrow-records/{borrowRecordId}` | 学生查看本人借用记录及完整设备信息 |
+| POST | `/user/borrow-records/{borrowRecordId}/return` | 学生提交归还；损坏归还会创建报修记录和待派单工单 |
+| GET | `/user/repair-reports/page` | 学生分页查看本人报修记录 |
+| GET | `/user/repair-reports/{repairReportId}` | 学生查看本人报修详情、损坏图片和维修进度 |
+| GET | `/admin/borrow-records/page` | 管理员按申请人、设备、状态、关键字和时间范围分页查询全部借用记录 |
+| GET | `/admin/borrow-records/{borrowRecordId}` | 管理员查看借用、归还、报修和工单摘要 |
+| POST | `/admin/borrow-records/{borrowRecordId}/review` | 管理员审核待审核借用申请 |
+| POST | `/admin/borrow-records/{borrowRecordId}/confirm-return` | 管理员确认待归还设备 |
+
+借用申请会锁定目标设备，在同一事务中完成可借校验、时间冲突校验、申请创建和设备状态切换，避免并发申请占用重叠时段。审核借用仅允许处理 `pending` 记录：通过后借用记录和设备均变为 `borrowed`，驳回后借用记录为 `rejected`、设备恢复 `available`。归还确认仅允许处理 `pending_return` 记录：`confirmedStatus=normal` 时设备恢复 `available`，`confirmedStatus=damaged` 时设备进入 `repair_pending` 并确保报修记录和维修工单存在。
+
+归还记录中的 `confirmStatus` 表示管理员是否已经处理归还申报（`pending`、`confirmed`、`rejected`）；`confirmedStatus` 表示已确认后的最终验收结论（`normal`、`damaged`）。
+
+## 审计与状态历史
+
+管理员审核借用和确认归还会在同一事务中写入：
+
+- `audit_record`：记录业务类型、业务 ID、操作类型、管理员、处理结果和备注。当前借用流程使用 `businessType=borrow_record`，`businessId=borrow_record.id`。
+- `equipment_status_record`：记录设备状态变更前后值、关联业务、操作管理员、原因和时间。
+
+设备状态变更统一通过 `equipment_service.change_equipment_status_service()` 处理；该方法只在状态实际变化时更新设备并新增状态历史，不自行提交事务。
+
 ## 待实现的业务范围
 
 根据项目需求，后续迭代应覆盖：
 
-- 设备、设备分类的新增、编辑、下架和状态变更。
-- 学生借用申请、个人借用记录、归还确认及损坏照片上传。
-- 损坏报修记录和由管理员创建、分配的维修工单。
-- 维修人员查看本人任务、更新维修进度、提交维修结果与维修凭证。
-- 管理员审核借用、确认归还、确认维修结果及设备报废处理。
-- 借用时间冲突校验、角色数据隔离、上传文件类型和大小限制。
-- 借用记录、报修记录和维修工单的分页查询，以及审核和状态变更记录。
+- 管理员查看和处理全部报修记录、创建和分配维修工单、确认维修结果及设备报废。
+- 维修人员查看本人任务、接收工单、更新维修进度、提交维修结果与维修凭证。
+- 审核记录和设备状态变更记录的分页查询接口。
+- 学生、管理员和维修人员的退出登录接口。
 
 ## 开发约定
 
-- 路由层只处理 HTTP 输入输出和依赖注入，复杂业务放在 `service`。
+- 路由层只处理 HTTP 输入输出和依赖注入，复杂业务放在 `service`；跨表状态流转与追溯记录由同一事务管理。
 - 数据库读写放在 `crud`，跨表操作由 `service` 管理事务。
-- 新接口应使用 `Result` 统一返回，使用 Pydantic schema 校验输入输出。
+- 新接口应使用 `Result` 统一返回，使用 Pydantic schema 校验输入输出；响应字段统一采用 camelCase，状态编码转换为中文展示含义。
 - 权限依赖使用 `user_verity`、`admin_verity`、`repair_verity`，不得仅依赖前端传入的用户 ID。
 - 新增或变更接口后，同步维护 Apifox 接口文档。
 - 不要提交 `.env` 中的数据库密码和 JWT 密钥。
