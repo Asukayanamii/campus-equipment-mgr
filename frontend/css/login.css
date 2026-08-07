@@ -2,7 +2,12 @@ body{
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: black;
+    /* background-color: ; */
+    background-image: url('../assets/images/backgroundimg.png');
+    background-size: cover;        
+    background-position: center;   
+    background-repeat: no-repeat;
+    
 }
 .login-box{
     display: flex;
@@ -11,8 +16,8 @@ body{
     width: 600px;
     justify-content: center;
     align-items: center;
-    background-color: pink;
-    margin: 90px;
+    background-color: rgba(226, 241, 246, 0.6);
+    border-radius: 30px;
 }
 .login-box form div div {
       display: flex;

@@ -1,7 +1,7 @@
 // 默认颜色
 const DEFAULT_COLOR = ''
 // 点击后颜色
-const DEFAULT_TARGET_COLOR = 'green'
+const DEFAULT_TARGET_COLOR = '#f1a6d7'
 
 const studentLogin  = document.getElementById('student-choose')
 const adminLogin = document.getElementById('admin-choose');
