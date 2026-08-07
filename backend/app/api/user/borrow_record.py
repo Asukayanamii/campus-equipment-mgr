@@ -7,7 +7,8 @@ from app.core.logger import logger
 from app.db.session import get_db
 from app.result.result import Result
 from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordCreateOut, BorrowRecordOut, BorrowRecordPageOut, BorrowRecordQuery
-from app.service.borrow_record_service import create_borrow_record_service, get_borrow_record_detail_by_user_service, query_borrow_record_by_user_service
+from app.schema.borrow_return_schema import BorrowReturnCreate, BorrowReturnCreateOut
+from app.service.borrow_record_service import create_borrow_record_service, create_borrow_return_record_service, get_borrow_record_detail_by_user_service, query_borrow_record_by_user_service
 
 router = APIRouter(prefix="/user/borrow-records", tags=["学生端/借用记录相关"], dependencies=[Depends(user_verity)])
 
@@ -32,6 +33,23 @@ def get_borrow_record_detail(
     logger.info("学生端查看本人借用记录详情，借用记录 ID：%s", borrow_record_id)
     res = get_borrow_record_detail_by_user_service(db, borrow_record_id, info["id"])
     return Result.success(res)
+
+
+@router.post("/{borrowRecordId}/return", response_model=Result[BorrowReturnCreateOut], name="提交归还")
+def create_borrow_return_record(
+    borrow_return_in: BorrowReturnCreate,
+    borrow_record_id: int = Path(..., alias="borrowRecordId", ge=1),
+    info: dict = Depends(user_verity),
+    db: Session = Depends(get_db),
+):
+    logger.info("学生端提交归还，借用记录 ID：%s", borrow_record_id)
+    borrow_return_out = create_borrow_return_record_service(
+        db,
+        borrow_record_id,
+        info["id"],
+        borrow_return_in,
+    )
+    return Result.success(borrow_return_out)
 
 
 @router.post("", response_model=Result[BorrowRecordCreateOut], name="提交借用申请")

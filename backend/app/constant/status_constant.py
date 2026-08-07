@@ -34,6 +34,19 @@ class ItemStatusCode:
     SCRAPPED = "scrapped"
     OFFLINE = "offline"
 
+# 生成状态映射字典，用于前端/数据库转换
+ITEM_STATUS_MAP = {
+    ItemStatusCode.AVAILABLE: ItemStatus.AVAILABLE,
+    ItemStatusCode.PENDING_BORROW: ItemStatus.PENDING_BORROW,
+    ItemStatusCode.BORROWED: ItemStatus.BORROWED,
+    ItemStatusCode.PENDING_RETURN: ItemStatus.PENDING_RETURN,
+    ItemStatusCode.DAMAGED: ItemStatus.DAMAGED,
+    ItemStatusCode.REPAIR_PENDING: ItemStatus.REPAIR_PENDING,
+    ItemStatusCode.REPAIRING: ItemStatus.REPAIRING,
+    ItemStatusCode.REPAIRED: ItemStatus.REPAIRED,
+    ItemStatusCode.SCRAPPED: ItemStatus.SCRAPPED,
+    ItemStatusCode.OFFLINE: ItemStatus.OFFLINE,
+}
 
 class BorrowRecordStatus:
     PENDING = "pending"
@@ -61,16 +74,42 @@ class BorrowReturnStatus:
     DAMAGED = "damaged"
 
 
+BORROW_RETURN_STATUS_MAP = {
+    BorrowReturnStatus.NORMAL: "正常",
+    BorrowReturnStatus.DAMAGED: "损坏",
+}
+
+BORROW_RETURN_STATUS_CODES = list(BORROW_RETURN_STATUS_MAP.keys())
+
+
 class ConfirmStatus:
     PENDING = "pending"
     CONFIRMED = "confirmed"
     REJECTED = "rejected"
 
 
+CONFIRM_STATUS_MAP = {
+    ConfirmStatus.PENDING: "待确认",
+    ConfirmStatus.CONFIRMED: "已确认",
+    ConfirmStatus.REJECTED: "已驳回",
+}
+
+CONFIRM_STATUS_CODES = list(CONFIRM_STATUS_MAP.keys())
+
+
 class RepairReportStatus:
     PENDING = "pending"
     CONFIRMED = "confirmed"
     REJECTED = "rejected"
+
+
+REPAIR_REPORT_STATUS_MAP = {
+    RepairReportStatus.PENDING: "待处理",
+    RepairReportStatus.CONFIRMED: "已确认",
+    RepairReportStatus.REJECTED: "已驳回",
+}
+
+REPAIR_REPORT_STATUS_CODES = list(REPAIR_REPORT_STATUS_MAP.keys())
 
 
 class RepairOrderStatus:
@@ -83,19 +122,19 @@ class RepairOrderStatus:
     SCRAPPED = "scrapped"
 
 
-# 可选：生成状态映射字典，用于前端/数据库转换
-ITEM_STATUS_MAP = {
-    ItemStatusCode.AVAILABLE: ItemStatus.AVAILABLE,
-    ItemStatusCode.PENDING_BORROW: ItemStatus.PENDING_BORROW,
-    ItemStatusCode.BORROWED: ItemStatus.BORROWED,
-    ItemStatusCode.PENDING_RETURN: ItemStatus.PENDING_RETURN,
-    ItemStatusCode.DAMAGED: ItemStatus.DAMAGED,
-    ItemStatusCode.REPAIR_PENDING: ItemStatus.REPAIR_PENDING,
-    ItemStatusCode.REPAIRING: ItemStatus.REPAIRING,
-    ItemStatusCode.REPAIRED: ItemStatus.REPAIRED,
-    ItemStatusCode.SCRAPPED: ItemStatus.SCRAPPED,
-    ItemStatusCode.OFFLINE: ItemStatus.OFFLINE,
+REPAIR_ORDER_STATUS_MAP = {
+    RepairOrderStatus.PENDING_ASSIGN: "待派单",
+    RepairOrderStatus.PENDING_REPAIR: "待维修",
+    RepairOrderStatus.REPAIRING: "维修中",
+    RepairOrderStatus.PENDING_CONFIRM: "待确认",
+    RepairOrderStatus.COMPLETED: "已完成",
+    RepairOrderStatus.UNREPAIRABLE: "无法维修",
+    RepairOrderStatus.SCRAPPED: "已报废",
 }
+
+REPAIR_ORDER_STATUS_CODES = list(REPAIR_ORDER_STATUS_MAP.keys())
+
+
 
 # 可选：所有状态英文列表，用于参数校验
 ITEM_STATUS_CODES = list(ITEM_STATUS_MAP.keys())

@@ -38,6 +38,28 @@ def add_borrow_record(borrow_record: BorrowRecord, session: Session) -> None:
     session.flush()
 
 
+def get_borrow_record_by_id_and_user_for_update(
+    session: Session,
+    borrow_record_id: int,
+    user_id: int,
+) -> BorrowRecord | None:
+    stmt = (
+        select(BorrowRecord)
+        .where(
+            BorrowRecord.id == borrow_record_id,
+            BorrowRecord.user_id == user_id,
+        )
+        .with_for_update()
+    )
+    return session.scalar(stmt)
+
+
+def update_borrow_record(borrow_record: BorrowRecord, values: dict, session: Session) -> None:
+    for field, value in values.items():
+        setattr(borrow_record, field, value)
+    session.flush()
+
+
 def get_borrow_record_detail_by_id_and_user(
     session: Session,
     borrow_record_id: int,

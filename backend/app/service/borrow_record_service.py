@@ -1,11 +1,16 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import BorrowRecordStatus, ItemStatusCode
+from app.constant.status_constant import BorrowRecordStatus, BorrowReturnStatus, ItemStatusCode, RepairOrderStatus, RepairReportStatus
 from app.core.exceptions import BussinessException
-from app.crud import borrow_record_crud, equipment_crud
+from app.crud import borrow_record_crud, borrow_return_image_crud, borrow_return_record_crud, equipment_crud, repair_order_crud, repair_report_crud
 from app.db.models.borrow_record_model import BorrowRecord
+from app.db.models.borrow_return_image_model import BorrowReturnImage
+from app.db.models.borrow_return_record_model import BorrowReturnRecord
+from app.db.models.repair_order_model import RepairOrder
+from app.db.models.repair_report_model import RepairReport
 from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordCreateOut, BorrowRecordOut, BorrowRecordPageOut, BorrowRecordQuery
+from app.schema.borrow_return_schema import BorrowReturnCreate, BorrowReturnCreateOut
 
 
 def create_borrow_record_service(
@@ -83,3 +88,76 @@ def get_borrow_record_detail_by_user_service(
         borrow_record_out.equipment_status = equipment.status
         borrow_record_out.remark = equipment.remark
     return borrow_record_out
+
+
+def create_borrow_return_record_service(
+    session: Session,
+    borrow_record_id: int,
+    user_id: int,
+    borrow_return_in: BorrowReturnCreate,
+) -> BorrowReturnCreateOut:
+    with session.begin():
+        borrow_record = borrow_record_crud.get_borrow_record_by_id_and_user_for_update(
+            session,
+            borrow_record_id,
+            user_id,
+        )
+        if not borrow_record:
+            raise BussinessException("借用记录不存在", status_code=404)
+        if borrow_record.status != BorrowRecordStatus.BORROWED:
+            raise BussinessException("当前借用记录不能提交归还", status_code=400)
+        if borrow_return_record_crud.get_borrow_return_record_by_borrow_record_id(session, borrow_record_id):
+            raise BussinessException("该借用记录已提交归还", status_code=409)
+
+        equipment = equipment_crud.get_equipment_by_id_for_update(session, borrow_record.equipment_id)
+        if not equipment:
+            raise BussinessException("设备不存在", status_code=404)
+
+        borrow_return_record = BorrowReturnRecord(
+            return_status=borrow_return_in.return_status,
+            return_remark=borrow_return_in.return_remark,
+            damage_description=borrow_return_in.damage_description,
+            borrow_record_id=borrow_record_id,
+        )
+        borrow_return_record_crud.add_borrow_return_record(borrow_return_record, session)
+        for sort, image_url in enumerate(borrow_return_in.damage_images):
+            borrow_return_image_crud.add_borrow_return_image(
+                BorrowReturnImage(
+                    return_record_id=borrow_return_record.id,
+                    image_url=image_url,
+                    sort=sort,
+                ),
+                session,
+            )
+
+        if borrow_return_in.return_status == BorrowReturnStatus.DAMAGED:
+            repair_report = RepairReport(
+                return_record_id=borrow_return_record.id,
+                user_id=user_id,
+                equipment_id=borrow_record.equipment_id,
+                damage_description=borrow_return_in.damage_description,
+                status=RepairReportStatus.PENDING,
+            )
+            repair_report_crud.add_repair_report(repair_report, session)
+            repair_order_crud.add_repair_order(
+                RepairOrder(
+                    repair_report_id=repair_report.id,
+                    equipment_id=borrow_record.equipment_id,
+                    status=RepairOrderStatus.PENDING_ASSIGN,
+                ),
+                session,
+            )
+
+        borrow_record_crud.update_borrow_record(
+            borrow_record,
+            {"status": BorrowRecordStatus.PENDING_RETURN},
+            session,
+        )
+        equipment_crud.update_equipment(
+            equipment,
+            {"status": ItemStatusCode.PENDING_RETURN},
+            session,
+        )
+        borrow_return_out = BorrowReturnCreateOut.model_validate(borrow_return_record)
+        borrow_return_out.damage_images = borrow_return_in.damage_images
+        return borrow_return_out
