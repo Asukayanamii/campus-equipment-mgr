@@ -299,6 +299,7 @@ function callDataShowing(){
                 <option value="startTime">设备采购开始时间</option>
                 <option value="endTime">设备采购结束时间</option>
             </select>
+            <button class="add-equipment">+</button>
          </div>
         <!-- 数据展示 -->
         <div class="data-showing" id="data-showing">
@@ -319,6 +320,83 @@ function callDataShowing(){
     attachEventsForPageButton()
     attachEventsForDataCard()
     attachEventsForSearchWayChoose()
+    attachEventsForAddButton()
+}
+
+// 给新增设备按钮绑定事件
+function attachEventsForAddButton(){
+    const addEquipment = document.querySelector('.add-equipment')
+    if(!addEquipment){
+        return
+    }
+    addEquipment.addEventListener('click',() =>{
+        addNewEquipmentPanel()
+        addBackgroundShadow()
+    })
+}
+
+// 呼出新增设备面板
+function addNewEquipmentPanel(){
+    const addEquipmentPanel = document.querySelector('.add-equipment-panel')
+    if(!addEquipmentPanel){
+        console.log('没找到新增设备面板')
+        return
+    }
+    if(addEquipmentPanel.querySelector('.add-equipment-panel-window')){
+        console.log('已唤出新增设备面板，无需再次操作')
+        return
+    }
+    addEquipmentPanel.style.display = 'block'
+    addEquipmentPanel.insertAdjacentHTML('beforeend',`
+        <div class="add-equipment-panel-window">
+            <button class="close-button-plus">X</button>
+            <div class="add-equipment-panel-change">
+                <p>设备编号:<input type="text" id="equipmentNo"></p>
+                <p>设备名称:<input type="text" id="equipmentName"></p>
+                <p>分类ID:<input type="text" id="categoryId"></p>
+                <p>规格:<input type="text" id="spec"></p>
+                <p>品牌:<input type="text" id="brand"></p>
+                <p>单位:<input type="text" id="unit"></p>
+                <p>位置:<input type="text" id="location"></p>
+                <p>购买日期:<input type="text" id="purchaseDate"></p>
+                <p>价格:<input type="text" id="price"></p>
+                <p>封面图片:<input type="text" id="coverImg"></p>
+                <p>状态:<input type="text" id="status"></p>
+                <p>备注:<input type="text" id="remark"></p>
+            </div>
+            <div class="add-equipment-panel-buttons">
+                <button class="add-equipment-panel-submit-button">确定提交</button>
+            </div>
+        </div>
+    `)
+    const closeButtonPlus = addEquipmentPanel.querySelector('.close-button-plus')
+    const addEquipmentPanelButton = addEquipmentPanel.querySelector('.add-equipment-panel-submit-button')
+    closeButtonPlus.addEventListener('click',closeAddEquipmentPanel)
+    addEquipmentPanelButton.addEventListener('click',async() =>{
+        const temEquipmentCreate = new EquipmentCreate()
+        addEquipmentPanel.querySelectorAll('.add-equipment-panel-change p input').forEach( (e) =>{
+            temEquipmentCreate[e.id] = e.value
+        })
+
+        const ok = await addNewEquipment(temEquipmentCreate,apiChoose())
+        if(!ok) return
+        alert('新增设备成功')
+
+        closeAddEquipmentPanel()
+        renderData(defaultQueryData)
+    })
+}
+
+function closeAddEquipmentPanel(){
+    const addEquipmentPanel = document.querySelector('.add-equipment-panel')
+    const dimOverlay = document.querySelector('.dim-overlay')
+    if(!addEquipmentPanel){
+        console.log('没找到新增设备面板')
+        return
+    }
+    addEquipmentPanel.innerHTML = ''
+    addEquipmentPanel.style.display = 'none'
+    dimOverlay?.remove()
 }
 
 // 给所有转换页码的按钮绑定事件
@@ -581,6 +659,8 @@ document.querySelector('#my-record-button').addEventListener('click',() =>{
 callDataShowing()
 renderData(defaultQueryData)
 renderPersonalData()
+
+
 
 
 
