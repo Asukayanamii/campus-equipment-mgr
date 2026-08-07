@@ -498,7 +498,11 @@ function callEquipmentDetailWindow(EquipmentOut){
                 <p>状态:<input type="text" id="status" value="${EquipmentOut.status ?? ''}"></p>
                 <p>备注:<input type="text" id="remark" value="${EquipmentOut.remark ?? ''}"></p>
             </div>
-            <button class="equipment-detail-window-submit-button" id="equipment-detail-window-submit-button">提交修改</button>
+            <div class="equipment-detail-window-buttons">
+                <button class="equipment-detail-window-delete-button">删除设备</button>
+                <button class="equipment-detail-window-submit-button" id="equipment-detail-window-submit-button">提交修改</button>
+            </div>
+            
         </div>
         `)
     document.querySelector('#close-button-equipment-detail-window').addEventListener('click', () =>{
@@ -510,15 +514,27 @@ function callEquipmentDetailWindow(EquipmentOut){
         document.querySelectorAll('.equipment-detail-window-change p input').forEach( (e) =>{
             temEquipmentUpdate[e.id] = e.value
         })
+
         const ok = await updateEquipment(EquipmentOut.id,temEquipmentUpdate,apiChoose())
         if(!ok) return
         alert('更新设备成功')
+
         document.querySelector('#equipment-detail-window').remove()
         document.querySelector('.dim-overlay')?.remove()
+
         const fresh = await getDataById(EquipmentOut.id, apiChoose())
         if(!fresh) return         
+
         addBackgroundShadow()
         callEquipmentDetailWindow(fresh)
+    })
+    document.querySelector('.equipment-detail-window-delete-button').addEventListener('click',async() =>{
+        if(await deleteEquipment(EquipmentOut.id,apiChoose())){
+            alert('删除成功')
+            document.querySelector('.equipment-detail-window').remove()
+            document.querySelector('.dim-overlay')?.remove()
+            renderData(defaultQueryData)
+        }
     })
 }
 
@@ -560,8 +576,8 @@ document.querySelector('#my-record-button').addEventListener('click',() =>{
 })
 
 
-// callDataShowing()
-// renderData(defaultQueryData)
+callDataShowing()
+renderData(defaultQueryData)
 renderPersonalData()
 
 

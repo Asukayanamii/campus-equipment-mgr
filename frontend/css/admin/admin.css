@@ -236,8 +236,24 @@ body {
     background-color: rgb(147, 128, 128);
 }
 
+.equipment-detail-window-buttons{
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+}
+
 .equipment-detail-window-submit-button{
     background-color: #719adc;
+    margin-top: 20px;
+    border-radius: 20px;
+    width: 20%;
+}
+
+.equipment-detail-window-delete-button{
+    background-color: #e0a479;
     margin-top: 20px;
     border-radius: 20px;
     width: 20%;

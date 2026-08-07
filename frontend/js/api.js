@@ -315,3 +315,40 @@ async function updateEquipment(equipmentId,EquipmentUpdate,identity){
     }
 }
 
+// 管理端根据id删除设备
+/**
+ * 
+ * @param {number} equipmentId 
+ * @param {String} identity 
+ * @returns {boolean}
+ */
+async function deleteEquipment(equipmentId,identity){
+    if(identity !== 'admin'){
+        alert('你无权删除')
+        return
+    }
+    try {
+        const response  = await fetch(`${BASE_URL}/${identity}/equipment/${equipmentId}`,{
+            method : 'DELETE',
+            headers : {
+                'Content-Type' : 'application/json',
+                'token' : sessionStorage.getItem('token')
+            }
+        })
+        const res = await response.json();
+
+        if(response.ok !== true || res.code !== 0){
+            if(res.code !== 0){
+                alert(`根据id删除设备失败，${res.message}`)
+            }
+            console.log(`根据id删除设备失败,错误码:${response.status},code ${res.code}`)
+            return false
+        }
+        
+        return true
+    } catch (error) {
+        console.error('根据id删除设备失败')
+        return
+    }
+}
+
