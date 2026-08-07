@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录界面</title>
+    <link rel="stylesheet" href="../frontend/css/reset.css">
+    <link rel="stylesheet" href="../frontend/css/login.css">
+</head>
+<body>
+    <!-- 主要登录区域 -->
+    <div class="login-box">
+        
+
+        <form action="" class="login-form">
+            <!-- 选择身份区域 -->
+            <div class="identity-choose">
+                <div id="student-choose">我是学生</div>
+                <div id="admin-choose">我是管理</div>
+                <div id="repair-choose">我是维修</div>
+                
+            </div>
+
+            <div class="input-data">
+                <!-- 账号 -->
+                <div><span>账号：</span><input type="text" class="account" id="account"></div>
+
+                <!-- 密码 -->
+                <div><span>密码: </span><input type="password" class="password" id="password"></div>
+            </div>
+            
+            <div class="button-showing">
+                <button id="register-button" type="button">注册</button>
+                <button id ="submit-button" type="button">登录</button>
+            </div>
+            
+        </form>
+        
+
+    </div>
+    <script src="./js/util.js"></script>
+    <script src="./js/api.js"></script>
+    <script src="./js/login.js"></script>
+</body>
+</html>

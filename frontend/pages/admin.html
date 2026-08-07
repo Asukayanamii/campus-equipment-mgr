@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理端</title>
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/admin/admin.css">
+</head>
+<body>
+
+   <div class="add-equipment-panel">
+    
+   </div>
+    <!-- 左侧导航栏 -->
+    <div class="nav" id="nav">
+        <!-- 欢迎语句 -->
+        <div class="nav-title">
+            <p>Welcome!</p>
+        </div>
+
+        <!-- 正式选项卡 -->
+        <div class="nav-options">
+            <button id="data-showing-button">数据展示</button>
+            <button id="admin-equipment-button">分类展示</button>
+            <button id="my-record-button">我的记录</button>
+        </div>
+
+        <!-- 放个人头像 -->
+        <div class="profile-showing">
+            <button class="profile-picture-box" id="profile-picture-box">
+                <img src="../assets/images/all-icon..png" alt="你的头像" id="profile-picture" class="profile-picture">
+            </button>
+            <div class="profile-name-box">
+                <p class="profile-name" id="profile-name"></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="place-holder">
+        
+    </div>
+
+    <!-- 右侧区域 -->
+     <div class="right-side" id="right-side">
+        
+     </div>
+    
+    <script src="../js/util.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/admin/index.js"> </script>
+</body>
+</html>

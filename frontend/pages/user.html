@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学生端</title>
+    <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/user/user.css">
+</head>
+<body>
+
+   
+    <!-- 左侧导航栏 -->
+    <div class="nav" id="nav">
+        <!-- 欢迎语句 -->
+        <div class="nav-title">
+            <p>Welcome!</p>
+        </div>
+
+        <!-- 正式选项卡 -->
+        <div class="nav-options">
+            <button id="data-showing-button">数据展示</button>
+            <button id="my-record-button">我的记录</button>
+        </div>
+
+        <!-- 放个人头像 -->
+        <div class="profile-showing">
+            <button class="profile-picture-box" id="profile-picture-box">
+                <img src="../assets/images/all-icon..png" alt="你的头像" id="profile-picture" class="profile-picture">
+            </button>
+            <div class="profile-name-box">
+                <p class="profile-name" id="profile-name"></p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="place-holder">
+        
+    </div>
+
+    <!-- 右侧区域 -->
+     <div class="right-side">
+        <!-- 数据展示视图 -->
+        <div id="data-view">
+            <!-- 搜索框 -->
+            <div class="search-box">
+                <p>搜索：<input type="text" class="search" id="search"></p>
+                <select id="search-way-choose" class="search-way-choose">
+                    <option value="no">请选择查询方式（支持联查）</option>
+                    <option value="reset">重置搜索</option>
+                    <option value="categoryId">设备分类ID</option>
+                    <option value="status">设备状态</option>
+                    <option value="equipmentName">设备名称</option>
+                    <option value="equipmentNo">设备编号</option>
+                    <option value="location">设备存放位置</option>
+                    <option value="brand">设备品牌</option>
+                    <option value="spec">设备规格型号</option>
+                    <option value="startTime">设备采购开始时间</option>
+                    <option value="endTime">设备采购结束时间</option>
+                </select>
+            </div>
+            <!-- 数据展示 -->
+            <div class="data-showing" id="data-showing">
+
+            </div>
+
+            <!-- 页码选择 -->
+            <div class="page-choose-box">
+                <button id="start"></button>
+                <button id="pre-2"></button>
+                <button id="pre-1"></button>
+                <button id="cur"></button>
+                <button id="aft-1"></button>
+                <button id="aft-2"></button>
+                <button id="end"></button>
+            </div>
+        </div>
+     </div>
+    
+    <script src="../js/util.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/user/index.js"> </script>
+</body>
+</html>
