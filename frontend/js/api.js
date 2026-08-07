@@ -385,9 +385,9 @@ async function updateEquipment(equipmentId,EquipmentUpdate,identity){
 
 // 管理端根据id删除设备
 /**
- * 
- * @param {number} equipmentId 
- * @param {String} identity 
+ *
+ * @param {number} equipmentId
+ * @param {String} identity
  * @returns {boolean}
  */
 async function deleteEquipment(equipmentId,identity){
@@ -412,10 +412,224 @@ async function deleteEquipment(equipmentId,identity){
             console.log(`根据id删除设备失败,错误码:${response.status},code ${res.code}`)
             return false
         }
-        
+
         return true
     } catch (error) {
         console.error('根据id删除设备失败')
         return
+    }
+}
+
+// 获取某页借用记录（学生端本人 / 管理端全部）
+/**
+ *
+ * @param {QueryBorrowRecordData} QueryData
+ * @returns {Result_Page_BorrowRecordPageOut__ | Result_Page_AdminBorrowRecordPageOut__}
+ */
+async function getBorrowRecordData(QueryData = {}){
+    try{
+        const params = new URLSearchParams();
+
+        // 为查询的参数列表清除空项
+        for(const[k,v] of Object.entries(QueryData)){
+            if(v !== null && v !== '' && v !== undefined){
+                params.set(k,v);
+            }
+        }
+
+        const data = await fetch(`${BASE_URL}/${apiChoose()}/borrow-records/page?${params.toString()}`,{
+            method : 'GET',
+            headers : {
+                'content-type' : 'application/json',
+                'token' : sessionStorage.getItem(`token`)
+            },
+        });
+
+        return await data.json();
+    }catch(error){
+        console.error(`请求借用记录数据失败`,error)
+        throw error;
+    }
+}
+
+// 获取某页报修记录（学生端本人）
+/**
+ *
+ * @param {QueryRepairReportData} QueryData
+ * @returns {Result_Page_RepairReportPageOut__}
+ */
+async function getRepairReportData(QueryData = {}){
+    try{
+        const params = new URLSearchParams();
+
+        // 为查询的参数列表清除空项
+        for(const[k,v] of Object.entries(QueryData)){
+            if(v !== null && v !== '' && v !== undefined){
+                params.set(k,v);
+            }
+        }
+
+        const data = await fetch(`${BASE_URL}/user/repair-reports/page?${params.toString()}`,{
+            method : 'GET',
+            headers : {
+                'content-type' : 'application/json',
+                'token' : sessionStorage.getItem(`token`)
+            },
+        });
+
+        return await data.json();
+    }catch(error){
+        console.error(`请求报修记录数据失败`,error)
+        throw error;
+    }
+}
+
+// 根据id获取借用记录详情
+/**
+ *
+ * @param {number} borrowRecordId
+ * @returns {BorrowRecordOut | boolean}
+ */
+async function getBorrowRecordDetail(borrowRecordId){
+    try {
+        const response = await fetch(`${BASE_URL}/${apiChoose()}/borrow-records/${borrowRecordId}`,{
+            method : 'GET',
+            headers : {
+                'Content-Type' : 'application/json',
+                'token' : sessionStorage.getItem(`token`)
+            }
+        })
+
+        const res = await response.json()
+
+        if(!response.ok || res.code !== 0){
+            if(res.code !== 0){
+                alert(`根据id获取借用记录详情失败，${res.message}`)
+            }
+            console.log(`根据id获取借用记录详情失败,错误码:${response.status},code ${res.code}`)
+            return false
+        }
+
+        return res.data
+    } catch (error) {
+        console.error('根据id获取借用记录详情失败')
+        return false
+    }
+}
+
+// 根据id获取报修记录详情（学生端本人）
+/**
+ *
+ * @param {number} repairReportId
+ * @returns {RepairReportOut | boolean}
+ */
+async function getRepairReportDetail(repairReportId){
+    try {
+        const response = await fetch(`${BASE_URL}/user/repair-reports/${repairReportId}`,{
+            method : 'GET',
+            headers : {
+                'Content-Type' : 'application/json',
+                'token' : sessionStorage.getItem(`token`)
+            }
+        })
+
+        const res = await response.json()
+
+        if(!response.ok || res.code !== 0){
+            if(res.code !== 0){
+                alert(`根据id获取报修记录详情失败，${res.message}`)
+            }
+            console.log(`根据id获取报修记录详情失败,错误码:${response.status},code ${res.code}`)
+            return false
+        }
+
+        return res.data
+    } catch (error) {
+        console.error('根据id获取报修记录详情失败')
+        return false
+    }
+}
+
+// 管理端审核借用申请
+/**
+ *
+ * @param {number} borrowRecordId
+ * @param {BorrowRecordReview} BorrowRecordReview
+ * @param {String} identity
+ * @returns {boolean}
+ */
+async function reviewBorrowRecord(borrowRecordId, BorrowRecordReview, identity){
+    if(identity !== 'admin'){
+        alert('你无权审核！')
+        return false
+    }
+    try {
+        const response = await fetch(`${BASE_URL}/admin/borrow-records/${borrowRecordId}/review`,{
+            method : 'POST',
+            headers : {
+                'Content-Type' : 'application/json',
+                'token' : sessionStorage.getItem('token')
+            },
+            body : JSON.stringify(
+                BorrowRecordReview
+            )
+        })
+
+        const res = await response.json();
+
+        if(response.ok !== true || res.code !== 0){
+            if(res.code !== 0){
+                alert(`审核借用申请失败，${res.message}`)
+            }
+            console.log(`审核借用申请失败,错误码:${response.status},code ${res.code}`)
+            return false
+        }
+
+        return true
+    } catch (error) {
+        console.error('审核借用申请失败')
+        return false
+    }
+}
+
+// 管理端确认设备归还
+/**
+ *
+ * @param {number} borrowRecordId
+ * @param {BorrowReturnConfirm} BorrowReturnConfirm
+ * @param {String} identity
+ * @returns {boolean}
+ */
+async function confirmReturnBorrowRecord(borrowRecordId, BorrowReturnConfirm, identity){
+    if(identity !== 'admin'){
+        alert('你无权确认归还！')
+        return false
+    }
+    try {
+        const response = await fetch(`${BASE_URL}/admin/borrow-records/${borrowRecordId}/confirm-return`,{
+            method : 'POST',
+            headers : {
+                'Content-Type' : 'application/json',
+                'token' : sessionStorage.getItem('token')
+            },
+            body : JSON.stringify(
+                BorrowReturnConfirm
+            )
+        })
+
+        const res = await response.json();
+
+        if(response.ok !== true || res.code !== 0){
+            if(res.code !== 0){
+                alert(`确认设备归还失败，${res.message}`)
+            }
+            console.log(`确认设备归还失败,错误码:${response.status},code ${res.code}`)
+            return false
+        }
+
+        return true
+    } catch (error) {
+        console.error('确认设备归还失败')
+        return false
     }
 }

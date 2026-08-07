@@ -448,3 +448,322 @@ class EquipmentUpdate{
         this.remark = remark;
     }
 }
+
+// 借用记录查询参数（学生端/管理端通用）
+class QueryBorrowRecordData{
+    constructor({
+        page,
+        size,
+        userId,
+        equipmentId,
+        status,
+        keyword,
+        equipmentName,
+        startTime,
+        endTime,
+        sort,
+        order,
+    } = {}){
+        this.page = page;
+        this.size = size;
+        this.userId = userId;
+        this.equipmentId = equipmentId;
+        this.status = status;
+        this.keyword = keyword;
+        this.equipmentName = equipmentName;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.sort = sort;
+        this.order = order;
+    }
+}
+
+// 报修记录查询参数（学生端专属）
+class QueryRepairReportData{
+    constructor({
+        page,
+        size,
+        status,
+        equipmentName,
+        sort,
+        order,
+    } = {}){
+        this.page = page;
+        this.size = size;
+        this.status = status;
+        this.equipmentName = equipmentName;
+        this.sort = sort;
+        this.order = order;
+    }
+}
+
+// 学生端借用记录列表项
+class BorrowRecordPageOut{
+    constructor({
+        status,
+        id,
+        equipmentId,
+        equipmentName,
+        borrowStartTime,
+        borrowEndTime,
+        createTime,
+    } = {}){
+        this.status = status;
+        this.id = id;
+        this.equipmentId = equipmentId;
+        this.equipmentName = equipmentName;
+        this.borrowStartTime = borrowStartTime;
+        this.borrowEndTime = borrowEndTime;
+        this.createTime = createTime;
+    }
+}
+
+// 学生端报修记录列表项
+class RepairReportPageOut{
+    constructor({
+        status,
+        id,
+        equipmentId,
+        equipmentName,
+        createTime,
+    } = {}){
+        this.status = status;
+        this.id = id;
+        this.equipmentId = equipmentId;
+        this.equipmentName = equipmentName;
+        this.createTime = createTime;
+    }
+}
+
+// 管理端借用记录列表项
+class AdminBorrowRecordPageOut{
+    constructor({
+        id,
+        userId,
+        userName,
+        username,
+        equipmentId,
+        equipmentName,
+        borrowStartTime,
+        borrowEndTime,
+        status,
+        returnStatus,
+        confirmStatus,
+        confirmedStatus,
+        createTime,
+    } = {}){
+        this.id = id;
+        this.userId = userId;
+        this.userName = userName;
+        this.username = username;
+        this.equipmentId = equipmentId;
+        this.equipmentName = equipmentName;
+        this.borrowStartTime = borrowStartTime;
+        this.borrowEndTime = borrowEndTime;
+        this.status = status;
+        this.returnStatus = returnStatus;
+        this.confirmStatus = confirmStatus;
+        this.confirmedStatus = confirmedStatus;
+        this.createTime = createTime;
+    }
+}
+
+// 借用记录详情
+class BorrowRecordOut{
+    constructor({
+        status,
+        id,
+        userId,
+        equipmentId,
+        equipmentNo,
+        equipmentName,
+        categoryId,
+        categoryName,
+        spec,
+        brand,
+        unit,
+        location,
+        purchaseDate,
+        price,
+        coverImg,
+        equipmentStatus,
+        remark,
+        borrowStartTime,
+        borrowEndTime,
+        purpose,
+        reviewRemark,
+        createTime,
+        updateTime,
+    } = {}){
+        this.status = status;
+        this.id = id;
+        this.userId = userId;
+        this.equipmentId = equipmentId;
+        this.equipmentNo = equipmentNo;
+        this.equipmentName = equipmentName;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.spec = spec;
+        this.brand = brand;
+        this.unit = unit;
+        this.location = location;
+        this.purchaseDate = purchaseDate;
+        this.price = price;
+        this.coverImg = coverImg;
+        this.equipmentStatus = equipmentStatus;
+        this.remark = remark;
+        this.borrowStartTime = borrowStartTime;
+        this.borrowEndTime = borrowEndTime;
+        this.purpose = purpose;
+        this.reviewRemark = reviewRemark;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+    }
+}
+
+// 报修记录详情
+class RepairReportOut{
+    constructor({
+        status,
+        id,
+        returnRecordId,
+        userId,
+        equipmentId,
+        equipmentNo,
+        equipmentName,
+        categoryId,
+        categoryName,
+        spec,
+        brand,
+        unit,
+        location,
+        purchaseDate,
+        price,
+        coverImg,
+        equipmentStatus,
+        remark,
+        damageDescription,
+        damageImages,
+        confirmStatus,
+        confirmRemark,
+        confirmerId,
+        confirmTime,
+        repairOrderId,
+        repairUserId,
+        repairStatus,
+        assignRemark,
+        assignTime,
+        faultCause,
+        repairProcess,
+        repairResult,
+        completionTime,
+        createTime,
+        updateTime,
+    } = {}){
+        this.status = status;
+        this.id = id;
+        this.returnRecordId = returnRecordId;
+        this.userId = userId;
+        this.equipmentId = equipmentId;
+        this.equipmentNo = equipmentNo;
+        this.equipmentName = equipmentName;
+        this.categoryId = categoryId;
+        this.categoryName = categoryName;
+        this.spec = spec;
+        this.brand = brand;
+        this.unit = unit;
+        this.location = location;
+        this.purchaseDate = purchaseDate;
+        this.price = price;
+        this.coverImg = coverImg;
+        this.equipmentStatus = equipmentStatus;
+        this.remark = remark;
+        this.damageDescription = damageDescription;
+        this.damageImages = damageImages;
+        this.confirmStatus = confirmStatus;
+        this.confirmRemark = confirmRemark;
+        this.confirmerId = confirmerId;
+        this.confirmTime = confirmTime;
+        this.repairOrderId = repairOrderId;
+        this.repairUserId = repairUserId;
+        this.repairStatus = repairStatus;
+        this.assignRemark = assignRemark;
+        this.assignTime = assignTime;
+        this.faultCause = faultCause;
+        this.repairProcess = repairProcess;
+        this.repairResult = repairResult;
+        this.completionTime = completionTime;
+        this.createTime = createTime;
+        this.updateTime = updateTime;
+    }
+}
+
+// 管理员审核借用申请请求模型
+class BorrowRecordReview{
+    constructor({
+        approved,
+        reviewRemark,
+    } = {}){
+        this.approved = approved;
+        this.reviewRemark = reviewRemark;
+    }
+}
+
+// 管理员确认设备归还请求模型
+class BorrowReturnConfirm{
+    constructor({
+        confirmedStatus,
+        confirmRemark,
+    } = {}){
+        this.confirmedStatus = confirmedStatus;
+        this.confirmRemark = confirmRemark;
+    }
+}
+
+class Page_BorrowRecordPageOut{
+    constructor({
+        items,
+        total,
+        page,
+        size,
+        pages,
+    } = {}){
+        this.items = items;
+        this.total = total;
+        this.page = page;
+        this.size = size;
+        this.pages = pages;
+    }
+}
+
+class Page_RepairReportPageOut{
+    constructor({
+        items,
+        total,
+        page,
+        size,
+        pages,
+    } = {}){
+        this.items = items;
+        this.total = total;
+        this.page = page;
+        this.size = size;
+        this.pages = pages;
+    }
+}
+
+class Page_AdminBorrowRecordPageOut{
+    constructor({
+        items,
+        total,
+        page,
+        size,
+        pages,
+    } = {}){
+        this.items = items;
+        this.total = total;
+        this.page = page;
+        this.size = size;
+        this.pages = pages;
+    }
+}

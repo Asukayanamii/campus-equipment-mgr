@@ -339,3 +339,120 @@ body {
     flex-direction: column;
     width: 200px;
 }
+
+/* 数据展示视图容器 */
+#data-view{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+/* ============ 我的记录 ============ */
+#record-view{
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}
+
+.record-tabs{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 20px;
+    padding: 16px 0 0;
+}
+
+.record-tabs button{
+    padding: 8px 24px;
+    border-radius: 20px;
+    border: 1px solid var(--border-light);
+    background-color: var(--card-bg);
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.record-tabs button:hover{
+    color: var(--nav-accent);
+    border-color: var(--nav-accent);
+}
+
+.record-tabs button.record-tab-active{
+    background-color: var(--nav-accent);
+    color: #fff;
+    border-color: var(--nav-accent);
+}
+
+.record-showing{
+    flex: 1;
+    width: 100%;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.record-table{
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.record-table th{
+    background-color: var(--nav-bg);
+    color: #f8fafc;
+    font-size: 1.4rem;
+    font-weight: 600;
+    padding: 10px 12px;
+    text-align: left;
+}
+
+.record-table td{
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-top: 1px solid var(--border-light);
+}
+
+.record-table tbody tr{
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.record-table tbody tr:hover{
+    background-color: #f1f5f9;
+}
+
+/* 记录详情弹窗 */
+.record-detail-window{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    inset: 0;
+    margin: auto;
+    height: 500px;
+    width: 700px;
+    padding: 30px 20px 20px;
+    background-color: rgb(203, 231, 188);
+    z-index: 500;
+    border-radius: 20px;
+    overflow-y: auto;
+}
+
+.record-detail-window h1{
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.record-detail-content{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 1.4rem;
+}

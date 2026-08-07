@@ -35,6 +35,15 @@ let defaultCategoryQueryData = new QueryCategoryData({
     size : PAGE_SIZE
 });
 
+// 记录页独立的分页与搜索状态
+let recordPageNow = 1;
+let recordPageAll = 1;
+let recordQueryDataYouChange  = ''
+let defaultRecordQueryData = new QueryBorrowRecordData({
+    page : 1,
+    size : PAGE_SIZE
+});
+
 // 重置查询数据
 function resetQueryData(){
     defaultQueryData = {
@@ -1029,6 +1038,340 @@ profilePictureBox.addEventListener('click',() => {
 
 
 
+// ============ 我的记录（全部借用记录） ============
+
+// 召唤我的记录页
+function callRecordShowing(){
+    rightSide.insertAdjacentHTML('beforeend',`
+        <!-- 搜索框 -->
+        <div class="search-box">
+            <p>搜索：<input type="text" class="search" id="search"></p>
+            <select id="search-way-choose" class="search-way-choose">
+                <option value="no">请选择查询方式（支持联查）</option>
+                <option value="reset">重置搜索</option>
+                <option value="status">借用状态</option>
+                <option value="keyword">申请人或设备关键字</option>
+                <option value="userId">申请人ID</option>
+                <option value="equipmentId">设备ID</option>
+                <option value="startTime">借用开始时间下限</option>
+                <option value="endTime">借用结束时间上限</option>
+            </select>
+        </div>
+        <!-- 记录列表 -->
+        <div class="record-showing" id="record-showing">
+
+        </div>
+        <!-- 页码选择 -->
+        <div class="page-choose-box">
+            <button id="start"></button>
+            <button id="pre-2"></button>
+            <button id="pre-1"></button>
+            <button id="cur"></button>
+            <button id="aft-1"></button>
+            <button id="aft-2"></button>
+            <button id="end"></button>
+        </div>`
+    )
+    attachEventsForRecordPageButton()
+    attachEventsForRecordSearchWayChoose()
+    renderRecordData(defaultRecordQueryData)
+}
+
+// 渲染全部借用记录列表
+async function renderRecordData(QueryData = {}){
+    const recordShowing = document.getElementById('record-showing')
+    const res = await getBorrowRecordData(QueryData)
+    if(!res || res.code !== 0 || !res.data) return
+    const list = res.data.items || []
+    recordShowing.innerHTML = ''
+    if(list.length === 0){
+        recordShowing.insertAdjacentHTML('beforeend',`
+            <p>暂无记录</p>
+        `)
+    }else{
+        const rows = list.map(i => `
+            <tr data-record-id="${i.id}">
+                <td>${i.userName || i.username || ''}</td>
+                <td>${i.equipmentName || ''}</td>
+                <td>${i.borrowStartTime || ''}</td>
+                <td>${i.borrowEndTime || ''}</td>
+                <td>${statusToChinese(BORROW_RECORD_STATUS_MAP,i.status)}</td>
+                <td>${i.returnStatus || ''}</td>
+                <td>${i.confirmStatus || ''}</td>
+                <td>${i.createTime || ''}</td>
+            </tr>
+        `).join('')
+        recordShowing.insertAdjacentHTML('beforeend',`
+            <table class="record-table">
+                <thead>
+                    <tr><th>申请人</th><th>设备名称</th><th>借用开始时间</th><th>借用结束时间</th><th>借用状态</th><th>归还申报</th><th>确认状态</th><th>创建时间</th></tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+        `)
+    }
+    recordPageAll = res.data.pages || 1
+    renderRecordButton()
+    checkRecordButton()
+    // 点击一行，弹详情（带审核/确认归还）
+    recordShowing.querySelectorAll('tbody tr[data-record-id]').forEach(row => {
+        row.addEventListener('click', async () => {
+            const detail = await getBorrowRecordDetail(row.dataset.recordId)
+            if(!detail) return
+            addBackgroundShadow()
+            callAdminRecordDetailWindow(detail)
+        })
+    })
+}
+
+// 检查记录页码按钮，务必在recordPageAll有数值的时候使用
+function checkRecordButton(){
+    const start = document.getElementById('start')
+    const pre2 = document.getElementById('pre-2')
+    const pre1 = document.getElementById('pre-1')
+    const cur = document.getElementById('cur')
+    const aft1 = document.getElementById('aft-1')
+    const aft2 = document.getElementById('aft-2')
+    const end = document.getElementById('end')
+    start.style.display = 'block'
+    pre2.style.display = 'block'
+    pre1.style.display = 'block'
+    end.style.display = 'block'
+    aft2.style.display = 'block'
+    aft1.style.display = 'block'
+    switch (Number(cur.innerHTML)){
+        case 1 :
+            start.style.display = 'none'
+            pre2.style.display = 'none'
+            pre1.style.display = 'none'
+            break
+        case 2 :
+            pre2.style.display = 'none'
+            pre1.style.display = 'none'
+            break
+        case 3 :
+            pre2.style.display = 'none'
+            break
+    }
+
+    switch(Number(cur.innerText)){
+        case recordPageAll - 2:
+            end.style.display = 'none'
+            break
+        case recordPageAll - 1:
+            end.style.display = 'none'
+            aft2.style.display = 'none'
+            break
+        case recordPageAll :
+            end.style.display = 'none'
+            aft2.style.display = 'none'
+            aft1.style.display = 'none'
+            break
+    }
+}
+
+// 给记录页码按钮赋值，务必在recordPageAll有数值和几个按钮已被获取的时候使用
+function renderRecordButton(){
+    const start = document.getElementById('start')
+    const pre2 = document.getElementById('pre-2')
+    const pre1 = document.getElementById('pre-1')
+    const cur = document.getElementById('cur')
+    const aft1 = document.getElementById('aft-1')
+    const aft2 = document.getElementById('aft-2')
+    const end = document.getElementById('end')
+    start.innerText = 1
+    pre2.innerText = recordPageNow - 2
+    pre1.innerText = recordPageNow - 1
+    cur.innerText = recordPageNow
+    aft1.innerText = recordPageNow + 1
+    aft2.innerText = recordPageNow + 2
+    end.innerText = recordPageAll
+    cur.style.backgroundColor = 'red'
+}
+
+// 给记录页码按钮绑定事件
+function attachEventsForRecordPageButton(){
+    const start = document.getElementById('start')
+    const pre2 = document.getElementById('pre-2')
+    const pre1 = document.getElementById('pre-1')
+    const cur = document.getElementById('cur')
+    const aft1 = document.getElementById('aft-1')
+    const aft2 = document.getElementById('aft-2')
+    const end = document.getElementById('end')
+    start.addEventListener('click', () => {
+        defaultRecordQueryData.page = 1;
+        recordPageNow = 1
+        renderRecordData(defaultRecordQueryData)
+    })
+
+    end.addEventListener('click',() => {
+        defaultRecordQueryData.page = recordPageAll
+        recordPageNow = recordPageAll
+        renderRecordData(defaultRecordQueryData)
+    })
+
+    pre2.addEventListener('click' ,() => {
+        defaultRecordQueryData.page = pre2.innerText
+        recordPageNow = recordPageNow - 2
+        renderRecordData(defaultRecordQueryData)
+    })
+
+    pre1.addEventListener('click' ,() => {
+        defaultRecordQueryData.page = pre1.innerText
+        recordPageNow = recordPageNow - 1
+        renderRecordData(defaultRecordQueryData)
+    })
+
+    cur.addEventListener('click' ,() => {
+        defaultRecordQueryData.page = cur.innerText
+        renderRecordData(defaultRecordQueryData)
+    })
+
+    aft1.addEventListener('click' ,() => {
+        defaultRecordQueryData.page = aft1.innerText
+        recordPageNow = recordPageNow + 1
+        renderRecordData(defaultRecordQueryData)
+    })
+
+    aft2.addEventListener('click' ,() => {
+        defaultRecordQueryData.page = aft2.innerText
+        recordPageNow = recordPageNow + 2
+        renderRecordData(defaultRecordQueryData)
+    })
+}
+
+// 给记录搜索下拉框绑定事件
+function attachEventsForRecordSearchWayChoose(){
+    const search = document.getElementById('search')
+    search.addEventListener('keydown',(e) =>{
+        if(e.key === 'Enter'){
+            if(!recordQueryDataYouChange){
+                alert('请选择搜索类型')
+                return
+            }
+            defaultRecordQueryData[recordQueryDataYouChange]  = e.target.value
+            defaultRecordQueryData.page = 1
+            recordPageNow = 1;
+            renderRecordData(defaultRecordQueryData)
+        }
+    })
+    const searchWayChoose = document.getElementById('search-way-choose')
+    searchWayChoose.addEventListener('change',(e) =>{
+        switch (e.target.value){
+            case 'no':
+                break
+            case 'reset':
+                defaultRecordQueryData = new QueryBorrowRecordData({
+                    page : recordPageNow,
+                    size : PAGE_SIZE
+                })
+                recordQueryDataYouChange = ''
+                search.value = ''
+                searchWayChoose.querySelectorAll('option').forEach(opt => {
+                    opt.textContent = opt.textContent.replace('（已指定）','')
+                })
+                renderRecordData(defaultRecordQueryData)
+                break
+            case 'status':
+                recordQueryDataYouChange  = 'status'
+                searchWayChoose.querySelector('option[value="status"]').textContent = '借用状态（已指定）'
+                break
+            case 'keyword':
+                recordQueryDataYouChange  = 'keyword'
+                searchWayChoose.querySelector('option[value="keyword"]').textContent = '申请人或设备关键字（已指定）'
+                break
+            case 'userId':
+                recordQueryDataYouChange  = 'userId'
+                searchWayChoose.querySelector('option[value="userId"]').textContent = '申请人ID（已指定）'
+                break
+            case 'equipmentId':
+                recordQueryDataYouChange  = 'equipmentId'
+                searchWayChoose.querySelector('option[value="equipmentId"]').textContent = '设备ID（已指定）'
+                break
+            case 'startTime':
+                recordQueryDataYouChange  = 'startTime'
+                searchWayChoose.querySelector('option[value="startTime"]').textContent = '借用开始时间下限（已指定）'
+                break
+            case 'endTime':
+                recordQueryDataYouChange  = 'endTime'
+                searchWayChoose.querySelector('option[value="endTime"]').textContent = '借用结束时间上限（已指定）'
+                break
+        }
+    })
+}
+
+// 呼出管理端借用记录详情弹窗（带审核/确认归还）
+function callAdminRecordDetailWindow(detail){
+    document.body.insertAdjacentHTML('beforeend',`
+        <div class="record-detail-window" id="admin-record-detail-window">
+            <button class="close-button-plus" id="close-record-detail">X</button>
+            <h1>借用记录详情</h1>
+            <div class="record-detail-content">
+                <p>记录ID:${detail.id}</p>
+                <p>申请人ID:${detail.userId}</p>
+                <p>设备名称:${detail.equipmentName}</p>
+                <p>设备编号:${detail.equipmentNo}</p>
+                <p>设备分类:${detail.categoryName}</p>
+                <p>存放位置:${detail.location}</p>
+                <p>借用开始时间:${detail.borrowStartTime}</p>
+                <p>借用结束时间:${detail.borrowEndTime}</p>
+                <p>借用用途:${detail.purpose || ''}</p>
+                <p>借用状态:${statusToChinese(BORROW_RECORD_STATUS_MAP,detail.status)}</p>
+                <p>审核备注:${detail.reviewRemark || ''}</p>
+                <p>创建时间:${detail.createTime}</p>
+                <p>更新时间:${detail.updateTime}</p>
+            </div>
+            <div class="record-detail-buttons">
+                <button class="record-detail-review-pass">审核通过</button>
+                <button class="record-detail-review-reject">审核驳回</button>
+            </div>
+            <div class="record-confirm-return-box">
+                <p>确认归还——最终设备状态:<select id="record-confirmed-status">${statusSelectOptions(EQUIPMENT_STATUS_MAP)}</select></p>
+                <p>确认备注:<input type="text" id="record-confirm-remark"></p>
+                <button id="record-confirm-submit">提交确认归还</button>
+            </div>
+        </div>
+    `)
+    const detailWindow = document.querySelector('#admin-record-detail-window')
+    document.querySelector('#close-record-detail').addEventListener('click',() => {
+        detailWindow.remove()
+        document.querySelector('.dim-overlay')?.remove()
+    })
+    // 审核通过 / 驳回
+    detailWindow.querySelector('.record-detail-review-pass').addEventListener('click',async () => {
+        if(!confirm(`确定审核通过记录${detail.id}吗？`)) return
+        if(await reviewBorrowRecord(detail.id,new BorrowRecordReview({ approved : true }),apiChoose())){
+            alert('审核通过成功')
+            detailWindow.remove()
+            document.querySelector('.dim-overlay')?.remove()
+            renderRecordData(defaultRecordQueryData)
+        }
+    })
+    detailWindow.querySelector('.record-detail-review-reject').addEventListener('click',async () => {
+        if(!confirm(`确定审核驳回记录${detail.id}吗？`)) return
+        if(await reviewBorrowRecord(detail.id,new BorrowRecordReview({ approved : false }),apiChoose())){
+            alert('审核驳回成功')
+            detailWindow.remove()
+            document.querySelector('.dim-overlay')?.remove()
+            renderRecordData(defaultRecordQueryData)
+        }
+    })
+    // 确认归还
+    detailWindow.querySelector('#record-confirm-submit').addEventListener('click',async () => {
+        const confirmedStatus = chineseToStatus(EQUIPMENT_STATUS_MAP,detailWindow.querySelector('#record-confirmed-status').value)
+        if(!confirm(`确定确认记录${detail.id}的设备归还吗？`)) return
+        if(await confirmReturnBorrowRecord(detail.id,new BorrowReturnConfirm({
+            confirmedStatus,
+            confirmRemark : detailWindow.querySelector('#record-confirm-remark').value || ''
+        }),apiChoose())){
+            alert('确认归还成功')
+            detailWindow.remove()
+            document.querySelector('.dim-overlay')?.remove()
+            renderRecordData(defaultRecordQueryData)
+        }
+    })
+}
+
 document.querySelector('#data-showing-button').addEventListener('click',() =>{
     rightSide.innerHTML = ''
     callDataShowing()
@@ -1042,6 +1385,7 @@ document.querySelector('#admin-equipment-button').addEventListener('click',() =>
 
 document.querySelector('#my-record-button').addEventListener('click',() =>{
     rightSide.innerHTML = ''
+    callRecordShowing()
 })
 
 

@@ -651,3 +651,138 @@ body {
     color: var(--text-secondary);
     padding: 6px 8px;
 }
+
+/* ============ 我的记录（全部借用记录） ============ */
+.record-showing{
+    flex: 1;
+    width: 100%;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+.record-table{
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.record-table th{
+    background-color: var(--nav-bg);
+    color: #f8fafc;
+    font-size: 1.4rem;
+    font-weight: 600;
+    padding: 10px 12px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.record-table td{
+    font-size: 1.3rem;
+    color: var(--text-primary);
+    padding: 10px 12px;
+    border-top: 1px solid var(--border-light);
+    white-space: nowrap;
+}
+
+.record-table tbody tr{
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.record-table tbody tr:hover{
+    background-color: #f1f5f9;
+}
+
+/* 管理端记录详情弹窗 */
+.record-detail-window{
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    inset: 0;
+    margin: auto;
+    height: 520px;
+    width: 700px;
+    padding: 30px 20px 20px;
+    background-color: rgb(203, 231, 188);
+    z-index: 500;
+    border-radius: 20px;
+    overflow-y: auto;
+}
+
+.record-detail-window h1{
+    font-size: 2rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.record-detail-content{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 1.4rem;
+}
+
+/* 审核通过 / 驳回按钮 */
+.record-detail-buttons{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 40px;
+    padding-top: 6px;
+}
+
+.record-detail-buttons button{
+    border-radius: 20px;
+    width: 30%;
+    padding: 6px 0;
+    font-size: 1.4rem;
+    cursor: pointer;
+    border: none;
+}
+
+.record-detail-review-pass{
+    background-color: #719adc;
+}
+
+.record-detail-review-reject{
+    background-color: #e67260;
+}
+
+/* 确认归还区域 */
+.record-confirm-return-box{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-light);
+    font-size: 1.4rem;
+}
+
+.record-confirm-return-box select{
+    height: 30px;
+    border-radius: 6px;
+}
+
+.record-confirm-return-box input{
+    height: 30px;
+    width: 300px;
+    border-radius: 6px;
+    border-style: solid;
+    border-width: 1px;
+}
+
+.record-confirm-return-box #record-confirm-submit{
+    align-self: center;
+    background-color: #719adc;
+    border: none;
+    border-radius: 20px;
+    width: 40%;
+    padding: 6px 0;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
