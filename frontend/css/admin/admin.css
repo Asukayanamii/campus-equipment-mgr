@@ -508,3 +508,146 @@ body {
     border-radius: 20px;
     width: 20%;
 }
+
+/* 分类展示 */
+.add-category{
+    position: absolute;
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    background-color: #8b5cf6;
+    right: 20px;
+}
+
+/* 分类展示：6 个竖列，点开成员只占自己这一列，不影响其他列 */
+.category-showing{
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    width: 100%;
+    padding: 24px;
+    gap: 12px;
+}
+
+.category-col{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    gap: 12px;
+}
+
+.category-cell{
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 6px;
+}
+
+/* 每个分类的细长条 */
+.category-bar{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    padding: 0 10px;
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    box-shadow: var(--card-shadow);
+    cursor: pointer;
+    transition: box-shadow 0.2s ease;
+}
+
+.category-bar:hover{
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+}
+
+.category-bar .category-name{
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.category-actions{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+.category-add-equipment{
+    border: none;
+    background-color: var(--nav-accent);
+    color: #fff;
+    border-radius: 4px;
+    width: 22px;
+    height: 22px;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+}
+
+.category-add-equipment:hover{
+    opacity: 0.85;
+}
+
+.category-bar .category-arrow{
+    font-size: 1.4rem;
+    color: var(--text-secondary);
+}
+
+/* 展开的成员区，占文档流 */
+.category-members{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.member-row{
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px 8px;
+    background-color: #f8fafc;
+    border: 1px solid var(--border-light);
+    border-left: 3px solid var(--nav-accent);
+    border-radius: 6px;
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    min-width: 0;
+    overflow: hidden;
+    transition: box-shadow 0.2s ease;
+}
+
+.member-row:hover{
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.member-row .member-name{
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 1.3rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.member-row .member-meta{
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.member-empty{
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    padding: 6px 8px;
+}

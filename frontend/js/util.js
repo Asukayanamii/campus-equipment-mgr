@@ -391,6 +391,34 @@ class Page_CategoryResp{
     }
 }
 
+class CategoryCreate{
+    constructor({
+        categoryName,
+        sort,
+    } = {}){
+        this.categoryName = categoryName;
+        this.sort = sort;
+    }
+}
+
+class QueryCategoryData{
+    constructor({
+        page,
+        size,
+        id,
+        categoryName,
+        sort,
+        order,
+    } = {}){
+        this.page = page;
+        this.size = size;
+        this.id = id;
+        this.categoryName = categoryName;
+        this.sort = sort;
+        this.order = order;
+    }
+}
+
 class EquipmentUpdate{
     constructor({
         equipmentNo,

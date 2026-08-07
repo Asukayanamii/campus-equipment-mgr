@@ -26,6 +26,15 @@ let defaultQueryData = new QueryData({
     size : PAGE_SIZE
 });
 
+// 分类页独立的分页与搜索状态
+let categoryPageNow = 1;
+let categoryPageAll = 1;
+let categoryQueryDataYouChange  = ''
+let defaultCategoryQueryData = new QueryCategoryData({
+    page : 1,
+    size : PAGE_SIZE
+});
+
 // 重置查询数据
 function resetQueryData(){
     defaultQueryData = {
@@ -323,6 +332,368 @@ function callDataShowing(){
     attachEventsForAddButton()
 }
 
+// 召唤分类展示页
+function callCategoryShowing(){
+    rightSide.insertAdjacentHTML('beforeend',`
+        <!-- 搜索框 -->
+         <div class="search-box">
+            <p>搜索：<input type="text" class="search" id="search"></p>
+            <select id="search-way-choose" class="search-way-choose">
+                <option value="no">请选择查询方式（支持联查）</option>
+                <option value="reset">重置搜索</option>
+                <option value="id">设备分类ID</option>
+                <option value="categoryName">设备分类名称</option>
+            </select>
+            <button class="add-category">+</button>
+         </div>
+        <!-- 分类列表 -->
+        <div class="category-showing" id="category-showing">
+
+        </div>
+
+        <!-- 页码选择 -->
+        <div class="page-choose-box">
+            <button id="start"></button>
+            <button id="pre-2"></button>
+            <button id="pre-1"></button>
+            <button id="cur"></button>
+            <button id="aft-1"></button>
+            <button id="aft-2"></button>
+            <button id="end"></button>
+        </div>`
+    )
+    attachEventsForCategoryPageButton()
+    attachEventsForCategorySearchWayChoose()
+    attachEventsForAddCategoryButton()
+    renderCategory(defaultCategoryQueryData)
+}
+
+// 重置分类查询数据
+function resetCategoryQueryData(){
+    defaultCategoryQueryData = new QueryCategoryData({
+        page : categoryPageNow,
+        size : PAGE_SIZE
+    })
+}
+
+// 刷新当前页签的数据，数据展示页和分类展示页通用
+function renderCurrentView(){
+    if(document.getElementById('data-showing')){
+        renderData(defaultQueryData)
+    }else if(document.getElementById('category-showing')){
+        renderCategory(defaultCategoryQueryData)
+    }
+}
+
+// 渲染分类细长条列表，轮流放进 6 个竖列，展开只占自己那一列
+async function renderCategory(QueryData = {}){
+    const categoryShowing = document.getElementById('category-showing')
+    const res = await getCategoryData(QueryData)
+    if(!res || res.code !== 0 || !res.data) return
+    const list = res.data.items || []
+    categoryShowing.innerHTML = ''
+    if(list.length === 0){
+        categoryShowing.insertAdjacentHTML('beforeend',`
+            <p>暂无分类</p>
+        `)
+        return
+    }
+    const columns = ['','','','','','']
+    list.forEach((category, index) => {
+        columns[index % 6] += `
+            <div class="category-cell">
+                <div class="category-bar" data-category-id="${category.id}">
+                    <span class="category-name">${category.categoryName}</span>
+                    <span class="category-actions">
+                        <button class="category-add-equipment" title="新增设备">＋</button>
+                        <span class="category-arrow">▸</span>
+                    </span>
+                </div>
+                <div class="category-members" id="category-members-${category.id}"></div>
+            </div>
+        `
+    })
+    columns.forEach(columnHtml => {
+        categoryShowing.insertAdjacentHTML('beforeend',`
+            <div class="category-col">${columnHtml}</div>
+        `)
+    })
+    categoryPageAll = res.data.pages || 1
+    renderCategoryButton()
+    checkCategoryButton()
+    // 给分类条绑定展开/收起，以及新增设备按钮
+    categoryShowing.querySelectorAll('.category-bar').forEach(bar => {
+        bar.addEventListener('click', async () => {
+            await toggleCategoryMembers(bar)
+        })
+        bar.querySelector('.category-add-equipment').addEventListener('click',(e) =>{
+            e.stopPropagation()
+            addNewEquipmentPanel(bar.dataset.categoryId)
+            addBackgroundShadow()
+        })
+    })
+}
+
+// 获取某分类下全部设备，自动翻页
+async function getAllEquipmentByCategory(categoryId){
+    let page = 1
+    const all = []
+    let pages = 1
+    do{
+        const res = await getData(new QueryData({ page, size : 100, categoryId }))
+        if(!res || res.code !== 0 || !res.data) break
+        all.push(...(res.data.items || []))
+        pages = res.data.pages
+        page++
+    }while(page <= pages)
+    return all
+}
+
+// 展开/收起分类下的成员
+async function toggleCategoryMembers(bar){
+    const categoryId = bar.dataset.categoryId
+    const arrow = bar.querySelector('.category-arrow')
+    const membersBox = document.getElementById(`category-members-${categoryId}`)
+    if(!membersBox) return
+    if(membersBox.querySelector('.member-row') || membersBox.querySelector('.member-empty')){
+        // 已展开，点击收起
+        membersBox.innerHTML = ''
+        arrow.textContent = '▸'
+        return
+    }
+    const members = await getAllEquipmentByCategory(categoryId)
+    if(members.length === 0){
+        membersBox.insertAdjacentHTML('beforeend',`
+            <p class="member-empty">该分类下暂无设备</p>
+        `)
+    }else{
+        const membersHtml = members.map(equipment => `
+            <div class="member-row" data-equipment-id="${equipment.id}">
+                <span class="member-name">${equipment.equipmentName}</span>
+                <span class="member-meta">${equipment.equipmentNo} · ${statusToChinese(EQUIPMENT_STATUS_MAP,equipment.status)} · ${equipment.location}</span>
+            </div>
+        `).join('')
+        membersBox.insertAdjacentHTML('beforeend', membersHtml)
+    }
+    arrow.textContent = '▾'
+    // 成员行点击，弹出设备编辑/删除弹窗
+    membersBox.querySelectorAll('.member-row').forEach(row => {
+        row.addEventListener('click', async () => {
+            const equipment = await getDataById(row.dataset.equipmentId, apiChoose())
+            if(!equipment) return
+            addBackgroundShadow()
+            callEquipmentDetailWindow(equipment)
+        })
+    })
+}
+
+// 检查分类页码按钮，务必在categoryPageAll有数值的时候使用
+function checkCategoryButton(){
+    const start = document.getElementById('start')
+    const pre2 = document.getElementById('pre-2')
+    const pre1 = document.getElementById('pre-1')
+    const cur = document.getElementById('cur')
+    const aft1 = document.getElementById('aft-1')
+    const aft2 = document.getElementById('aft-2')
+    const end = document.getElementById('end')
+    start.style.display = 'block'
+    pre2.style.display = 'block'
+    pre1.style.display = 'block'
+    end.style.display = 'block'
+    aft2.style.display = 'block'
+    aft1.style.display = 'block'
+    switch (Number(cur.innerHTML)){
+        case 1 :
+            start.style.display = 'none'
+            pre2.style.display = 'none'
+            pre1.style.display = 'none'
+            break
+        case 2 :
+            pre2.style.display = 'none'
+            pre1.style.display = 'none'
+            break
+        case 3 :
+            pre2.style.display = 'none'
+            break
+    }
+
+    switch(Number(cur.innerText)){
+        case categoryPageAll - 2:
+            end.style.display = 'none'
+            break
+        case categoryPageAll - 1:
+            end.style.display = 'none'
+            aft2.style.display = 'none'
+            break
+        case categoryPageAll :
+            end.style.display = 'none'
+            aft2.style.display = 'none'
+            aft1.style.display = 'none'
+            break
+    }
+}
+
+// 给分类页码按钮赋值，务必在categoryPageAll有数值和几个按钮已被获取的时候使用
+function renderCategoryButton(){
+    const start = document.getElementById('start')
+    const pre2 = document.getElementById('pre-2')
+    const pre1 = document.getElementById('pre-1')
+    const cur = document.getElementById('cur')
+    const aft1 = document.getElementById('aft-1')
+    const aft2 = document.getElementById('aft-2')
+    const end = document.getElementById('end')
+    start.innerText = 1
+    pre2.innerText = categoryPageNow - 2
+    pre1.innerText = categoryPageNow - 1
+    cur.innerText = categoryPageNow
+    aft1.innerText = categoryPageNow + 1
+    aft2.innerText = categoryPageNow + 2
+    end.innerText = categoryPageAll
+    cur.style.backgroundColor = 'red'
+}
+
+// 给分类页码按钮绑定事件
+function attachEventsForCategoryPageButton(){
+    const start = document.getElementById('start')
+    const pre2 = document.getElementById('pre-2')
+    const pre1 = document.getElementById('pre-1')
+    const cur = document.getElementById('cur')
+    const aft1 = document.getElementById('aft-1')
+    const aft2 = document.getElementById('aft-2')
+    const end = document.getElementById('end')
+    start.addEventListener('click', () => {
+        defaultCategoryQueryData.page = 1;
+        categoryPageNow = 1
+        renderCategory(defaultCategoryQueryData)
+    })
+
+    end.addEventListener('click',() => {
+        defaultCategoryQueryData.page = categoryPageAll
+        categoryPageNow = categoryPageAll
+        renderCategory(defaultCategoryQueryData)
+    })
+
+    pre2.addEventListener('click' ,() => {
+        defaultCategoryQueryData.page = pre2.innerText
+        categoryPageNow = categoryPageNow - 2
+        renderCategory(defaultCategoryQueryData)
+    })
+
+    pre1.addEventListener('click' ,() => {
+        defaultCategoryQueryData.page = pre1.innerText
+        categoryPageNow = categoryPageNow - 1
+        renderCategory(defaultCategoryQueryData)
+    })
+
+    cur.addEventListener('click' ,() => {
+        defaultCategoryQueryData.page = cur.innerText
+        renderCategory(defaultCategoryQueryData)
+    })
+
+    aft1.addEventListener('click' ,() => {
+        defaultCategoryQueryData.page = aft1.innerText
+        categoryPageNow = categoryPageNow + 1
+        renderCategory(defaultCategoryQueryData)
+    })
+
+    aft2.addEventListener('click' ,() => {
+        defaultCategoryQueryData.page = aft2.innerText
+        categoryPageNow = categoryPageNow + 2
+        renderCategory(defaultCategoryQueryData)
+    })
+}
+
+// 给分类搜索下拉框绑定事件
+function attachEventsForCategorySearchWayChoose(){
+    const search = document.querySelector('#search')
+    search.addEventListener('keydown',(e) =>{
+        if(e.key === 'Enter'){
+            if(!categoryQueryDataYouChange){
+                alert('请选择搜索类型')
+                return
+            }
+            defaultCategoryQueryData[categoryQueryDataYouChange]  = e.target.value
+            defaultCategoryQueryData.page = 1
+            categoryPageNow = 1;
+            renderCategory(defaultCategoryQueryData)
+        }
+    })
+    const searchWayChoose = document.querySelector('#search-way-choose')
+    searchWayChoose.addEventListener('change',(e) =>{
+        switch (e.target.value){
+            case 'no':
+                break
+            case 'reset':
+                resetCategoryQueryData()
+                categoryQueryDataYouChange = ''
+                search.value = ''
+                searchWayChoose.querySelector('option[value="id"]').textContent = '设备分类ID'
+                searchWayChoose.querySelector('option[value="categoryName"]').textContent = '设备分类名称'
+                renderCategory(defaultCategoryQueryData)
+                break
+            case 'id':
+                categoryQueryDataYouChange  = 'id'
+                searchWayChoose.querySelector('option[value="id"]').textContent = '设备分类ID（已指定）'
+                break
+            case 'categoryName':
+                categoryQueryDataYouChange  = 'categoryName'
+                searchWayChoose.querySelector('option[value="categoryName"]').textContent = '设备分类名称（已指定）'
+                break
+        }
+    })
+}
+
+// 给新建分类按钮绑定事件
+function attachEventsForAddCategoryButton(){
+    const addCategory = document.querySelector('.add-category')
+    if(!addCategory){
+        return
+    }
+    addCategory.addEventListener('click',() =>{
+        addNewCategoryPanel()
+        addBackgroundShadow()
+    })
+}
+
+// 呼出新增分类面板
+function addNewCategoryPanel(){
+    const addEquipmentPanel = document.querySelector('.add-equipment-panel')
+    if(!addEquipmentPanel){
+        console.log('没找到新增分类面板')
+        return
+    }
+    if(addEquipmentPanel.querySelector('.add-equipment-panel-window')){
+        console.log('已唤出新增面板，无需再次操作')
+        return
+    }
+    addEquipmentPanel.style.display = 'block'
+    addEquipmentPanel.insertAdjacentHTML('beforeend',`
+        <div class="add-equipment-panel-window">
+            <button class="close-button-plus">X</button>
+            <div class="add-equipment-panel-change">
+                <p>分类名称:<input type="text" id="categoryName"></p>
+            </div>
+            <div class="add-equipment-panel-buttons">
+                <button class="add-equipment-panel-submit-button">确定提交</button>
+            </div>
+        </div>
+    `)
+    const closeButtonPlus = addEquipmentPanel.querySelector('.close-button-plus')
+    const addCategoryPanelButton = addEquipmentPanel.querySelector('.add-equipment-panel-submit-button')
+    closeButtonPlus.addEventListener('click',closeAddEquipmentPanel)
+    addCategoryPanelButton.addEventListener('click',async() =>{
+        const temCategoryCreate = new CategoryCreate({
+            categoryName : addEquipmentPanel.querySelector('#categoryName').value
+        })
+        const ok = await addNewCategory(temCategoryCreate)
+        if(!ok) return
+        alert('新增分类成功')
+
+        closeAddEquipmentPanel()
+        renderCategory(defaultCategoryQueryData)
+    })
+}
+
 // 给新增设备按钮绑定事件
 function attachEventsForAddButton(){
     const addEquipment = document.querySelector('.add-equipment')
@@ -336,7 +707,7 @@ function attachEventsForAddButton(){
 }
 
 // 呼出新增设备面板
-function addNewEquipmentPanel(){
+function addNewEquipmentPanel(categoryId){
     const addEquipmentPanel = document.querySelector('.add-equipment-panel')
     if(!addEquipmentPanel){
         console.log('没找到新增设备面板')
@@ -353,7 +724,7 @@ function addNewEquipmentPanel(){
             <div class="add-equipment-panel-change">
                 <p>设备编号:<input type="text" id="equipmentNo"></p>
                 <p>设备名称:<input type="text" id="equipmentName"></p>
-                <p>分类ID:<input type="text" id="categoryId"></p>
+                <p>分类ID:<input type="text" id="categoryId" value="${categoryId ?? ''}"></p>
                 <p>规格:<input type="text" id="spec"></p>
                 <p>品牌:<input type="text" id="brand"></p>
                 <p>单位:<input type="text" id="unit"></p>
@@ -392,7 +763,7 @@ function addNewEquipmentPanel(){
         alert('新增设备成功')
 
         closeAddEquipmentPanel()
-        renderData(defaultQueryData)
+        renderCurrentView()
     })
 }
 
@@ -630,7 +1001,7 @@ function callEquipmentDetailWindow(EquipmentOut){
             alert('删除成功')
             document.querySelector('.equipment-detail-window').remove()
             document.querySelector('.dim-overlay')?.remove()
-            renderData(defaultQueryData)
+            renderCurrentView()
         }
         }
     })
@@ -665,8 +1036,8 @@ document.querySelector('#data-showing-button').addEventListener('click',() =>{
 })
 
 document.querySelector('#admin-equipment-button').addEventListener('click',() =>{
-
     rightSide.innerHTML = ''
+    callCategoryShowing()
 })
 
 document.querySelector('#my-record-button').addEventListener('click',() =>{

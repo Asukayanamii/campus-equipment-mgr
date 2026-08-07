@@ -41,7 +41,75 @@ async function getData (QueryData = {}){
         console.error(`请求数据失败`,error)
         throw error;
     }
-    
+
+}
+
+// 获取某页分类数据
+/**`
+ * @param {QueryData} QueryData
+ * @returns {Result_Page_CategoryResp}
+ */
+async function getCategoryData (QueryData = {}){
+    try{
+        const params = new URLSearchParams();
+
+        // 为查询的参数列表清除空项
+        for(const[k,v] of Object.entries(QueryData)){
+            if(v !== null && v !== '' && v !== undefined){
+                params.set(k,v);
+            }
+        }
+
+        const data = await fetch(`${BASE_URL}/${apiChoose()}/equipment-category/page?${params.toString()}`,{
+            method : 'GET',
+            headers : {
+                'content-type' : 'application/json',
+                'token' : sessionStorage.getItem(`token`)
+            },
+        });
+
+        return await data.json();
+    }catch(error){
+        console.error(`请求分类数据失败`,error)
+        throw error;
+    }
+
+}
+
+// 管理端新增设备分类
+/**
+ *
+ * @param {CategoryCreate} CategoryCreate
+ * @returns {boolean}
+ */
+async function addNewCategory(CategoryCreate){
+    try {
+        const response = await fetch(`${BASE_URL}/admin/equipment-category/`,{
+            method : 'POST',
+            headers : {
+                'Content-Type' : 'application/json',
+                'token' : sessionStorage.getItem('token')
+            },
+            body : JSON.stringify(
+                CategoryCreate
+            )
+        })
+
+        const res = await response.json();
+
+        if(response.ok !== true || res.code !== 0){
+            if(res.code !== 0){
+                alert(`新增分类失败，${res.message}`)
+            }
+            console.log(`新增分类失败,错误码:${response.status},code ${res.code}`)
+            return false
+        }
+
+        return true
+    } catch (error) {
+        console.error('新增分类失败')
+        return false
+    }
 }
 
 // 根据id获取数据
@@ -351,4 +419,3 @@ async function deleteEquipment(equipmentId,identity){
         return
     }
 }
-
