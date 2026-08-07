@@ -19,6 +19,7 @@ def create_borrow_record_service(
     borrow_record_in: BorrowRecordCreate,
 ) -> BorrowRecordCreateOut:
     with session.begin():
+        # 锁定设备行，避免并发申请时重复占用同一设备。
         equipment = equipment_crud.get_equipment_by_id_for_update(session, borrow_record_in.equipment_id)
         if not equipment:
             raise BussinessException("设备不存在", status_code=404)
@@ -34,6 +35,7 @@ def create_borrow_record_service(
         if borrow_record:
             raise BussinessException("该时间段内设备已被申请借用", status_code=409)
 
+        # 创建待审核借用记录，并把设备切换为借用审核中。
         borrow_record = BorrowRecord(
             **borrow_record_in.model_dump(),
             user_id=user_id,
@@ -50,11 +52,13 @@ def query_borrow_record_by_user_service(
     query: BorrowRecordQuery,
 ) -> Page[BorrowRecordPageOut]:
     list = []
+    # 按当前学生 ID 查询借用记录及列表展示所需的设备名称。
     res = borrow_record_crud.query_borrow_record_by_user(session, user_id, query)
     for borrow_record, equipment in res.items:
         borrow_record_out = BorrowRecordPageOut.model_validate(borrow_record)
         borrow_record_out.equipment_name = equipment.equipment_name if equipment else None
         list.append(borrow_record_out)
+    # 保留分页器元数据并返回精简列表模型。
     return Page(items=list, total=res.total, page=query.page, size=res.size, pages=res.pages)
 
 
@@ -63,6 +67,7 @@ def get_borrow_record_detail_by_user_service(
     borrow_record_id: int,
     user_id: int,
 ) -> BorrowRecordOut:
+    # 查询时同时按借用记录 ID 和当前学生 ID 过滤，隔离他人数据。
     borrow_record_detail = borrow_record_crud.get_borrow_record_detail_by_id_and_user(
         session,
         borrow_record_id,
@@ -71,6 +76,7 @@ def get_borrow_record_detail_by_user_service(
     if not borrow_record_detail:
         raise BussinessException("借用记录不存在", status_code=404)
 
+    # 补齐详情展示所需的设备和分类字段。
     borrow_record, equipment, category = borrow_record_detail
     borrow_record_out = BorrowRecordOut.model_validate(borrow_record)
     if equipment:
@@ -97,6 +103,7 @@ def create_borrow_return_record_service(
     borrow_return_in: BorrowReturnCreate,
 ) -> BorrowReturnCreateOut:
     with session.begin():
+        # 锁定并校验当前学生的借用记录，防止重复归还。
         borrow_record = borrow_record_crud.get_borrow_record_by_id_and_user_for_update(
             session,
             borrow_record_id,
@@ -109,10 +116,12 @@ def create_borrow_return_record_service(
         if borrow_return_record_crud.get_borrow_return_record_by_borrow_record_id(session, borrow_record_id):
             raise BussinessException("该借用记录已提交归还", status_code=409)
 
+        # 锁定关联设备，保证归还状态与设备状态同步更新。
         equipment = equipment_crud.get_equipment_by_id_for_update(session, borrow_record.equipment_id)
         if not equipment:
             raise BussinessException("设备不存在", status_code=404)
 
+        # 创建归还主记录，归还图片作为一对多子记录保存。
         borrow_return_record = BorrowReturnRecord(
             return_status=borrow_return_in.return_status,
             return_remark=borrow_return_in.return_remark,
@@ -130,6 +139,7 @@ def create_borrow_return_record_service(
                 session,
             )
 
+        # 损坏归还自动生成报修记录和待派单维修工单。
         if borrow_return_in.return_status == BorrowReturnStatus.DAMAGED:
             repair_report = RepairReport(
                 return_record_id=borrow_return_record.id,
@@ -148,6 +158,7 @@ def create_borrow_return_record_service(
                 session,
             )
 
+        # 归还提交后，借用记录与设备均进入待确认归还状态。
         borrow_record_crud.update_borrow_record(
             borrow_record,
             {"status": BorrowRecordStatus.PENDING_RETURN},
@@ -158,6 +169,8 @@ def create_borrow_return_record_service(
             {"status": ItemStatusCode.PENDING_RETURN},
             session,
         )
+        # 使用已 flush 的归还记录回显，并补充本次上传的图片地址。
         borrow_return_out = BorrowReturnCreateOut.model_validate(borrow_return_record)
         borrow_return_out.damage_images = borrow_return_in.damage_images
         return borrow_return_out
+        # 校验设备当前可借用，再检查申请时间段是否冲突。
