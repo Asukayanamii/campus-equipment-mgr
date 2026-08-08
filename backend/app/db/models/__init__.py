@@ -10,3 +10,4 @@ from app.db.models.repair_order_model import RepairOrder
 from app.db.models.repair_report_model import RepairReport
 from app.db.models.repair_user_model import RepairUser
 from app.db.models.user_model import User
+from app.db.models.registration_code_model import RegistrationCode

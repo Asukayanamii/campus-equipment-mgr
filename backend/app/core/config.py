@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     DEFAULT_EQUIPMENT_IMAGE_URL: str = Field(..., description="新增设备的默认图片 URL")
     DEFAULT_PROFILE_IMAGE_URL: str = Field(..., description="新账号的默认头像 URL")
 
+    SUPER_ADMIN_USERNAME: str = Field(..., description="super administrator username")
 
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> str:

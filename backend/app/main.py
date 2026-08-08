@@ -4,7 +4,7 @@ from fastapi_pagination import Page, add_pagination, paginate
 
 from app.api.common import common
 from app.api.user import user, equipment, borrow_record, repair_report
-from app.api.admin import admin, borrow_record as admin_borrow_record, equipment as admin_equipment, equipment_category as admin_equipment_category
+from app.api.admin import admin, borrow_record as admin_borrow_record, equipment as admin_equipment, equipment_category as admin_equipment_category, registration_code as admin_registration_code
 from app.api.repair import repair, equipment as repair_equipment
 from app.core.exception_handler import register_exception_handler
 from app.db import models
@@ -28,6 +28,7 @@ app.include_router(admin.router)
 app.include_router(admin_borrow_record.router)
 app.include_router(admin_equipment.router)
 app.include_router(admin_equipment_category.router)
+app.include_router(admin_registration_code.router)
 app.include_router(repair.router)
 app.include_router(repair_equipment.router)
 app.include_router(common.router)
