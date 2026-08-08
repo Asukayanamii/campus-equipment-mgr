@@ -4,6 +4,7 @@ from app.core.exceptions import BussinessException
 from app.core.logger import logger
 from app.result.result import Result
 from fastapi import Request
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 def register_exception_handler(app):
     """
@@ -25,6 +26,13 @@ def register_exception_handler(app):
 
         return Result.fail("；".join(err_details)).to_json(code=422)
 
+
+
+    @app.exception_handler(StarletteHTTPException)
+    async def starlette_http_exception_handler(request: Request, exc: StarletteHTTPException):
+        """接管404、405等starlette原生http错误"""
+        logger.error(f"{request.method} {request.url} {exc}")
+        return Result.fail(str(exc)).to_json(code=exc.status_code)
 
     """
     注册全局异常处理
