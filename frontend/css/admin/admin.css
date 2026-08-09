@@ -786,3 +786,8 @@ body {
     font-size: 1.4rem;
     cursor: pointer;
 }
+.data-card {
+    background-size: contain !important;
+    background-position: center;
+    background-repeat: no-repeat;
+}

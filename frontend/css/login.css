@@ -1,78 +1,58 @@
-body{
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* background-color: ; */
-    background-image: url('../assets/images/backgroundimg.png');
-    background-size: cover;        
-    background-position: center;   
-    background-repeat: no-repeat;
-    
-}
-.login-box{
-    display: flex;
-    flex-direction: column;
-    height: 400px;
-    width: 600px;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(226, 241, 246, 0.6);
-    border-radius: 30px;
-}
-.login-box form div div {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-}
-.login-box form div div span{
-    width: 50px;
-}
-.login-form{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    justify-content: center;
-    align-content: center;
-    border-style: solid;
-    /* padding: 70px;
-    padding-top: 0px; */
-}
-.identity-choose{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
+:root { --green: #176b4a; --green-dark: #105238; --ink: #18231d; --muted: #66736c; --line: #dfe6e1; --surface: #f5f8f6; }
+
+body { background: #f4f7f5; color: var(--ink); }
+.login-page { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-columns: minmax(360px, 46%) 1fr; }
+.campus-panel { position: relative; min-height: 100%; padding: 36px 48px; color: #fff; background: linear-gradient(180deg, rgba(9, 31, 21, .32), rgba(9, 31, 21, .82)), url('../assets/images/backgroundimg.png') center/cover no-repeat; display: flex; align-items: flex-end; }
+.back-home { position: absolute; top: 34px; left: 48px; padding: 8px 0; color: rgba(255,255,255,.9); font-size: 1.4rem; }
+.back-home:hover { color: #fff; }
+.campus-copy { max-width: 520px; padding-bottom: 44px; }
+.brand-mark { width: 46px; height: 46px; margin-bottom: 28px; display: grid; place-items: center; border-radius: 6px; color: var(--green-dark); background: #fff; font-weight: 800; }
+.eyebrow { margin-bottom: 14px; color: #c7e4d3; font-size: 1.15rem; font-weight: 700; letter-spacing: .13em; }
+.campus-copy h1 { font-size: clamp(4rem, 4.2vw, 6rem); line-height: 1.15; font-weight: 750; }
+.campus-copy > p:last-child { margin-top: 20px; color: rgba(255,255,255,.78); font-size: 1.6rem; }
+
+.form-panel { display: grid; place-items: center; padding: 48px; }
+.login-box { width: min(100%, 430px); animation: enter .55s ease-out both; }
+.form-heading { margin-bottom: 34px; }
+.mobile-brand { display: none; }
+.form-heading h2 { font-size: 3.2rem; line-height: 1.25; font-weight: 750; }
+.form-heading > p:last-child { margin-top: 8px; color: var(--muted); font-size: 1.45rem; }
+.login-form { display: flex; flex-direction: column; gap: 26px; }
+.identity-field { border: 0; }
+.identity-field legend, .field > span:first-child { display: block; margin-bottom: 9px; font-size: 1.35rem; font-weight: 650; }
+.identity-choose { display: grid; grid-template-columns: repeat(3, 1fr); padding: 4px; border: 1px solid var(--line); border-radius: 7px; background: #fff; }
+.identity-option { min-height: 40px; padding: 7px 10px; border-radius: 5px; color: var(--muted); font-size: 1.4rem; transition: background .2s ease, color .2s ease, box-shadow .2s ease; }
+.identity-option:hover { color: var(--green-dark); background: var(--surface); }
+.identity-option.is-active { color: #fff; background: var(--green); box-shadow: 0 3px 10px rgba(23,107,74,.2); }
+.input-data { display: flex; flex-direction: column; gap: 20px; }
+.registration-field[hidden] { display: none; }
+.field { display: block; }
+.field input { width: 100%; height: 48px; padding: 0 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; font-size: 1.5rem; transition: border-color .2s ease, box-shadow .2s ease; }
+.field input::placeholder { color: #9aa59f; }
+.field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(23,107,74,.1); }
+.password-wrap { position: relative; display: block; }
+.password-wrap input { padding-right: 64px; }
+.password-toggle { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); padding: 5px; color: var(--green); font-size: 1.25rem; font-weight: 650; }
+.button-showing { display: flex; flex-direction: column; gap: 12px; }
+.button-showing button { min-height: 48px; border-radius: 6px; font-weight: 700; transition: transform .2s ease, background .2s ease, border-color .2s ease; }
+.button-showing button:active { transform: translateY(1px); }
+.primary-button { color: #fff; background: var(--green); box-shadow: 0 8px 20px rgba(23,107,74,.16); }
+.primary-button:hover { background: var(--green-dark); }
+.secondary-button { border: 1px solid var(--line); background: #fff; color: var(--green-dark); }
+.secondary-button:hover { border-color: #a8bdb1; background: var(--surface); }
+.identity-option:focus-visible, .button-showing button:focus-visible, .password-toggle:focus-visible, .back-home:focus-visible { outline: 3px solid rgba(23,107,74,.25); outline-offset: 2px; }
+.form-note { margin-top: 20px; text-align: center; color: #87938c; font-size: 1.25rem; }
+
+@keyframes enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 820px) {
+    .login-page { display: block; }
+    .campus-panel { display: none; }
+    .form-panel { min-height: 100vh; min-height: 100dvh; padding: 36px 22px; }
+    .mobile-brand { display: block; margin-bottom: 42px; color: var(--green); font-weight: 750; }
 }
 
-.identity-choose div{
-    border-style: solid;
-    flex: 1;
-    display: flex;
-    justify-content: center;
-
-}
-.input-data{
-    padding: 60px;
-    padding-top: 20px;
-    padding-bottom: 20px;
-}
-.account{
-    border-color: black;
-    border-width: 2px;
-    border-style: solid;
-}
-.password{
-    border-color: black;
-    border-width: 2px;
-    border-style: solid;
-}
-.button-showing{
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-}
-.button-showing button{
-    width: 50%;
-    background-color: aliceblue;
-    border-style: solid;
+@media (max-width: 380px) {
+    .form-panel { padding-inline: 16px; }
+    .identity-option { padding-inline: 5px; font-size: 1.3rem; }
 }

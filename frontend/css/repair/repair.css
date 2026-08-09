@@ -339,3 +339,8 @@ body {
     flex-direction: column;
     width: 200px;
 }
+.data-card {
+    background-size: contain !important;
+    background-position: center;
+    background-repeat: no-repeat;
+}

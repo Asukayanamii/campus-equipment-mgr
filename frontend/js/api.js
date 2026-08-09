@@ -155,7 +155,7 @@ async function getDataById(equipmentId,identity){
  * @param {string} identity 
  * @returns {boolean}
  */
-async function sendRegister(username , password, identity){
+async function sendRegister(username , password, identity, registrationCode = ''){
 
     try{
         const response = await fetch(`${BASE_URL}/${identity}/register`,{
@@ -166,7 +166,8 @@ async function sendRegister(username , password, identity){
             },
             body : JSON.stringify({
                 'username': username,
-                'password' : password 
+                'password' : password,
+                ...(identity === 'admin' ? {'registration_code': registrationCode} : {})
             })
         })
 
