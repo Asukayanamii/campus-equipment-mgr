@@ -137,32 +137,5 @@ REPAIR_ORDER_STATUS_MAP = {
 REPAIR_ORDER_STATUS_CODES = list(REPAIR_ORDER_STATUS_MAP.keys())
 
 
-class AuditBusinessType:
-    BORROW_RECORD = "borrow_record"
-    EQUIPMENT = "equipment"
-
-
-AUDIT_BUSINESS_TYPE_MAP = {
-    AuditBusinessType.BORROW_RECORD: "借用记录",
-    AuditBusinessType.EQUIPMENT: "设备",
-}
-
-AUDIT_BUSINESS_TYPE_CODES = list(AUDIT_BUSINESS_TYPE_MAP.keys())
-
-
-class AuditOperationType:
-    REVIEW = "review"
-    CONFIRM_RETURN = "confirm_return"
-
-
-AUDIT_OPERATION_TYPE_MAP = {
-    AuditOperationType.REVIEW: "审核借用申请",
-    AuditOperationType.CONFIRM_RETURN: "确认设备归还",
-}
-
-AUDIT_OPERATION_TYPE_CODES = list(AUDIT_OPERATION_TYPE_MAP.keys())
-
-
-
 # 可选：所有状态英文列表，用于参数校验
 ITEM_STATUS_CODES = list(ITEM_STATUS_MAP.keys())

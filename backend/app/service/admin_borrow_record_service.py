@@ -4,8 +4,6 @@ from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
 from app.constant.status_constant import (
-    AuditBusinessType,
-    AuditOperationType,
     BorrowRecordStatus,
     BorrowReturnStatus,
     ConfirmStatus,
@@ -33,7 +31,6 @@ from app.schema.admin_borrow_record_schema import (
     BorrowReturnConfirm,
     BorrowReturnConfirmOut,
 )
-from app.service.audit_service import create_audit_record_service
 from app.service.equipment_service import change_equipment_status_service
 
 
@@ -152,21 +149,6 @@ def review_borrow_record_service(
             session=session,
             equipment=equipment,
             target_status=equipment_status,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            admin_id=admin_id,
-            reason=review_in.review_remark,
-        )
-
-        # 统一写入审核记录，提供后续审计追溯。
-        create_audit_record_service(
-            session=session,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            operation_type=AuditOperationType.REVIEW,
-            admin_id=admin_id,
-            result=result_status,
-            remark=review_in.review_remark,
         )
         return BorrowRecordReviewOut.model_validate(borrow_record)
 
@@ -287,21 +269,6 @@ def confirm_borrow_return_service(
             session=session,
             equipment=equipment,
             target_status=target_equipment_status,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            admin_id=admin_id,
-            reason=confirm_in.confirm_remark,
-        )
-
-        # 统一写入管理员确认记录，确保处理过程可审计。
-        create_audit_record_service(
-            session=session,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            operation_type=AuditOperationType.CONFIRM_RETURN,
-            admin_id=admin_id,
-            result=confirm_in.confirmed_status,
-            remark=confirm_in.confirm_remark,
         )
         return BorrowReturnConfirmOut(
             borrow_record_id=borrow_record.id,

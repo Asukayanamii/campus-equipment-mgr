@@ -64,7 +64,7 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=720
 ```
 
-数据库使用 MySQL。应用启动时会根据 ORM 模型创建缺失的数据表：`user`、`admin`、`repair_user`、`equipment`、`equipment_category`、`borrow_record`、`borrow_return_record`、`borrow_return_image`、`repair_report`、`repair_order`、`audit_record`、`equipment_status_record`。
+数据库使用 MySQL。应用启动时会根据 ORM 模型创建缺失的数据表：`user`、`admin`、`repair_user`、`equipment`、`equipment_category`、`borrow_record`、`borrow_return_record`、`borrow_return_image`、`repair_report`、`repair_order`。
 
 `Base.metadata.create_all()` 只会创建缺失的表，不能为既有表补列。已有数据库升级到当前版本时，需要执行一次：
 
@@ -72,6 +72,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES=720
 ALTER TABLE borrow_return_record
 ADD COLUMN confirmed_status VARCHAR(30) NULL COMMENT '管理员最终确认的设备状态'
 AFTER confirm_status;
+
+DROP TABLE IF EXISTS audit_record;
+DROP TABLE IF EXISTS equipment_status_record;
 ```
 
 ### 3. 启动服务
@@ -186,7 +189,7 @@ token: <login-response.data.token>
 `available`、`pending_borrow`、`borrowed`、`pending_return`、`damaged`、`repair_pending`、`repairing`、
 `repaired`、`scrapped`、`offline`。设备编号全局唯一。
 
-更新设备时，名称、位置、品牌、封面等普通字段不会生成设备状态历史；仅在请求传入的 `status` 与数据库当前值不同时，系统才会写入一条 `equipment_status_record`。该记录关联 `businessType=equipment` 和当前设备 ID，操作人为当前管理员。
+更新设备时，名称、位置、品牌、封面等普通字段按请求更新；传入的 `status` 与数据库当前值不同时，系统更新设备当前状态。
 
 ### 管理端设备分类
 
@@ -263,22 +266,12 @@ token: <student-token>
 
 归还记录中的 `confirmStatus` 表示管理员是否已经处理归还申报（`pending`、`confirmed`、`rejected`）；`confirmedStatus` 表示已确认后的最终验收结论（`normal`、`damaged`）。
 
-## 审计与状态历史
-
-管理员审核借用和确认归还会在同一事务中写入：
-
-- `audit_record`：记录业务类型、业务 ID、操作类型、管理员、处理结果和备注。当前借用流程使用 `businessType=borrow_record`，`businessId=borrow_record.id`。
-- `equipment_status_record`：记录设备状态变更前后值、关联业务、操作管理员、原因和时间。
-
-设备状态变更统一通过 `equipment_service.change_equipment_status_service()` 处理；该方法只在状态实际变化时更新设备并新增状态历史，不自行提交事务。
-
 ## 待实现的业务范围
 
 根据项目需求，后续迭代应覆盖：
 
 - 管理员查看和处理全部报修记录、创建和分配维修工单、确认维修结果及设备报废。
 - 维修人员查看本人任务、接收工单、更新维修进度、提交维修结果与维修凭证。
-- 审核记录和设备状态变更记录的分页查询接口。
 - 学生、管理员和维修人员的退出登录接口。
 
 ## 开发约定
