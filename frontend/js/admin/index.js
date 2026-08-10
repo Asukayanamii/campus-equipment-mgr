@@ -268,20 +268,20 @@ function renderChangeProfileSubmitWindow(){
                 return
             }
             if(!newPasswordFirst){
-                alert('第一次密码不能为空')
+                Toast.warning('第一次密码不能为空')
                 return
             }
             if(!newPasswordSecondString){
-                alert('第二次密码不能为空')
+                Toast.warning('第二次密码不能为空')
             }
             if(newPasswordFirstString !== newPasswordSecondString){
-                alert("两次密码输入不一致")
+                Toast.warning("两次密码输入不一致")
                 return
             }
 
             const temUserName = (await getPersonalData(apiChoose())).username
             if(!await sendSubmit(temUserName,originPasswordString,apiChoose())){
-                alert('原密码输入错误')
+                Toast.failure('原密码输入错误')
                 return
             }
 
@@ -290,9 +290,9 @@ function renderChangeProfileSubmitWindow(){
                 name : changedName.value || temName,
                 password : newPasswordFirst.value
             },apiChoose())){
-                alert('修改失败')
+                Toast.failure('修改失败')
             }else{
-                alert('修改成功')
+                Toast.success('修改成功')
             }
         }
     })
@@ -618,7 +618,7 @@ function attachEventsForCategorySearchWayChoose(){
     search.addEventListener('keydown',(e) =>{
         if(e.key === 'Enter'){
             if(!categoryQueryDataYouChange){
-                alert('请选择搜索类型')
+                Toast.warning('请选择搜索类型')
                 return
             }
             defaultCategoryQueryData[categoryQueryDataYouChange]  = e.target.value
@@ -696,7 +696,7 @@ function addNewCategoryPanel(){
         })
         const ok = await addNewCategory(temCategoryCreate)
         if(!ok) return
-        alert('新增分类成功')
+        Toast.success('新增分类成功')
 
         closeAddEquipmentPanel()
         renderCategory(defaultCategoryQueryData)
@@ -769,7 +769,7 @@ function addNewEquipmentPanel(categoryId){
 
         const ok = await addNewEquipment(temEquipmentCreate,apiChoose())
         if(!ok) return
-        alert('新增设备成功')
+        Toast.success('新增设备成功')
 
         closeAddEquipmentPanel()
         renderCurrentView()
@@ -869,7 +869,7 @@ function attachEventsForSearchWayChoose(){
     search.addEventListener('keydown',(e) =>{
         if(e.key === 'Enter'){
             if(!queryDataYouChange){
-                alert('请选择搜索类型')
+                Toast.warning('请选择搜索类型')
                 return
             }
             defaultQueryData[queryDataYouChange]  = e.target.value
@@ -993,7 +993,7 @@ function callEquipmentDetailWindow(EquipmentOut){
 
         const ok = await updateEquipment(EquipmentOut.id,temEquipmentUpdate,apiChoose())
         if(!ok) return
-        alert('更新设备成功')
+        Toast.success('更新设备成功')
 
         document.querySelector('#equipment-detail-window').remove()
         document.querySelector('.dim-overlay')?.remove()
@@ -1007,7 +1007,7 @@ function callEquipmentDetailWindow(EquipmentOut){
     document.querySelector('.equipment-detail-window-delete-button').addEventListener('click',async() =>{
         if(confirm(`你确定要删除${EquipmentOut.equipmentName}吗，改操作不可逆`)){
             if(await deleteEquipment(EquipmentOut.id,apiChoose())){
-            alert('删除成功')
+            Toast.success('删除成功')
             document.querySelector('.equipment-detail-window').remove()
             document.querySelector('.dim-overlay')?.remove()
             renderCurrentView()
@@ -1246,7 +1246,7 @@ function attachEventsForRecordSearchWayChoose(){
     search.addEventListener('keydown',(e) =>{
         if(e.key === 'Enter'){
             if(!recordQueryDataYouChange){
-                alert('请选择搜索类型')
+                Toast.warning('请选择搜索类型')
                 return
             }
             defaultRecordQueryData[recordQueryDataYouChange]  = e.target.value
@@ -1341,7 +1341,7 @@ function callAdminRecordDetailWindow(detail){
     detailWindow.querySelector('.record-detail-review-pass').addEventListener('click',async () => {
         if(!confirm(`确定审核通过记录${detail.id}吗？`)) return
         if(await reviewBorrowRecord(detail.id,new BorrowRecordReview({ approved : true }),apiChoose())){
-            alert('审核通过成功')
+            Toast.success('审核通过成功')
             detailWindow.remove()
             document.querySelector('.dim-overlay')?.remove()
             renderRecordData(defaultRecordQueryData)
@@ -1350,7 +1350,7 @@ function callAdminRecordDetailWindow(detail){
     detailWindow.querySelector('.record-detail-review-reject').addEventListener('click',async () => {
         if(!confirm(`确定审核驳回记录${detail.id}吗？`)) return
         if(await reviewBorrowRecord(detail.id,new BorrowRecordReview({ approved : false }),apiChoose())){
-            alert('审核驳回成功')
+            Toast.success('审核驳回成功')
             detailWindow.remove()
             document.querySelector('.dim-overlay')?.remove()
             renderRecordData(defaultRecordQueryData)
@@ -1364,7 +1364,7 @@ function callAdminRecordDetailWindow(detail){
             confirmedStatus,
             confirmRemark : detailWindow.querySelector('#record-confirm-remark').value || ''
         }),apiChoose())){
-            alert('确认归还成功')
+            Toast.success('确认归还成功')
             detailWindow.remove()
             document.querySelector('.dim-overlay')?.remove()
             renderRecordData(defaultRecordQueryData)

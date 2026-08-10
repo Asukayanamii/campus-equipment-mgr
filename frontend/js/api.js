@@ -99,7 +99,7 @@ async function addNewCategory(CategoryCreate){
 
         if(response.ok !== true || res.code !== 0){
             if(res.code !== 0){
-                alert(`新增分类失败，${res.message}`)
+                Toast.failure(`新增分类失败，${res.message}`)
             }
             console.log(`新增分类失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -133,7 +133,7 @@ async function getDataById(equipmentId,identity){
 
         if(!response.ok || res.code !== 0){
             if(res.code !== 0){
-                alert(`根据id获取数据失败，${res.message}`)
+                Toast.failure(`根据id获取数据失败，${res.message}`)
             }
             console.log(`根据id获取数据失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -175,7 +175,7 @@ async function sendRegister(username , password, identity, registrationCode = ''
 
         if(!response.ok || res.code !== 0){
             if(res.code !== 0){
-                alert(`注册失败，${res.message}`)
+                Toast.failure(`注册失败，${res.message}`)
             }
             console.log(`注册失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -215,7 +215,7 @@ async function sendSubmit(username , password ,identity){
 
         if(response.ok !== true || res.code !== 0){
             if(res.code !== 0){
-                alert(`登录失败，${res.message}`)
+                Toast.failure(`登录失败，${res.message}`)
             }
             console.log(`登录失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -251,7 +251,7 @@ async function getPersonalData(identity){
 
         if(response.ok !== true || res.code !== 0){
             if(res.code !== 0){
-                alert(`查询个人信息或者鉴权失败，${res.message}`)
+                Toast.failure(`查询个人信息或者鉴权失败，${res.message}`)
             }
             console.log(`查询个人信息或者鉴权失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -289,7 +289,7 @@ async function changePersonalData(UpdateInDTO,identity){
 
         if(response.ok !== true || res.code !== 0){
             if(res.code !== 0){
-                alert(`修改个人信息失败，${res.message}`)
+                Toast.failure(`修改个人信息失败，${res.message}`)
             }
             console.log(`修改个人信息失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -311,7 +311,7 @@ async function changePersonalData(UpdateInDTO,identity){
  */
 async function addNewEquipment(EquipmentCreate,identity){
     if(identity !== 'admin'){
-        alert('你无权新增设备！')
+        Toast.warning('你无权新增设备！')
         return false
     }
     try {
@@ -330,7 +330,7 @@ async function addNewEquipment(EquipmentCreate,identity){
 
         if(response.ok !== true || res.code !== 0){
             if(res.code !== 0){
-                alert(`新增设备失败，${res.message}`)
+                Toast.failure(`新增设备失败，${res.message}`)
             }
             console.log(`新增设备失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -353,7 +353,7 @@ async function addNewEquipment(EquipmentCreate,identity){
  */
 async function updateEquipment(equipmentId,EquipmentUpdate,identity){
     if(identity !== 'admin'){
-        alert('你无权更新！')
+        Toast.warning('你无权更新！')
         return false
     }
     try {
@@ -370,7 +370,7 @@ async function updateEquipment(equipmentId,EquipmentUpdate,identity){
 
         if(response.ok !== true || res.code !== 0){
             if(res.code !== 0){
-                alert(`根据id更新设备失败，${res.message}`)
+                Toast.failure(`根据id更新设备失败，${res.message}`)
             }
             console.log(`根据id更新设备失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -393,7 +393,7 @@ async function updateEquipment(equipmentId,EquipmentUpdate,identity){
  */
 async function deleteEquipment(equipmentId,identity){
     if(identity !== 'admin'){
-        alert('你无权删除')
+        Toast.warning('你无权删除')
         return
     }
     try {
@@ -408,7 +408,7 @@ async function deleteEquipment(equipmentId,identity){
 
         if(response.ok !== true || res.code !== 0){
             if(res.code !== 0){
-                alert(`根据id删除设备失败，${res.message}`)
+                Toast.failure(`根据id删除设备失败，${res.message}`)
             }
             console.log(`根据id删除设备失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -505,7 +505,7 @@ async function getBorrowRecordDetail(borrowRecordId){
 
         if(!response.ok || res.code !== 0){
             if(res.code !== 0){
-                alert(`根据id获取借用记录详情失败，${res.message}`)
+                Toast.failure(`根据id获取借用记录详情失败，${res.message}`)
             }
             console.log(`根据id获取借用记录详情失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -538,7 +538,7 @@ async function getRepairReportDetail(repairReportId){
 
         if(!response.ok || res.code !== 0){
             if(res.code !== 0){
-                alert(`根据id获取报修记录详情失败，${res.message}`)
+                Toast.failure(`根据id获取报修记录详情失败，${res.message}`)
             }
             console.log(`根据id获取报修记录详情失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -561,7 +561,7 @@ async function getRepairReportDetail(repairReportId){
  */
 async function reviewBorrowRecord(borrowRecordId, BorrowRecordReview, identity){
     if(identity !== 'admin'){
-        alert('你无权审核！')
+        Toast.warning('你无权审核！')
         return false
     }
     try {
@@ -580,7 +580,7 @@ async function reviewBorrowRecord(borrowRecordId, BorrowRecordReview, identity){
 
         if(response.ok !== true || res.code !== 0){
             if(res.code !== 0){
-                alert(`审核借用申请失败，${res.message}`)
+                Toast.failure(`审核借用申请失败，${res.message}`)
             }
             console.log(`审核借用申请失败,错误码:${response.status},code ${res.code}`)
             return false
@@ -603,7 +603,7 @@ async function reviewBorrowRecord(borrowRecordId, BorrowRecordReview, identity){
  */
 async function confirmReturnBorrowRecord(borrowRecordId, BorrowReturnConfirm, identity){
     if(identity !== 'admin'){
-        alert('你无权确认归还！')
+        Toast.warning('你无权确认归还！')
         return false
     }
     try {
@@ -622,7 +622,7 @@ async function confirmReturnBorrowRecord(borrowRecordId, BorrowReturnConfirm, id
 
         if(response.ok !== true || res.code !== 0){
             if(res.code !== 0){
-                alert(`确认设备归还失败，${res.message}`)
+                Toast.failure(`确认设备归还失败，${res.message}`)
             }
             console.log(`确认设备归还失败,错误码:${response.status},code ${res.code}`)
             return false

@@ -242,20 +242,20 @@ function renderChangeProfileSubmitWindow(){
                 return
             }
             if(!newPasswordFirst){
-                alert('第一次密码不能为空')
+                Toast.warning('第一次密码不能为空')
                 return
             }
             if(!newPasswordSecondString){
-                alert('第二次密码不能为空')
+                Toast.warning('第二次密码不能为空')
             }
             if(newPasswordFirstString !== newPasswordSecondString){
-                alert("两次密码输入不一致")
+                Toast.warning("两次密码输入不一致")
                 return
             }
 
             const temUserName = (await getPersonalData(apiChoose())).username
             if(!await sendSubmit(temUserName,originPasswordString,apiChoose())){
-                alert('原密码输入错误')
+                Toast.failure('原密码输入错误')
                 return
             }
 
@@ -264,9 +264,9 @@ function renderChangeProfileSubmitWindow(){
                 name : changedName.value || temName,
                 password : newPasswordFirst.value
             },apiChoose())){
-                alert('修改失败')
+                Toast.failure('修改失败')
             }else{
-                alert('修改成功')
+                Toast.success('修改成功')
             }
         }
     })
@@ -406,7 +406,7 @@ searchWayChoose.addEventListener('change',(e) =>{
 search.addEventListener('keydown',(e) =>{
     if(e.key === 'Enter'){
         if(!queryDataYouChange){
-            alert('请选择搜索类型')
+            Toast.warning('请选择搜索类型')
             return
         }
         defaultQueryData[queryDataYouChange]  = e.target.value
@@ -707,7 +707,7 @@ function attachEventsForRecordSearchWayChoose(){
     search.addEventListener('keydown',(e) =>{
         if(e.key === 'Enter'){
             if(!recordQueryDataYouChange){
-                alert('请选择搜索类型')
+                Toast.warning('请选择搜索类型')
                 return
             }
             defaultRecordQueryData[recordQueryDataYouChange]  = e.target.value

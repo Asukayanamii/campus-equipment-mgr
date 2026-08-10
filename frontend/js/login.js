@@ -93,12 +93,12 @@ async function register(){
 
     if(checkedAccount !== false && checkedPassword !== false){
         if(checkedPassword !== registerPasswordConfirm.value){
-            alert('两次输入的密码不一致')
+            Toast.warning('两次输入的密码不一致')
             registerPasswordConfirm.focus()
             return false
         }
         if(registeringIdentity === 2 && !registerCode.value.trim()){
-            alert('请输入管理员注册码')
+            Toast.warning('请输入管理员注册码')
             registerCode.focus()
             return false
         }
@@ -136,7 +136,7 @@ registerForm.addEventListener('submit', async event => {
     registerSubmit.disabled = true
     registerSubmit.textContent = '注册中...'
     if(await register() === true){
-        alert("注册成功")
+        Toast.success("注册成功")
         closeRegisterDialog()
     }
     registerSubmit.disabled = false
@@ -145,8 +145,9 @@ registerForm.addEventListener('submit', async event => {
 loginForm.addEventListener('submit', async event => {
     event.preventDefault()
     if(await submit() === true){
-        alert("登录成功")
-        window.location.replace(`/campus-equipment-mgr/frontend/pages/${apiChoose()}.html`)
+        Toast.nextPage("登录成功")
+        const targetPage = `/campus-equipment-mgr/frontend/pages/${apiChoose()}.html`
+        window.location.replace(targetPage)
     }
 })
 
