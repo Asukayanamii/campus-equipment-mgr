@@ -9,10 +9,20 @@ const account = document.getElementById(`account`)
 const password = document.getElementById(`password`)
 const loginForm = document.getElementById('login-form')
 const passwordToggle = document.getElementById('password-toggle')
-const registrationField = document.querySelector('.registration-field')
-const registrationCode = document.getElementById('registration-code')
+const registerDialog = document.getElementById('register-dialog')
+const registerForm = document.getElementById('register-form')
+const registerTitle = document.getElementById('register-title')
+const registerAccount = document.getElementById('register-account')
+const registerPassword = document.getElementById('register-password')
+const registerPasswordConfirm = document.getElementById('register-password-confirm')
+const registerCodeField = document.getElementById('register-code-field')
+const registerCode = document.getElementById('register-code')
+const registerSubmit = document.getElementById('register-submit')
+const registerClose = document.getElementById('register-close')
+const registerCancel = document.getElementById('register-cancel')
 
 let identity = 1;
+let registeringIdentity = 1;
 
 // 重置身份和样式
 function resetIdentity(){
@@ -51,21 +61,53 @@ function chooseIdentity(target){
     target.classList.add('is-active');
     target.setAttribute('aria-checked', 'true')
     identity = showIdentity(target);
-    const isAdmin = identity === 2
-    registrationField.hidden = !isAdmin
-    registrationCode.required = isAdmin
 }
 
+function identityName(identityValue){
+    return {1: '学生', 2: '管理员', 3: '维修人员'}[identityValue]
+}
 
-// 注册 
+function identityApi(identityValue){
+    return {1: 'user', 2: 'admin', 3: 'repair'}[identityValue]
+}
+
+function openRegisterDialog(){
+    registeringIdentity = identity
+    const isAdmin = registeringIdentity === 2
+    registerForm.reset()
+    registerTitle.textContent = `注册${identityName(registeringIdentity)}账号`
+    registerCodeField.hidden = !isAdmin
+    registerCode.required = isAdmin
+    registerDialog.showModal()
+    registerAccount.focus()
+}
+
+function closeRegisterDialog(){
+    registerDialog.close()
+}
+
+// 注册
 async function register(){
+    const checkedAccount = checkAccount(registerAccount)
+    const checkedPassword = checkPassword(registerPassword)
 
-    if(checkAccount(account) !==false && checkPassword(password) !== false){
-        if(identity === 2 && !registrationCode.value.trim()){
-            alert('请输入管理员注册码')
+    if(checkedAccount !== false && checkedPassword !== false){
+        if(checkedPassword !== registerPasswordConfirm.value){
+            alert('两次输入的密码不一致')
+            registerPasswordConfirm.focus()
             return false
         }
-        return  await sendRegister(checkAccount(account),checkPassword(password),apiChoose(),registrationCode.value.trim());
+        if(registeringIdentity === 2 && !registerCode.value.trim()){
+            alert('请输入管理员注册码')
+            registerCode.focus()
+            return false
+        }
+        return await sendRegister(
+            checkedAccount,
+            checkedPassword,
+            identityApi(registeringIdentity),
+            registerCode.value.trim()
+        )
     }else{
         return false;
     }
@@ -83,12 +125,22 @@ studentLogin.addEventListener('click',async () => chooseIdentity(studentLogin))
 repairLogin.addEventListener('click',async () => chooseIdentity(repairLogin))
 adminLogin.addEventListener('click',async () => chooseIdentity(adminLogin))
 
-registerButton.addEventListener('click',async () => {
-    if(await register() === true ){
+registerButton.addEventListener('click', openRegisterDialog)
+registerClose.addEventListener('click', closeRegisterDialog)
+registerCancel.addEventListener('click', closeRegisterDialog)
+registerDialog.addEventListener('click', event => {
+    if(event.target === registerDialog) closeRegisterDialog()
+})
+registerForm.addEventListener('submit', async event => {
+    event.preventDefault()
+    registerSubmit.disabled = true
+    registerSubmit.textContent = '注册中...'
+    if(await register() === true){
         alert("注册成功")
-    }else{
-        alert("注册失败")
+        closeRegisterDialog()
     }
+    registerSubmit.disabled = false
+    registerSubmit.textContent = '确认注册'
 })
 loginForm.addEventListener('submit', async event => {
     event.preventDefault()

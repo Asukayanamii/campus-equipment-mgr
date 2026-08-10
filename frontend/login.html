@@ -51,10 +51,6 @@
                                 <button class="password-toggle" id="password-toggle" type="button" aria-label="显示密码">显示</button>
                             </span>
                         </label>
-                        <label class="field registration-field" for="registration-code" hidden>
-                            <span>管理员注册码</span>
-                            <input type="text" id="registration-code" name="registrationCode" autocomplete="off" placeholder="请输入管理员注册码">
-                        </label>
                     </div>
 
                     <div class="button-showing">
@@ -66,6 +62,42 @@
             </div>
         </section>
     </main>
+
+    <dialog class="register-dialog" id="register-dialog" aria-labelledby="register-title">
+        <form class="register-form" id="register-form">
+            <div class="dialog-heading">
+                <div>
+                    <h2 id="register-title">注册学生账号</h2>
+                    <p>填写以下信息创建新账号</p>
+                </div>
+                <button class="dialog-close" id="register-close" type="button" aria-label="关闭注册弹窗">×</button>
+            </div>
+
+            <div class="register-fields">
+                <label class="field" for="register-account">
+                    <span>账号</span>
+                    <input type="text" id="register-account" autocomplete="username" placeholder="请输入账号" required>
+                </label>
+                <label class="field" for="register-password">
+                    <span>密码</span>
+                    <input type="password" id="register-password" autocomplete="new-password" placeholder="请输入密码" required>
+                </label>
+                <label class="field" for="register-password-confirm">
+                    <span>确认密码</span>
+                    <input type="password" id="register-password-confirm" autocomplete="new-password" placeholder="请再次输入密码" required>
+                </label>
+                <label class="field" id="register-code-field" for="register-code" hidden>
+                    <span>管理员注册码</span>
+                    <input type="text" id="register-code" autocomplete="off" placeholder="请输入管理员注册码">
+                </label>
+            </div>
+
+            <div class="dialog-actions">
+                <button class="secondary-button" id="register-cancel" type="button">取消</button>
+                <button class="primary-button" id="register-submit" type="submit">确认注册</button>
+            </div>
+        </form>
+    </dialog>
     <script src="./js/util.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/login.js"></script>
