@@ -5958,48 +5958,6 @@
             "title": "Damageimages",
             "description": "损坏图片地址"
           },
-          "confirmStatus": {
-            "type": "string",
-            "title": "Confirmstatus",
-            "description": "管理员确认状态"
-          },
-          "confirmRemark": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confirmremark",
-            "description": "管理员确认备注"
-          },
-          "confirmerId": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confirmerid",
-            "description": "确认管理员 ID"
-          },
-          "confirmTime": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Confirmtime",
-            "description": "确认时间"
-          },
           "repairOrderId": {
             "anyOf": [
               {
@@ -6131,7 +6089,6 @@
           "userId",
           "equipmentId",
           "damageDescription",
-          "confirmStatus",
           "createTime",
           "updateTime"
         ],

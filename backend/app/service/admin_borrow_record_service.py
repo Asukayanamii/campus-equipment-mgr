@@ -194,10 +194,6 @@ def confirm_borrow_return_service(
                         or "管理员验收发现设备损坏"
                     ),
                     status=RepairReportStatus.CONFIRMED,
-                    confirm_status=ConfirmStatus.CONFIRMED,
-                    confirm_remark=confirm_in.confirm_remark,
-                    confirmer_id=admin_id,
-                    confirm_time=datetime.now(),
                 )
                 repair_report_crud.add_repair_report(repair_report, session)
             else:
@@ -205,10 +201,6 @@ def confirm_borrow_return_service(
                     repair_report,
                     {
                         "status": RepairReportStatus.CONFIRMED,
-                        "confirm_status": ConfirmStatus.CONFIRMED,
-                        "confirm_remark": confirm_in.confirm_remark,
-                        "confirmer_id": admin_id,
-                        "confirm_time": datetime.now(),
                     },
                     session,
                 )
@@ -228,10 +220,6 @@ def confirm_borrow_return_service(
                     repair_report,
                     {
                         "status": RepairReportStatus.REJECTED,
-                        "confirm_status": ConfirmStatus.REJECTED,
-                        "confirm_remark": confirm_in.confirm_remark,
-                        "confirmer_id": admin_id,
-                        "confirm_time": datetime.now(),
                     },
                     session,
                 )
