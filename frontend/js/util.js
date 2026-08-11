@@ -195,6 +195,14 @@ const BORROW_RECORD_STATUS_MAP = {
     completed : '已完成',
 }
 
+// 报修记录与维修工单是两个状态域，查询和展示时不能混用。
+const REPAIR_REPORT_STATUS_MAP = {
+    pending: '待处理',
+    confirmed: '已确认',
+    processing: '处理中',
+    completed: '已完成',
+}
+
 // 维修工单状态编码与中文互转映射
 const REPAIR_ORDER_STATUS_MAP = {
     pending_assign : '待派单',

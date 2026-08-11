@@ -24,6 +24,11 @@ function createImageUploadController({ input, preview, maxCount = 9 }){
 
     input.addEventListener('change', async () => {
         const files = Array.from(input.files)
+        if(files.some(file => !file.type.startsWith('image/'))){
+            Toast.warning('只能上传图片文件')
+            input.value = ''
+            return
+        }
         if(state.urls.length + files.length > maxCount){
             Toast.warning(`最多上传 ${maxCount} 张图片`)
             input.value = ''

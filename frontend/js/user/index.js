@@ -556,7 +556,7 @@ async function renderRecordData(QueryData = {}){
         const rows = list.map(i => `
             <tr data-record-id="${i.id}">
                 <td>${i.equipmentName || ''}</td>
-                <td>${statusToChinese(REPAIR_ORDER_STATUS_MAP,i.status)}</td>
+                <td>${statusToChinese(REPAIR_REPORT_STATUS_MAP,i.status)}</td>
                 <td>${i.createTime || ''}</td>
             </tr>
         `).join('')
@@ -796,7 +796,7 @@ function callRecordDetailWindow(detail){
             <p>损坏说明:${detail.damageDescription || ''}</p>
             <p>管理员确认状态:${detail.confirmStatus || ''}</p>
             <p>管理员确认备注:${detail.confirmRemark || ''}</p>
-            <p>报修状态:${statusToChinese(REPAIR_ORDER_STATUS_MAP,detail.status)}</p>
+            <p>报修状态:${statusToChinese(REPAIR_REPORT_STATUS_MAP,detail.status)}</p>
             <p>维修工单状态:${statusToChinese(REPAIR_ORDER_STATUS_MAP,detail.repairStatus)}</p>
             <p>故障原因:${detail.faultCause || ''}</p>
             <p>维修过程:${detail.repairProcess || ''}</p>
