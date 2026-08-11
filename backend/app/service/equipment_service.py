@@ -8,6 +8,7 @@ from app.crud import equipment_crud
 from app.db.models.equipment_model import Equipment
 from app.schema.equipment_schema import EquipmentCreate, EquipmentOut, EquipmentUpdate, EquipQuery
 from app.schema.page_schema import PageResp
+from app.utils.redis_cache import mark_equipment_cache_invalidation, redis_cache
 
 
 # def get_all_equipment(session: Session) -> PageResp[EquipmentOut]:
@@ -18,6 +19,22 @@ from app.schema.page_schema import PageResp
 #         list.append(equip_out)
 #     return PageResp(total=len(list), records=list)
 
+def _equipment_page_cache_key(session: Session, query: EquipQuery) -> dict:
+    """使用全部校验后的查询字段，区分不同条件的设备分页结果。"""
+    return query.model_dump(mode="json")
+
+
+def _equipment_detail_cache_key(session: Session, equipment_id: int) -> dict:
+    """使用设备 ID 作为详情查询的稳定缓存键。"""
+    return {"equipment_id": equipment_id}
+
+
+@redis_cache(
+    key_prefix="equipment:page",
+    key_builder=_equipment_page_cache_key,
+    response_model=Page[EquipmentOut],
+    expire_seconds=settings.EQUIPMENT_QUERY_CACHE_TTL,
+)
 def query_equipment_service(session: Session, query: EquipQuery) -> Page[EquipmentOut]:
     list = []
     # 执行设备与分类的分页联表查询。
@@ -32,6 +49,12 @@ def query_equipment_service(session: Session, query: EquipQuery) -> Page[Equipme
     return Page(items=list, total=res.total, page=query.page, size=res.size, pages=res.pages)
 
 
+@redis_cache(
+    key_prefix="equipment:detail",
+    key_builder=_equipment_detail_cache_key,
+    response_model=EquipmentOut,
+    expire_seconds=settings.EQUIPMENT_QUERY_CACHE_TTL,
+)
 def get_equipment_service(session: Session, equipment_id: int) -> EquipmentOut:
     # 查询未删除设备及其分类信息。
     equipment_detail = equipment_crud.get_equipment_detail_by_id(session, equipment_id)
@@ -57,6 +80,8 @@ def create_equipment_service(session: Session, equipment_in: EquipmentCreate) ->
             equipment_data["cover_img"] = settings.DEFAULT_EQUIPMENT_IMAGE_URL
         # 在当前事务中写入设备。
         equipment_crud.add_equipment(Equipment(**equipment_data), session)
+        # 缓存版本只会在本次事务成功提交后更新。
+        mark_equipment_cache_invalidation(session)
 
 
 def change_equipment_status_service(
@@ -69,6 +94,7 @@ def change_equipment_status_service(
         return False
 
     equipment_crud.update_equipment(equipment, {"status": target_status}, session)
+    mark_equipment_cache_invalidation(session)
     return True
 
 
@@ -104,6 +130,7 @@ def update_equipment_service(
             raise BussinessException("设备维修状态只能通过维修工单流转", status_code=400)
         if values:
             equipment_crud.update_equipment(equipment, values, session)
+            mark_equipment_cache_invalidation(session)
         if target_status is not None:
             change_equipment_status_service(
                 session=session,
@@ -119,3 +146,5 @@ def delete_equipment_service(session: Session, equipment_id: int) -> None:
         if not equipment:
             raise BussinessException("设备不存在", status_code=404)
         equipment_crud.delete_equipment(equipment, session)
+        # 逻辑删除成功提交后，所有列表和详情缓存都使用新的版本号。
+        mark_equipment_cache_invalidation(session)

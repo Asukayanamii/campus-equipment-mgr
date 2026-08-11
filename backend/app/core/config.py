@@ -10,6 +10,14 @@ backend_root = os.path.join(current_file_dir, "..", "..")
 env_file_abs = os.path.join(backend_root, ".env")
 
 class Settings(BaseSettings):
+    # Redis 缓存配置；Redis 不可用时查询接口自动回源 MySQL。
+    REDIS_HOST: str = Field("127.0.0.1", description="Redis 主机地址")
+    REDIS_PORT: int = Field(6379, description="Redis 端口")
+    REDIS_DB: int = Field(0, description="Redis 数据库编号")
+    REDIS_PASSWORD: str | None = Field(None, description="Redis 密码")
+    REDIS_SOCKET_TIMEOUT: float = Field(0.5, description="Redis 请求超时时间，单位秒")
+    EQUIPMENT_QUERY_CACHE_TTL: int = Field(300, ge=1, description="设备查询缓存有效期，单位秒")
+
     #数据库配置
     DB_HOST: str = Field(..., description="数据库主机地址")
     DB_PORT: int = Field(..., description="数据库端口")
