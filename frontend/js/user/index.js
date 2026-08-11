@@ -132,6 +132,11 @@ function renderData(QueryData = {}){
                 </div>
             `)
             const card = dataShowing.lastElementChild
+            card.dataset.equipmentId = i.id
+            card.dataset.equipmentStatus = i.status
+            card.tabIndex = 0
+            card.setAttribute('role', 'button')
+            card.setAttribute('aria-label', `查看${i.equipmentName}详情`)
             card.style.background = i.coverImg
                 ? `linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url("${i.coverImg}")`
                 : 'rgba(255,255,255,0.5)'
@@ -821,6 +826,17 @@ document.querySelector('#data-showing-button').addEventListener('click',() => {
 
 document.querySelector('#my-record-button').addEventListener('click',() => {
     callRecordShowing()
+})
+
+// 借用模块提交成功后，通过事件刷新记录页，避免跨模块直接依赖内部函数。
+document.addEventListener('borrow-record-created', () => {
+    if(recordType !== 'borrow'){
+        switchRecordType('borrow')
+        return
+    }
+    recordPageNow = 1
+    defaultRecordQueryData = new QueryBorrowRecordData({ page: 1, size: PAGE_SIZE })
+    renderRecordData(defaultRecordQueryData)
 })
 
 renderData(defaultQueryData)

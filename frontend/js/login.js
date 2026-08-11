@@ -61,6 +61,7 @@ function chooseIdentity(target){
     target.classList.add('is-active');
     target.setAttribute('aria-checked', 'true')
     identity = showIdentity(target);
+    prepareRoleLogin(identityApi(identity))
 }
 
 function identityName(identityValue){

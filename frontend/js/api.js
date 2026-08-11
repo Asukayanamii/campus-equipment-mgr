@@ -198,6 +198,7 @@ async function sendRegister(username , password, identity, registrationCode = ''
  * @returns {boolean}
  */
 async function sendSubmit(username , password ,identity){
+    prepareRoleLogin(identity)
     try{
         const response = await fetch(`${BASE_URL}/${identity}/login`,{
             method : 'POST',
@@ -221,7 +222,7 @@ async function sendSubmit(username , password ,identity){
             return false
         }
         
-        sessionStorage.setItem('token',res.data.token)
+        saveAuthSession(identity, res.data)
         
         return true
     }catch(error){
@@ -547,6 +548,31 @@ async function getRepairReportDetail(repairReportId){
         return res.data
     } catch (error) {
         console.error('根据id获取报修记录详情失败')
+        return false
+    }
+}
+
+// 学生提交借用申请。身份由 token 确定，前端只提交设备和借用信息。
+async function createBorrowRecord(borrowRecordCreate){
+    try {
+        const response = await fetch(`${BASE_URL}/user/borrow-records`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': sessionStorage.getItem('token')
+            },
+            body: JSON.stringify(borrowRecordCreate)
+        })
+        const result = await response.json().catch(() => ({ message: '服务返回的数据格式不正确' }))
+
+        if(!response.ok || result.code !== 0){
+            Toast.failure(result.message || '借用申请提交失败')
+            return false
+        }
+        return result.data
+    } catch (error) {
+        console.error('借用申请提交失败', error)
+        Toast.failure('网络异常，请稍后重试')
         return false
     }
 }

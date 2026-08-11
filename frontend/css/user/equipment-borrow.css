@@ -1,0 +1,192 @@
+.data-card[role="button"] {
+    cursor: pointer;
+}
+
+.data-card[role="button"]:focus-visible {
+    outline: 3px solid var(--nav-accent);
+    outline-offset: 3px;
+}
+
+.equipment-borrow-dialog {
+    width: min(760px, calc(100vw - 32px));
+    max-height: calc(100vh - 48px);
+    padding: 0;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    color: var(--text-primary);
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+    overflow: auto;
+}
+
+.equipment-borrow-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.58);
+}
+
+.equipment-dialog-heading {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-light);
+    background: #ffffff;
+}
+
+.equipment-dialog-eyebrow {
+    margin-bottom: 4px;
+    color: #0f766e;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.equipment-dialog-heading h2 {
+    font-size: 2.2rem;
+    line-height: 1.3;
+}
+
+.equipment-dialog-close {
+    width: 36px;
+    height: 36px;
+    font-size: 2.4rem;
+    line-height: 1;
+    border-radius: 4px;
+    color: var(--text-secondary);
+}
+
+.equipment-dialog-close:hover {
+    background: #f1f5f9;
+}
+
+.equipment-dialog-loading,
+.equipment-unavailable-message {
+    padding: 40px 24px;
+    color: var(--text-secondary);
+    font-size: 1.5rem;
+    text-align: center;
+}
+
+.equipment-dialog-content {
+    padding: 24px;
+}
+
+.equipment-dialog-cover {
+    width: 100%;
+    height: 220px;
+    margin-bottom: 20px;
+    border: 1px solid var(--border-light);
+    border-radius: 6px;
+    object-fit: contain;
+    background: #f8fafc;
+}
+
+.equipment-detail-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border-light);
+    background: var(--border-light);
+}
+
+.equipment-detail-list > div {
+    min-width: 0;
+    padding: 12px 14px;
+    background: #ffffff;
+}
+
+.equipment-detail-list dt {
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.equipment-detail-list dd {
+    overflow-wrap: anywhere;
+    font-size: 1.4rem;
+}
+
+.borrow-application-form {
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-light);
+}
+
+.borrow-application-form h3 {
+    margin-bottom: 16px;
+    font-size: 1.8rem;
+}
+
+.borrow-time-fields {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.borrow-application-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 16px;
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+.borrow-application-form input,
+.borrow-application-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    color: var(--text-primary);
+    background: #ffffff;
+    font: inherit;
+    font-weight: 400;
+}
+
+.borrow-application-form textarea {
+    resize: vertical;
+}
+
+.borrow-form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.borrow-form-actions button {
+    min-width: 96px;
+    min-height: 40px;
+    padding: 8px 16px;
+    border-radius: 5px;
+    font-size: 1.4rem;
+    font-weight: 600;
+}
+
+.borrow-cancel-button {
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+}
+
+.borrow-submit-button {
+    color: #ffffff;
+    background: #0f766e;
+}
+
+.borrow-submit-button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+@media (max-width: 640px) {
+    .equipment-detail-list,
+    .borrow-time-fields {
+        grid-template-columns: 1fr;
+    }
+
+    .equipment-dialog-heading,
+    .equipment-dialog-content {
+        padding: 16px;
+    }
+}

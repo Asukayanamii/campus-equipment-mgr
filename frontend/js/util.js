@@ -123,6 +123,53 @@ class Toast {
 
 Toast.restore()
 
+const AUTH_SESSION_KEYS = ['token', 'role', 'id', 'name', 'username']
+const ROLE_PAGE_MAP = {
+    user: 'user.html',
+    admin: 'admin.html',
+    repair: 'repair.html',
+}
+
+function clearAuthSession(){
+    AUTH_SESSION_KEYS.forEach(key => sessionStorage.removeItem(key))
+}
+
+function saveAuthSession(role, loginData){
+    clearAuthSession()
+    sessionStorage.setItem('token', loginData.token)
+    sessionStorage.setItem('role', role)
+    sessionStorage.setItem('id', String(loginData.id))
+    sessionStorage.setItem('name', loginData.name ?? '')
+    sessionStorage.setItem('username', loginData.username)
+}
+
+function prepareRoleLogin(role){
+    const savedRole = sessionStorage.getItem('role')
+    if(savedRole && savedRole !== role){
+        clearAuthSession()
+    }
+}
+
+function protectedPageRole(){
+    const pageName = window.location.pathname.split('/').pop()
+    return Object.keys(ROLE_PAGE_MAP).find(role => ROLE_PAGE_MAP[role] === pageName) ?? null
+}
+
+function guardRolePage(){
+    const expectedRole = protectedPageRole()
+    if(!expectedRole) return true
+
+    const hasToken = Boolean(sessionStorage.getItem('token'))
+    const roleMatches = sessionStorage.getItem('role') === expectedRole
+    if(hasToken && roleMatches) return true
+
+    clearAuthSession()
+    window.location.replace('../login.html')
+    return false
+}
+
+guardRolePage()
+
 
 // 设备状态编码与中文互转映射
 const EQUIPMENT_STATUS_MAP = {
@@ -175,7 +222,7 @@ window.fetch = async function (input , init ){
     if(response.status === 401){
         if(isRedirecting === false){
             isRedirecting = true;
-            sessionStorage.removeItem('token');
+            clearAuthSession();
             window.location.replace(`/campus-equipment-mgr/frontend/login.html`);
         }
     }
@@ -188,13 +235,14 @@ window.fetch = async function (input , init ){
 }
 // 身份映射到接口
 function apiChoose(){
-    if(identity === 1){
-        return `user`
-    }else if(identity === 2){
-        return `admin`
-    }else if(identity === 3){
-        return `repair`
+    const pageRole = protectedPageRole()
+    if(pageRole) return pageRole
+
+    if(typeof identity !== 'undefined'){
+        return {1: 'user', 2: 'admin', 3: 'repair'}[identity]
     }
+
+    return sessionStorage.getItem('role')
 }
 
 //验证账号是否合规
