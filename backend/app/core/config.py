@@ -10,6 +10,21 @@ backend_root = os.path.join(current_file_dir, "..", "..")
 env_file_abs = os.path.join(backend_root, ".env")
 
 class Settings(BaseSettings):
+    # SMTP 发件人配置；仅邮箱验证码接口使用。
+    MAIL_USERNAME: str | None = Field(None, description="SMTP 用户名")
+    MAIL_PASSWORD: str | None = Field(None, description="SMTP 授权码或密码")
+    MAIL_FROM: str | None = Field(None, description="发件人邮箱")
+    MAIL_FROM_NAME: str = Field("校园设备管理系统", description="发件人名称")
+    MAIL_PORT: int = Field(465, description="SMTP 端口")
+    MAIL_SERVER: str | None = Field(None, description="SMTP 服务器地址")
+    MAIL_STARTTLS: bool = Field(False, description="是否启用 STARTTLS")
+    MAIL_SSL_TLS: bool = Field(True, description="是否启用 SSL/TLS")
+    EMAIL_VERIFICATION_CODE_EXPIRE_SECONDS: int = Field(
+        60,
+        ge=1,
+        description="邮箱验证码有效期，单位秒",
+    )
+
     # Redis 缓存配置；Redis 不可用时查询接口自动回源 MySQL。
     REDIS_HOST: str = Field("127.0.0.1", description="Redis 主机地址")
     REDIS_PORT: int = Field(6379, description="Redis 端口")

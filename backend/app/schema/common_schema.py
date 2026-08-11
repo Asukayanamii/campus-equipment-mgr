@@ -52,6 +52,27 @@ class LoginIn(InfoRegexBaseSchema):
     username: str = Field(..., description="用户名")
     password: str = Field(..., description="密码")
 
+class EmailVerificationCodeIn(InfoRegexBaseSchema):
+    """学生邮箱验证码发送请求。"""
+    email: str = Field(..., description="邮箱")
+
+
+class EmailLoginIn(InfoRegexBaseSchema):
+    """学生邮箱验证码注册并登录请求。"""
+    email: str = Field(..., description="邮箱")
+    verification_code: str = Field(..., min_length=6, max_length=6, description="六位邮箱验证码")
+
+
+class EmailLoginOut(BaseSchema):
+    """学生邮箱验证码注册或登录成功响应。"""
+    id: int = Field(..., description="用户 ID")
+    name: str = Field(..., description="昵称")
+    username: str = Field(..., description="系统生成的账号")
+    image: str | None = Field(None, description="头像图片 URL")
+    email: str = Field(..., description="邮箱")
+    token: str = Field(..., description="登录令牌")
+
+
 class LoginOut(InfoRegexBaseSchema):
     """登录成功返回结果"""
     id: int = Field(..., description="用户id")

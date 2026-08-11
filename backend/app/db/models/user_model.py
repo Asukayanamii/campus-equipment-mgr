@@ -9,6 +9,7 @@ class User(Base):
     __tablename__ = "user"
     __table_args__ = (
         UniqueConstraint("username", name="username"),
+        UniqueConstraint("email", name="uq_user_email"),
         {"comment": "用户表"}
     )
 
