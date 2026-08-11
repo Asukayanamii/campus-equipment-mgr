@@ -577,6 +577,51 @@ async function createBorrowRecord(borrowRecordCreate){
     }
 }
 
+async function uploadImage(file){
+    const formData = new FormData()
+    formData.append('file', file, file.name)
+    try {
+        const response = await fetch(`${BASE_URL}/common/upload-image`, {
+            method: 'POST',
+            headers: { 'token': sessionStorage.getItem('token') },
+            body: formData
+        })
+        const result = await response.json().catch(() => ({ message: '服务返回的数据格式不正确' }))
+        if(!response.ok || result.code !== 0){
+            Toast.failure(result.message || '图片上传失败')
+            return false
+        }
+        return result.data
+    } catch (error) {
+        console.error('图片上传失败', error)
+        Toast.failure('图片上传失败，请稍后重试')
+        return false
+    }
+}
+
+async function submitBorrowReturn(borrowRecordId, borrowReturnCreate){
+    try {
+        const response = await fetch(`${BASE_URL}/user/borrow-records/${borrowRecordId}/return`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'token': sessionStorage.getItem('token')
+            },
+            body: JSON.stringify(borrowReturnCreate)
+        })
+        const result = await response.json().catch(() => ({ message: '服务返回的数据格式不正确' }))
+        if(!response.ok || result.code !== 0){
+            Toast.failure(result.message || '归还提交失败')
+            return false
+        }
+        return result.data
+    } catch (error) {
+        console.error('归还提交失败', error)
+        Toast.failure('网络异常，请稍后重试')
+        return false
+    }
+}
+
 // 管理端审核借用申请
 /**
  *

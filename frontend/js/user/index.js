@@ -816,6 +816,9 @@ function callRecordDetailWindow(detail){
         document.querySelector('.record-detail-window').remove()
         document.querySelector('.dim-overlay')?.remove()
     })
+    document.dispatchEvent(new CustomEvent('record-detail-opened', {
+        detail: { recordType, record: detail }
+    }))
 }
 
 // 导航：数据展示 / 我的记录
@@ -836,6 +839,19 @@ document.addEventListener('borrow-record-created', () => {
     }
     recordPageNow = 1
     defaultRecordQueryData = new QueryBorrowRecordData({ page: 1, size: PAGE_SIZE })
+    renderRecordData(defaultRecordQueryData)
+})
+
+document.addEventListener('borrow-returned', event => {
+    const nextType = event.detail.damaged ? 'repair' : 'borrow'
+    if(recordType !== nextType){
+        switchRecordType(nextType)
+        return
+    }
+    recordPageNow = 1
+    defaultRecordQueryData = nextType === 'repair'
+        ? new QueryRepairReportData({ page: 1, size: PAGE_SIZE })
+        : new QueryBorrowRecordData({ page: 1, size: PAGE_SIZE })
     renderRecordData(defaultRecordQueryData)
 })
 

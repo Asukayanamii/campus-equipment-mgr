@@ -8,8 +8,11 @@
 }
 
 .equipment-borrow-dialog {
+    position: fixed;
+    inset: 0;
     width: min(760px, calc(100vw - 32px));
     max-height: calc(100vh - 48px);
+    margin: auto;
     padding: 0;
     border: 1px solid var(--border-light);
     border-radius: 8px;
