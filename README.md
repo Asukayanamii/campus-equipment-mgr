@@ -28,15 +28,14 @@ campus-equipment-mgr/
 | 角色 | 已完成能力 |
 | --- | --- |
 | 学生 | 注册登录、设备与详情查询、本人借用记录和报修记录查询、提交归还 |
-| 管理员 | 设备与设备分类管理、查看全部借用记录、审核借用申请、确认设备归还 |
+| 管理员 | 设备与设备分类管理、查看全部借用记录、审核借用申请 |
 | 维修人员 | 注册登录、设备查询和个人信息维护；工单处理流程待实现 |
 
 已实现的核心业务保障：
 
 - 借用申请锁定设备行，并校验同一设备的借用时间冲突。
-- 损坏归还自动创建报修记录和待派单维修工单。
-- 管理员审核和归还确认与设备状态变更在同一事务中完成。
-- 管理员操作写入审核记录和设备状态变更记录，支持后续追溯。
+- 损坏归还创建报修记录，维修工单由管理员后续创建。
+- 借用审核、归还提交和设备状态变更在同一事务中完成。
 - 三端使用独立 JWT 密钥；学生借用与报修数据按当前登录用户隔离。
 - 图片上传接入阿里云 OSS，并校验扩展名白名单和文件大小。
 
@@ -71,7 +70,7 @@ uvicorn app.main:app --reload
 
 默认后端地址为 `http://127.0.0.1:8000`，接口文档为 `http://127.0.0.1:8000/docs`。
 
-> 使用已有数据库升级时，`Base.metadata.create_all()` 不会新增列；`borrow_return_record` 需要包含 `confirmed_status`。具体 SQL 见 [backend/README.md](./backend/README.md)。
+> 使用已有数据库升级时，`Base.metadata.create_all()` 不会删除列；请执行 [归还确认字段迁移](./backend/migrations/20260810_remove_borrow_return_confirmation_fields.sql)。
 
 ### 2. 配置前端接口地址
 
@@ -115,12 +114,12 @@ http://127.0.0.1:5500/campus-equipment-mgr/frontend/
 available
   -> pending_borrow    学生提交借用申请
   -> borrowed          管理员审核通过
-  -> pending_return    学生提交归还
-  -> available         管理员确认正常归还
-  -> repair_pending    管理员确认损坏归还
+  -> completed         学生提交归还
+  -> available         正常归还
+  -> repair_pending    损坏归还
 ```
 
-借用审核驳回时，借用记录变为 `rejected`，设备恢复 `available`。归还记录中，`confirmStatus` 表示管理员是否已处理，`confirmedStatus` 表示最终验收结果（`normal` 或 `damaged`）。
+借用审核驳回时，借用记录变为 `rejected`，设备恢复 `available`。设备状态 `pending_return` 作为后续扩展预留，不参与当前归还流程。
 
 ## 相关文档
 

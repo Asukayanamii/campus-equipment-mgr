@@ -1,13 +1,12 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import BorrowRecordStatus, BorrowReturnStatus, ItemStatusCode, RepairOrderStatus, RepairReportStatus
+from app.constant.status_constant import BorrowRecordStatus, BorrowReturnStatus, ItemStatusCode, RepairReportStatus
 from app.core.exceptions import BussinessException
-from app.crud import borrow_record_crud, borrow_return_image_crud, borrow_return_record_crud, equipment_crud, repair_order_crud, repair_report_crud
+from app.crud import borrow_record_crud, borrow_return_image_crud, borrow_return_record_crud, equipment_crud, repair_report_crud
 from app.db.models.borrow_record_model import BorrowRecord
 from app.db.models.borrow_return_image_model import BorrowReturnImage
 from app.db.models.borrow_return_record_model import BorrowReturnRecord
-from app.db.models.repair_order_model import RepairOrder
 from app.db.models.repair_report_model import RepairReport
 from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordCreateOut, BorrowRecordOut, BorrowRecordPageOut, BorrowRecordQuery
 from app.schema.borrow_return_schema import BorrowReturnCreate, BorrowReturnCreateOut
@@ -139,7 +138,7 @@ def create_borrow_return_record_service(
                 session,
             )
 
-        # 损坏归还自动生成报修记录和待派单维修工单。
+        # 损坏归还只生成报修记录，维修工单由管理员后续创建。
         if borrow_return_in.return_status == BorrowReturnStatus.DAMAGED:
             repair_report = RepairReport(
                 return_record_id=borrow_return_record.id,
@@ -149,24 +148,21 @@ def create_borrow_return_record_service(
                 status=RepairReportStatus.PENDING,
             )
             repair_report_crud.add_repair_report(repair_report, session)
-            repair_order_crud.add_repair_order(
-                RepairOrder(
-                    repair_report_id=repair_report.id,
-                    equipment_id=borrow_record.equipment_id,
-                    status=RepairOrderStatus.PENDING_ASSIGN,
-                ),
-                session,
-            )
 
-        # 归还提交后，借用记录与设备均进入待确认归还状态。
+        target_borrow_status = BorrowRecordStatus.COMPLETED
+        target_equipment_status = (
+            ItemStatusCode.REPAIR_PENDING
+            if borrow_return_in.return_status == BorrowReturnStatus.DAMAGED
+            else ItemStatusCode.AVAILABLE
+        )
         borrow_record_crud.update_borrow_record(
             borrow_record,
-            {"status": BorrowRecordStatus.PENDING_RETURN},
+            {"status": target_borrow_status},
             session,
         )
         equipment_crud.update_equipment(
             equipment,
-            {"status": ItemStatusCode.PENDING_RETURN},
+            {"status": target_equipment_status},
             session,
         )
         # 使用已 flush 的归还记录回显，并补充本次上传的图片地址。

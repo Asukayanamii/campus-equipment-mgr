@@ -6,7 +6,7 @@ class ItemStatus:
     PENDING_BORROW = "借用审核中"
     # 已借出
     BORROWED = "已借出"
-    # 待确认归还
+    # 待确认归还（预留扩展状态）
     PENDING_RETURN = "待确认归还"
     # 已损坏
     DAMAGED = "已损坏"
@@ -53,7 +53,6 @@ class BorrowRecordStatus:
     APPROVED = "approved"
     REJECTED = "rejected"
     BORROWED = "borrowed"
-    PENDING_RETURN = "pending_return"
     COMPLETED = "completed"
 
 
@@ -62,7 +61,6 @@ BORROW_RECORD_STATUS_MAP = {
     BorrowRecordStatus.APPROVED: "审核通过",
     BorrowRecordStatus.REJECTED: "审核驳回",
     BorrowRecordStatus.BORROWED: "已借出",
-    BorrowRecordStatus.PENDING_RETURN: "待确认归还",
     BorrowRecordStatus.COMPLETED: "已完成",
 }
 
@@ -80,21 +78,6 @@ BORROW_RETURN_STATUS_MAP = {
 }
 
 BORROW_RETURN_STATUS_CODES = list(BORROW_RETURN_STATUS_MAP.keys())
-
-
-class ConfirmStatus:
-    PENDING = "pending"
-    CONFIRMED = "confirmed"
-    REJECTED = "rejected"
-
-
-CONFIRM_STATUS_MAP = {
-    ConfirmStatus.PENDING: "待确认",
-    ConfirmStatus.CONFIRMED: "已确认",
-    ConfirmStatus.REJECTED: "已驳回",
-}
-
-CONFIRM_STATUS_CODES = list(CONFIRM_STATUS_MAP.keys())
 
 
 class RepairReportStatus:

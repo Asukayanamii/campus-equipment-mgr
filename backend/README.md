@@ -66,15 +66,15 @@ ACCESS_TOKEN_EXPIRE_MINUTES=720
 
 数据库使用 MySQL。应用启动时会根据 ORM 模型创建缺失的数据表：`user`、`admin`、`repair_user`、`equipment`、`equipment_category`、`borrow_record`、`borrow_return_record`、`borrow_return_image`、`repair_report`、`repair_order`。
 
-`Base.metadata.create_all()` 只会创建缺失的表，不能为既有表补列。已有数据库升级到当前版本时，需要执行一次：
+`Base.metadata.create_all()` 只会创建缺失的表，不能为既有表补列或删列。已有数据库升级到当前版本时，需要执行迁移目录中的 SQL：
 
 ```sql
 ALTER TABLE borrow_return_record
-ADD COLUMN confirmed_status VARCHAR(30) NULL COMMENT '管理员最终确认的设备状态'
-AFTER confirm_status;
-
-DROP TABLE IF EXISTS audit_record;
-DROP TABLE IF EXISTS equipment_status_record;
+    DROP COLUMN confirm_status,
+    DROP COLUMN confirmed_status,
+    DROP COLUMN confirm_remark,
+    DROP COLUMN confirmer_id,
+    DROP COLUMN confirm_time;
 ```
 
 ### 3. 启动服务
@@ -254,17 +254,14 @@ token: <student-token>
 | POST | `/user/borrow-records` | 学生提交借用申请；校验设备可借和时间冲突后，设备进入 `pending_borrow` |
 | GET | `/user/borrow-records/page` | 学生分页查看本人借用记录 |
 | GET | `/user/borrow-records/{borrowRecordId}` | 学生查看本人借用记录及完整设备信息 |
-| POST | `/user/borrow-records/{borrowRecordId}/return` | 学生提交归还；损坏归还会创建报修记录和待派单工单 |
+| POST | `/user/borrow-records/{borrowRecordId}/return` | 学生提交归还；正常归还直接完成，损坏归还创建报修记录 |
 | GET | `/user/repair-reports/page` | 学生分页查看本人报修记录 |
 | GET | `/user/repair-reports/{repairReportId}` | 学生查看本人报修详情、损坏图片和维修进度 |
 | GET | `/admin/borrow-records/page` | 管理员按申请人、设备、状态、关键字和时间范围分页查询全部借用记录 |
 | GET | `/admin/borrow-records/{borrowRecordId}` | 管理员查看借用、归还、报修和工单摘要 |
 | POST | `/admin/borrow-records/{borrowRecordId}/review` | 管理员审核待审核借用申请 |
-| POST | `/admin/borrow-records/{borrowRecordId}/confirm-return` | 管理员确认待归还设备 |
 
-借用申请会锁定目标设备，在同一事务中完成可借校验、时间冲突校验、申请创建和设备状态切换，避免并发申请占用重叠时段。审核借用仅允许处理 `pending` 记录：通过后借用记录和设备均变为 `borrowed`，驳回后借用记录为 `rejected`、设备恢复 `available`。归还确认仅允许处理 `pending_return` 记录：`confirmedStatus=normal` 时设备恢复 `available`，`confirmedStatus=damaged` 时设备进入 `repair_pending` 并确保报修记录和维修工单存在。
-
-归还记录中的 `confirmStatus` 表示管理员是否已经处理归还申报（`pending`、`confirmed`、`rejected`）；`confirmedStatus` 表示已确认后的最终验收结论（`normal`、`damaged`）。
+借用申请会锁定目标设备，在同一事务中完成可借校验、时间冲突校验、申请创建和设备状态切换，避免并发申请占用重叠时段。审核借用仅允许处理 `pending` 记录：通过后借用记录和设备均变为 `borrowed`，驳回后借用记录为 `rejected`、设备恢复 `available`。学生归还提交后借用记录直接变为 `completed`：正常归还时设备恢复 `available`；损坏归还时创建报修记录、设备进入 `repair_pending`，维修工单由管理员后续创建。设备状态 `pending_return` 作为后续扩展预留，不参与当前归还流程。
 
 ## 待实现的业务范围
 
