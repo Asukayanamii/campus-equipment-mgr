@@ -1,13 +1,27 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import BorrowRecordStatus, BorrowReturnStatus, ItemStatusCode, RepairReportStatus
+from app.constant.status_constant import (
+    BorrowRecordStatus,
+    BorrowReturnStatus,
+    ItemStatusCode,
+    RepairOrderStatus,
+    RepairReportStatus,
+)
 from app.core.exceptions import BussinessException
-from app.crud import borrow_record_crud, borrow_return_image_crud, borrow_return_record_crud, equipment_crud, repair_report_crud
+from app.crud import (
+    borrow_record_crud,
+    borrow_return_image_crud,
+    borrow_return_record_crud,
+    equipment_crud,
+    repair_order_crud,
+    repair_report_crud,
+)
 from app.db.models.borrow_record_model import BorrowRecord
 from app.db.models.borrow_return_image_model import BorrowReturnImage
 from app.db.models.borrow_return_record_model import BorrowReturnRecord
 from app.db.models.repair_report_model import RepairReport
+from app.db.models.repair_order_model import RepairOrder
 from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordCreateOut, BorrowRecordOut, BorrowRecordPageOut, BorrowRecordQuery
 from app.schema.borrow_return_schema import BorrowReturnCreate, BorrowReturnCreateOut
 
@@ -138,7 +152,7 @@ def create_borrow_return_record_service(
                 session,
             )
 
-        # 损坏归还只生成报修记录，维修工单由管理员后续创建。
+        # 损坏归还同时创建唯一待派单工单，保证报修与工单不会脱节。
         if borrow_return_in.return_status == BorrowReturnStatus.DAMAGED:
             repair_report = RepairReport(
                 return_record_id=borrow_return_record.id,
@@ -148,6 +162,14 @@ def create_borrow_return_record_service(
                 status=RepairReportStatus.PENDING,
             )
             repair_report_crud.add_repair_report(repair_report, session)
+            repair_order_crud.add_repair_order(
+                RepairOrder(
+                    repair_report_id=repair_report.id,
+                    equipment_id=borrow_record.equipment_id,
+                    status=RepairOrderStatus.PENDING_ASSIGN,
+                ),
+                session,
+            )
 
         target_borrow_status = BorrowRecordStatus.COMPLETED
         target_equipment_status = (

@@ -54,6 +54,8 @@ class RepairReportOut(RepairReportStatusOut):
     fault_cause: str | None = Field(None, description="故障原因")
     repair_process: str | None = Field(None, description="维修过程")
     repair_result: str | None = Field(None, description="维修结果")
+    before_images: list[str] = Field(default_factory=list, description="维修前图片地址")
+    after_images: list[str] = Field(default_factory=list, description="维修后图片地址")
     completion_time: datetime | None = Field(None, description="提交维修完成时间")
     create_time: datetime = Field(..., description="创建时间")
     update_time: datetime = Field(..., description="更新时间")

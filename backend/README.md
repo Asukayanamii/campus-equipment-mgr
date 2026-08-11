@@ -2,7 +2,7 @@
 
 本目录是校园设备借用与维修管理系统的 FastAPI 后端。系统面向学生、管理员和维修人员三类角色，目标是覆盖设备查询、借用归还、损坏报修、维修派单及结果确认等流程。
 
-当前已实现三端账号认证、个人信息维护、设备与分类管理、学生借用申请/归还/报修查询，以及管理员借用审核和归还确认。维修端工单处理和管理员维修工单管理仍待后续迭代。
+当前已实现三端账号认证、个人信息维护、设备与分类管理、学生借用申请/归还/报修查询、管理员借用审核与维修工单管理，以及维修人员接单、维修和结果提交。
 
 ## 技术栈
 
@@ -64,18 +64,7 @@ ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=720
 ```
 
-数据库使用 MySQL。应用启动时会根据 ORM 模型创建缺失的数据表：`user`、`admin`、`repair_user`、`equipment`、`equipment_category`、`borrow_record`、`borrow_return_record`、`borrow_return_image`、`repair_report`、`repair_order`。
-
-`Base.metadata.create_all()` 只会创建缺失的表，不能为既有表补列或删列。已有数据库升级到当前版本时，需要执行迁移目录中的 SQL：
-
-```sql
-ALTER TABLE borrow_return_record
-    DROP COLUMN confirm_status,
-    DROP COLUMN confirmed_status,
-    DROP COLUMN confirm_remark,
-    DROP COLUMN confirmer_id,
-    DROP COLUMN confirm_time;
-```
+数据库使用 MySQL。应用启动时会根据当前 ORM 模型创建缺失的数据表：`user`、`admin`、`repair_user`、`equipment`、`equipment_category`、`borrow_record`、`borrow_return_record`、`borrow_return_image`、`repair_report`、`repair_order`、`repair_order_image`。全新数据库部署后即可使用当前版本的完整表结构。
 
 ### 3. 启动服务
 
@@ -189,7 +178,7 @@ token: <login-response.data.token>
 `available`、`pending_borrow`、`borrowed`、`pending_return`、`damaged`、`repair_pending`、`repairing`、
 `repaired`、`scrapped`、`offline`。设备编号全局唯一。
 
-更新设备时，名称、位置、品牌、封面等普通字段按请求更新；传入的 `status` 与数据库当前值不同时，系统更新设备当前状态。
+更新设备时，名称、位置、品牌、封面等普通字段按请求更新；维修流程中的设备状态只能通过维修工单接口流转。
 
 ### 管理端设备分类
 
@@ -237,7 +226,6 @@ token: <student-token>
 | `available` | 可借用 |
 | `pending_borrow` | 借用审核中 |
 | `borrowed` | 已借出 |
-| `pending_return` | 待确认归还 |
 | `damaged` | 已损坏 |
 | `repair_pending` | 待维修 |
 | `repairing` | 维修中 |
@@ -254,22 +242,18 @@ token: <student-token>
 | POST | `/user/borrow-records` | 学生提交借用申请；校验设备可借和时间冲突后，设备进入 `pending_borrow` |
 | GET | `/user/borrow-records/page` | 学生分页查看本人借用记录 |
 | GET | `/user/borrow-records/{borrowRecordId}` | 学生查看本人借用记录及完整设备信息 |
-| POST | `/user/borrow-records/{borrowRecordId}/return` | 学生提交归还；正常归还直接完成，损坏归还创建报修记录 |
+| POST | `/user/borrow-records/{borrowRecordId}/return` | 学生提交归还；正常归还直接完成，损坏归还自动创建报修记录和待派单工单 |
 | GET | `/user/repair-reports/page` | 学生分页查看本人报修记录 |
 | GET | `/user/repair-reports/{repairReportId}` | 学生查看本人报修详情、损坏图片和维修进度 |
 | GET | `/admin/borrow-records/page` | 管理员按申请人、设备、状态、关键字和时间范围分页查询全部借用记录 |
 | GET | `/admin/borrow-records/{borrowRecordId}` | 管理员查看借用、归还、报修和工单摘要 |
 | POST | `/admin/borrow-records/{borrowRecordId}/review` | 管理员审核待审核借用申请 |
 
-借用申请会锁定目标设备，在同一事务中完成可借校验、时间冲突校验、申请创建和设备状态切换，避免并发申请占用重叠时段。审核借用仅允许处理 `pending` 记录：通过后借用记录和设备均变为 `borrowed`，驳回后借用记录为 `rejected`、设备恢复 `available`。学生归还提交后借用记录直接变为 `completed`：正常归还时设备恢复 `available`；损坏归还时创建报修记录、设备进入 `repair_pending`，维修工单由管理员后续创建。设备状态 `pending_return` 作为后续扩展预留，不参与当前归还流程。
+借用申请会锁定目标设备，在同一事务中完成可借校验、时间冲突校验、申请创建和设备状态切换，避免并发申请占用重叠时段。审核借用仅允许处理 `pending` 记录：通过后借用记录和设备均变为 `borrowed`，驳回后借用记录为 `rejected`、设备恢复 `available`。学生归还提交后借用记录直接变为 `completed`：正常归还时设备恢复 `available`；损坏归还时同步创建报修记录和待派单工单，设备进入 `repair_pending`。设备状态 `pending_return` 保留为后续扩展状态，不参与当前归还流程。
 
-## 待实现的业务范围
+## 维修工单接口
 
-根据项目需求，后续迭代应覆盖：
-
-- 管理员查看和处理全部报修记录、创建和分配维修工单、确认维修结果及设备报废。
-- 维修人员查看本人任务、接收工单、更新维修进度、提交维修结果与维修凭证。
-- 学生、管理员和维修人员的退出登录接口。
+管理员可确认报修、查询和派发工单、确认维修完成或报废设备；维修人员仅可查询和处理分配给自己的工单。完整字段和状态流转见根目录 [接口文档.md](../接口文档.md)。
 
 ## 开发约定
 

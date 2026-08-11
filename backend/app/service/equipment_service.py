@@ -1,7 +1,7 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import ITEM_STATUS_MAP
+from app.constant.status_constant import ITEM_STATUS_MAP, ItemStatusCode
 from app.core.config import settings
 from app.core.exceptions import BussinessException
 from app.crud import equipment_crud
@@ -91,6 +91,17 @@ def update_equipment_service(
             if same_no_equipment and same_no_equipment.id != equipment_id:
                 raise BussinessException("设备编号已存在", status_code=409)
         target_status = values.pop("status", None)
+        repair_flow_statuses = {
+            ItemStatusCode.DAMAGED,
+            ItemStatusCode.REPAIR_PENDING,
+            ItemStatusCode.REPAIRING,
+            ItemStatusCode.REPAIRED,
+        }
+        # 维修链路中的设备状态只能由工单服务变更，避免绕过维修确认直接重新可借。
+        if target_status is not None and (
+            equipment.status in repair_flow_statuses or target_status in repair_flow_statuses
+        ):
+            raise BussinessException("设备维修状态只能通过维修工单流转", status_code=400)
         if values:
             equipment_crud.update_equipment(equipment, values, session)
         if target_status is not None:

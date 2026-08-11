@@ -97,6 +97,7 @@ REPAIR_REPORT_STATUS_CODES = list(REPAIR_REPORT_STATUS_MAP.keys())
 
 class RepairOrderStatus:
     PENDING_ASSIGN = "pending_assign"
+    PENDING_ACCEPT = "pending_accept"
     PENDING_REPAIR = "pending_repair"
     REPAIRING = "repairing"
     PENDING_CONFIRM = "pending_confirm"
@@ -108,6 +109,7 @@ class RepairOrderStatus:
 
 REPAIR_ORDER_STATUS_MAP = {
     RepairOrderStatus.PENDING_ASSIGN: "待派单",
+    RepairOrderStatus.PENDING_ACCEPT: "待接单",
     RepairOrderStatus.PENDING_REPAIR: "待维修",
     RepairOrderStatus.REPAIRING: "维修中",
     RepairOrderStatus.PENDING_CONFIRM: "待确认",

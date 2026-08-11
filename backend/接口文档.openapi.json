@@ -2953,6 +2953,761 @@
         }
       }
     },
+    "/admin/repair-reports/page": {
+      "get": {
+        "tags": [
+          "管理端/报修记录相关"
+        ],
+        "summary": "分页查询全部报修记录",
+        "operationId": "分页查询全部报修记录_admin_repair_reports_page_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 10000,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "页码"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页条数",
+              "default": 10,
+              "title": "Size"
+            },
+            "description": "每页条数"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "报修状态",
+              "title": "Status"
+            },
+            "description": "报修状态"
+          },
+          {
+            "name": "equipmentName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "设备名称",
+              "title": "Equipmentname"
+            },
+            "description": "设备名称"
+          },
+          {
+            "name": "sort",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "排序字段",
+              "default": "id",
+              "title": "Sort"
+            },
+            "description": "排序字段"
+          },
+          {
+            "name": "order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^(asc|desc)$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "排序顺序",
+              "default": "asc",
+              "title": "Order"
+            },
+            "description": "排序顺序"
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_Page_RepairReportAdminPageOut__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/repair-reports/{repairReportId}": {
+      "get": {
+        "tags": [
+          "管理端/报修记录相关"
+        ],
+        "summary": "查看报修记录详情",
+        "operationId": "查看报修记录详情_admin_repair_reports__repairReportId__get",
+        "parameters": [
+          {
+            "name": "repairReportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairreportid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairReportAdminOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/repair-reports/{repairReportId}/confirm": {
+      "post": {
+        "tags": [
+          "管理端/报修记录相关"
+        ],
+        "summary": "确认报修记录",
+        "operationId": "确认报修记录_admin_repair_reports__repairReportId__confirm_post",
+        "parameters": [
+          {
+            "name": "repairReportId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairreportid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairReportConfirmOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/repair-orders/page": {
+      "get": {
+        "tags": [
+          "管理端/维修工单相关"
+        ],
+        "summary": "分页查询全部维修工单",
+        "operationId": "分页查询全部维修工单_admin_repair_orders_page_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 10000,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "页码"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页条数",
+              "default": 10,
+              "title": "Size"
+            },
+            "description": "每页条数"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "维修工单状态编码",
+              "title": "Status"
+            },
+            "description": "维修工单状态编码"
+          },
+          {
+            "name": "equipmentName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "设备名称",
+              "title": "Equipmentname"
+            },
+            "description": "设备名称"
+          },
+          {
+            "name": "repairUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "维修人员 ID",
+              "title": "Repairuserid"
+            },
+            "description": "维修人员 ID"
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_Page_RepairOrderPageOut__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/repair-orders/{repairOrderId}": {
+      "get": {
+        "tags": [
+          "管理端/维修工单相关"
+        ],
+        "summary": "查看维修工单详情",
+        "operationId": "查看维修工单详情_admin_repair_orders__repairOrderId__get",
+        "parameters": [
+          {
+            "name": "repairOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairorderid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairOrderOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/repair-orders/{repairOrderId}/assign": {
+      "post": {
+        "tags": [
+          "管理端/维修工单相关"
+        ],
+        "summary": "派发维修工单",
+        "operationId": "派发维修工单_admin_repair_orders__repairOrderId__assign_post",
+        "parameters": [
+          {
+            "name": "repairOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairorderid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepairOrderAssignIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairOrderAssignOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/repair-orders/{repairOrderId}/confirm": {
+      "post": {
+        "tags": [
+          "管理端/维修工单相关"
+        ],
+        "summary": "确认维修完成",
+        "operationId": "确认维修完成_admin_repair_orders__repairOrderId__confirm_post",
+        "parameters": [
+          {
+            "name": "repairOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairorderid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairOrderActionOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/repair-orders/{repairOrderId}/scrap": {
+      "post": {
+        "tags": [
+          "管理端/维修工单相关"
+        ],
+        "summary": "报废维修工单设备",
+        "operationId": "报废维修工单设备_admin_repair_orders__repairOrderId__scrap_post",
+        "parameters": [
+          {
+            "name": "repairOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairorderid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairOrderActionOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/repair-users/page": {
+      "get": {
+        "tags": [
+          "管理端/维修人员相关"
+        ],
+        "summary": "分页查询维修人员",
+        "operationId": "分页查询维修人员_admin_repair_users_page_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 1000,
+              "minimum": 1,
+              "description": "页码",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "页码"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "description": "每页条数",
+              "default": 10,
+              "title": "Size"
+            },
+            "description": "每页条数"
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_Page_RepairUserPageOut__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/repair/register": {
       "post": {
         "tags": [
@@ -3479,6 +4234,399 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Result_EquipmentOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/repair/orders/page": {
+      "get": {
+        "tags": [
+          "维修端/维修工单相关"
+        ],
+        "summary": "分页查询本人维修工单",
+        "operationId": "分页查询本人维修工单_repair_orders_page_get",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 10000,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "页码",
+              "default": 1,
+              "title": "Page"
+            },
+            "description": "页码"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "maximum": 100,
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "每页条数",
+              "default": 10,
+              "title": "Size"
+            },
+            "description": "每页条数"
+          },
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "维修工单状态编码",
+              "title": "Status"
+            },
+            "description": "维修工单状态编码"
+          },
+          {
+            "name": "equipmentName",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 100
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "设备名称",
+              "title": "Equipmentname"
+            },
+            "description": "设备名称"
+          },
+          {
+            "name": "repairUserId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "维修人员 ID",
+              "title": "Repairuserid"
+            },
+            "description": "维修人员 ID"
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_Page_RepairOrderPageOut__"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/repair/orders/{repairOrderId}": {
+      "get": {
+        "tags": [
+          "维修端/维修工单相关"
+        ],
+        "summary": "查看本人维修工单详情",
+        "operationId": "查看本人维修工单详情_repair_orders__repairOrderId__get",
+        "parameters": [
+          {
+            "name": "repairOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairorderid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairOrderOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/repair/orders/{repairOrderId}/accept": {
+      "post": {
+        "tags": [
+          "维修端/维修工单相关"
+        ],
+        "summary": "接收维修工单",
+        "operationId": "接收维修工单_repair_orders__repairOrderId__accept_post",
+        "parameters": [
+          {
+            "name": "repairOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairorderid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairOrderActionOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/repair/orders/{repairOrderId}/start": {
+      "post": {
+        "tags": [
+          "维修端/维修工单相关"
+        ],
+        "summary": "开始维修工单",
+        "operationId": "开始维修工单_repair_orders__repairOrderId__start_post",
+        "parameters": [
+          {
+            "name": "repairOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairorderid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairOrderActionOut_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/repair/orders/{repairOrderId}/completion": {
+      "post": {
+        "tags": [
+          "维修端/维修工单相关"
+        ],
+        "summary": "提交维修结果",
+        "operationId": "提交维修结果_repair_orders__repairOrderId__completion_post",
+        "parameters": [
+          {
+            "name": "repairOrderId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "title": "Repairorderid"
+            }
+          },
+          {
+            "name": "token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RepairOrderCompletionIn"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_RepairOrderCompletionOut_"
                 }
               }
             }
@@ -5683,6 +6831,86 @@
         ],
         "title": "Page[RegistrationCodeOut]"
       },
+      "Page_RepairOrderPageOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RepairOrderPageOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Size"
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "size",
+          "pages"
+        ],
+        "title": "Page[RepairOrderPageOut]"
+      },
+      "Page_RepairReportAdminPageOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RepairReportAdminPageOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Size"
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "size",
+          "pages"
+        ],
+        "title": "Page[RepairReportAdminPageOut]"
+      },
       "Page_RepairReportPageOut_": {
         "properties": {
           "items": {
@@ -5722,6 +6950,46 @@
           "pages"
         ],
         "title": "Page[RepairReportPageOut]"
+      },
+      "Page_RepairUserPageOut_": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RepairUserPageOut"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Page"
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Size"
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Pages"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "size",
+          "pages"
+        ],
+        "title": "Page[RepairUserPageOut]"
       },
       "RegisterIn": {
         "properties": {
@@ -5825,6 +7093,895 @@
         },
         "type": "object",
         "title": "RegistrationCodeUpdate"
+      },
+      "RepairOrderActionOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "维修工单状态"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "维修工单 ID"
+          },
+          "equipmentId": {
+            "type": "integer",
+            "title": "Equipmentid",
+            "description": "设备 ID"
+          },
+          "equipmentStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentstatus",
+            "description": "设备状态"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatetime",
+            "description": "更新时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "id",
+          "equipmentId",
+          "updateTime"
+        ],
+        "title": "RepairOrderActionOut"
+      },
+      "RepairOrderAssignIn": {
+        "properties": {
+          "repairUserId": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Repairuserid",
+            "description": "维修人员 ID"
+          },
+          "assignRemark": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignremark",
+            "description": "派单备注"
+          }
+        },
+        "type": "object",
+        "required": [
+          "repairUserId"
+        ],
+        "title": "RepairOrderAssignIn"
+      },
+      "RepairOrderAssignOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "维修工单状态"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "维修工单 ID"
+          },
+          "equipmentId": {
+            "type": "integer",
+            "title": "Equipmentid",
+            "description": "设备 ID"
+          },
+          "equipmentStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentstatus",
+            "description": "设备状态"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatetime",
+            "description": "更新时间"
+          },
+          "repairReportId": {
+            "type": "integer",
+            "title": "Repairreportid",
+            "description": "报修记录 ID"
+          },
+          "repairUserId": {
+            "type": "integer",
+            "title": "Repairuserid",
+            "description": "维修人员 ID"
+          },
+          "assignRemark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignremark",
+            "description": "派单备注"
+          },
+          "assignTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Assigntime",
+            "description": "派单时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "id",
+          "equipmentId",
+          "updateTime",
+          "repairReportId",
+          "repairUserId",
+          "assignTime"
+        ],
+        "title": "RepairOrderAssignOut"
+      },
+      "RepairOrderCompletionIn": {
+        "properties": {
+          "resultStatus": {
+            "type": "string",
+            "pattern": "^(repaired|unrepairable)$",
+            "title": "Resultstatus",
+            "description": "维修结果状态"
+          },
+          "faultCause": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Faultcause",
+            "description": "故障原因"
+          },
+          "repairProcess": {
+            "type": "string",
+            "maxLength": 4000,
+            "minLength": 1,
+            "title": "Repairprocess",
+            "description": "维修过程"
+          },
+          "repairResult": {
+            "type": "string",
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Repairresult",
+            "description": "维修结果"
+          },
+          "beforeImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 9,
+            "minItems": 1,
+            "title": "Beforeimages",
+            "description": "维修前图片地址"
+          },
+          "afterImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "maxItems": 9,
+            "minItems": 1,
+            "title": "Afterimages",
+            "description": "维修后图片地址"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resultStatus",
+          "faultCause",
+          "repairProcess",
+          "repairResult",
+          "beforeImages",
+          "afterImages"
+        ],
+        "title": "RepairOrderCompletionIn"
+      },
+      "RepairOrderCompletionOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "维修工单状态"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "维修工单 ID"
+          },
+          "equipmentId": {
+            "type": "integer",
+            "title": "Equipmentid",
+            "description": "设备 ID"
+          },
+          "equipmentStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentstatus",
+            "description": "设备状态"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatetime",
+            "description": "更新时间"
+          },
+          "faultCause": {
+            "type": "string",
+            "title": "Faultcause",
+            "description": "故障原因"
+          },
+          "repairProcess": {
+            "type": "string",
+            "title": "Repairprocess",
+            "description": "维修过程"
+          },
+          "repairResult": {
+            "type": "string",
+            "title": "Repairresult",
+            "description": "维修结果"
+          },
+          "beforeImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Beforeimages",
+            "description": "维修前图片地址"
+          },
+          "afterImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Afterimages",
+            "description": "维修后图片地址"
+          },
+          "completionTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Completiontime",
+            "description": "提交维修完成时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "id",
+          "equipmentId",
+          "updateTime",
+          "faultCause",
+          "repairProcess",
+          "repairResult",
+          "completionTime"
+        ],
+        "title": "RepairOrderCompletionOut"
+      },
+      "RepairOrderOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "维修工单状态"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "维修工单 ID"
+          },
+          "repairReportId": {
+            "type": "integer",
+            "title": "Repairreportid",
+            "description": "报修记录 ID"
+          },
+          "equipmentId": {
+            "type": "integer",
+            "title": "Equipmentid",
+            "description": "设备 ID"
+          },
+          "equipmentNo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentno",
+            "description": "设备编号"
+          },
+          "equipmentName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentname",
+            "description": "设备名称"
+          },
+          "equipmentStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentstatus",
+            "description": "设备状态"
+          },
+          "userId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Userid",
+            "description": "报修用户 ID"
+          },
+          "userName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "报修用户姓名"
+          },
+          "damageDescription": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Damagedescription",
+            "description": "损坏说明"
+          },
+          "damageImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Damageimages",
+            "description": "损坏图片地址"
+          },
+          "repairUserId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairuserid",
+            "description": "维修人员 ID"
+          },
+          "repairUserName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairusername",
+            "description": "维修人员姓名"
+          },
+          "assignRemark": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assignremark",
+            "description": "派单备注"
+          },
+          "assignTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigntime",
+            "description": "派单时间"
+          },
+          "faultCause": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Faultcause",
+            "description": "故障原因"
+          },
+          "repairProcess": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairprocess",
+            "description": "维修过程"
+          },
+          "repairResult": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairresult",
+            "description": "维修结果"
+          },
+          "beforeImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Beforeimages",
+            "description": "维修前图片地址"
+          },
+          "afterImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Afterimages",
+            "description": "维修后图片地址"
+          },
+          "completionTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completiontime",
+            "description": "提交维修完成时间"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createtime",
+            "description": "创建时间"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatetime",
+            "description": "更新时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "id",
+          "repairReportId",
+          "equipmentId",
+          "createTime",
+          "updateTime"
+        ],
+        "title": "RepairOrderOut"
+      },
+      "RepairOrderPageOut": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "维修工单状态"
+          },
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "维修工单 ID"
+          },
+          "repairReportId": {
+            "type": "integer",
+            "title": "Repairreportid",
+            "description": "报修记录 ID"
+          },
+          "equipmentId": {
+            "type": "integer",
+            "title": "Equipmentid",
+            "description": "设备 ID"
+          },
+          "equipmentName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentname",
+            "description": "设备名称"
+          },
+          "repairUserId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairuserid",
+            "description": "维修人员 ID"
+          },
+          "repairUserName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairusername",
+            "description": "维修人员姓名"
+          },
+          "assignTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Assigntime",
+            "description": "派单时间"
+          },
+          "completionTime": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completiontime",
+            "description": "提交维修完成时间"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createtime",
+            "description": "创建时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "id",
+          "repairReportId",
+          "equipmentId",
+          "createTime"
+        ],
+        "title": "RepairOrderPageOut"
+      },
+      "RepairReportAdminOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "报修记录 ID"
+          },
+          "returnRecordId": {
+            "type": "integer",
+            "title": "Returnrecordid",
+            "description": "归还记录 ID"
+          },
+          "userId": {
+            "type": "integer",
+            "title": "Userid",
+            "description": "报修用户 ID"
+          },
+          "userName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "报修用户姓名"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "报修用户账号"
+          },
+          "equipmentId": {
+            "type": "integer",
+            "title": "Equipmentid",
+            "description": "设备 ID"
+          },
+          "equipmentNo": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentno",
+            "description": "设备编号"
+          },
+          "equipmentName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentname",
+            "description": "设备名称"
+          },
+          "damageDescription": {
+            "type": "string",
+            "title": "Damagedescription",
+            "description": "损坏说明"
+          },
+          "damageImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Damageimages",
+            "description": "损坏图片地址"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "报修状态"
+          },
+          "repairOrderId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairorderid",
+            "description": "维修工单 ID"
+          },
+          "repairOrderStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairorderstatus",
+            "description": "维修工单状态"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createtime",
+            "description": "创建时间"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatetime",
+            "description": "更新时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "returnRecordId",
+          "userId",
+          "equipmentId",
+          "damageDescription",
+          "status",
+          "createTime",
+          "updateTime"
+        ],
+        "title": "RepairReportAdminOut"
+      },
+      "RepairReportAdminPageOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "报修记录 ID"
+          },
+          "userId": {
+            "type": "integer",
+            "title": "Userid",
+            "description": "报修用户 ID"
+          },
+          "userName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username",
+            "description": "报修用户姓名"
+          },
+          "equipmentId": {
+            "type": "integer",
+            "title": "Equipmentid",
+            "description": "设备 ID"
+          },
+          "equipmentName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Equipmentname",
+            "description": "设备名称"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "报修状态"
+          },
+          "repairOrderId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairorderid",
+            "description": "维修工单 ID"
+          },
+          "repairOrderStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Repairorderstatus",
+            "description": "维修工单状态"
+          },
+          "createTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Createtime",
+            "description": "创建时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "userId",
+          "equipmentId",
+          "status",
+          "createTime"
+        ],
+        "title": "RepairReportAdminPageOut"
+      },
+      "RepairReportConfirmOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "报修记录 ID"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "报修状态"
+          },
+          "updateTime": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updatetime",
+            "description": "更新时间"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status",
+          "updateTime"
+        ],
+        "title": "RepairReportConfirmOut"
       },
       "RepairReportOut": {
         "properties": {
@@ -6121,6 +8278,22 @@
             "title": "Repairresult",
             "description": "维修结果"
           },
+          "beforeImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Beforeimages",
+            "description": "维修前图片地址"
+          },
+          "afterImages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Afterimages",
+            "description": "维修后图片地址"
+          },
           "completionTime": {
             "anyOf": [
               {
@@ -6206,6 +8379,38 @@
         ],
         "title": "RepairReportPageOut",
         "description": "报修记录分页响应模型"
+      },
+      "RepairUserPageOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "维修人员 ID"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name",
+            "description": "维修人员姓名"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "维修人员账号"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "username"
+        ],
+        "title": "RepairUserPageOut"
       },
       "Result": {
         "properties": {
@@ -6672,6 +8877,68 @@
         ],
         "title": "Result[Page[RegistrationCodeOut]]"
       },
+      "Result_Page_RepairOrderPageOut__": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_RepairOrderPageOut_"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[Page[RepairOrderPageOut]]"
+      },
+      "Result_Page_RepairReportAdminPageOut__": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_RepairReportAdminPageOut_"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[Page[RepairReportAdminPageOut]]"
+      },
       "Result_Page_RepairReportPageOut__": {
         "properties": {
           "code": {
@@ -6703,6 +8970,37 @@
         ],
         "title": "Result[Page[RepairReportPageOut]]"
       },
+      "Result_Page_RepairUserPageOut__": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Page_RepairUserPageOut_"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[Page[RepairUserPageOut]]"
+      },
       "Result_RegistrationCodeOut_": {
         "properties": {
           "code": {
@@ -6733,6 +9031,192 @@
           "message"
         ],
         "title": "Result[RegistrationCodeOut]"
+      },
+      "Result_RepairOrderActionOut_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepairOrderActionOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[RepairOrderActionOut]"
+      },
+      "Result_RepairOrderAssignOut_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepairOrderAssignOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[RepairOrderAssignOut]"
+      },
+      "Result_RepairOrderCompletionOut_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepairOrderCompletionOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[RepairOrderCompletionOut]"
+      },
+      "Result_RepairOrderOut_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepairOrderOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[RepairOrderOut]"
+      },
+      "Result_RepairReportAdminOut_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepairReportAdminOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[RepairReportAdminOut]"
+      },
+      "Result_RepairReportConfirmOut_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RepairReportConfirmOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[RepairReportConfirmOut]"
       },
       "Result_RepairReportOut_": {
         "properties": {

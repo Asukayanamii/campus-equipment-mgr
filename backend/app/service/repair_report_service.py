@@ -2,7 +2,7 @@ from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
 from app.core.exceptions import BussinessException
-from app.crud import borrow_return_image_crud, repair_report_crud
+from app.crud import borrow_return_image_crud, repair_order_crud, repair_report_crud
 from app.schema.repair_report_schema import RepairReportOut, RepairReportPageOut, RepairReportQuery
 
 
@@ -71,5 +71,8 @@ def get_repair_report_detail_by_user_service(
         repair_report_out.fault_cause = repair_order.fault_cause
         repair_report_out.repair_process = repair_order.repair_process
         repair_report_out.repair_result = repair_order.repair_result
+        repair_images = repair_order_crud.get_repair_order_images(session, repair_order.id)
+        repair_report_out.before_images = [image.image_url for image in repair_images if image.image_type == "before"]
+        repair_report_out.after_images = [image.image_url for image in repair_images if image.image_type == "after"]
         repair_report_out.completion_time = repair_order.completion_time
     return repair_report_out

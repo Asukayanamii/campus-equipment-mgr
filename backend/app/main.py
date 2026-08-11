@@ -4,8 +4,8 @@ from fastapi_pagination import Page, add_pagination, paginate
 
 from app.api.common import common
 from app.api.user import user, equipment, borrow_record, repair_report
-from app.api.admin import admin, borrow_record as admin_borrow_record, equipment as admin_equipment, equipment_category as admin_equipment_category, registration_code as admin_registration_code
-from app.api.repair import repair, equipment as repair_equipment
+from app.api.admin import admin, borrow_record as admin_borrow_record, equipment as admin_equipment, equipment_category as admin_equipment_category, registration_code as admin_registration_code, repair_order as admin_repair_order, repair_report as admin_repair_report
+from app.api.repair import repair, equipment as repair_equipment, repair_order as repair_repair_order
 from app.core.exception_handler import register_exception_handler
 from app.db import models
 from app.db.session import Base, engine
@@ -29,8 +29,12 @@ app.include_router(admin_borrow_record.router)
 app.include_router(admin_equipment.router)
 app.include_router(admin_equipment_category.router)
 app.include_router(admin_registration_code.router)
+app.include_router(admin_repair_report.router)
+app.include_router(admin_repair_order.router)
+app.include_router(admin_repair_order.repair_user_router)
 app.include_router(repair.router)
 app.include_router(repair_equipment.router)
+app.include_router(repair_repair_order.router)
 app.include_router(common.router)
 
 # 开发环境：允许所有源（仅用于开发！）

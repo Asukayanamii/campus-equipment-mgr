@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+from fastapi_pagination import Params
 from pydantic import Field, field_validator
 
 from app.constant.regex_constant import RegexConstant
@@ -9,7 +10,7 @@ from app.schema.base_schema import BaseSchema
 
 
 
-class PageQuery(BaseSchema):
+class PageQuery(BaseSchema, Params):
     page: int = Field(default=1, ge=1, le=1000, description="页码")
     size: int = Field(default=10, ge=1, le=100, description="每页条数")
 
