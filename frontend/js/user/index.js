@@ -166,118 +166,6 @@ async function renderPersonalData(){
     }
 }
 
-// 渲染详情和修改面板
-async function renderChangePanel(){
-    const personalData = await getPersonalData(apiChoose())
-    document.body.insertAdjacentHTML('beforeend',`
-        <div class="change-panel">
-            <button class="close-button">X</button> 
-            <div class="profile-detail-showing">
-                <div class="profile-picture-change-box">
-                    <img src="${personalData.image || DEFAULT_PICTURE_URL}" alt="你的头像" class="profile-picture-box">
-                    <p class="profile-picture-update-box">点击确认修改头像<input type="file"></p>
-                </div>
-                <p>你的id:${personalData.id}</p>
-                <p>你的昵称:${personalData.name}</p>
-                <p>你的账号:${personalData.username}</p>
-                <p>你的邮箱:${personalData.email  || DEFAULT_EMAIL_DECRIPTION}</p>
-                <p>上传更新时间:${personalData.updateTime}</p>
-                <p>账号创建时间:${personalData.createTime}</p>
-                <button id="change-profile-button">点击修改个人信息</button>
-            </div>
-        </div>
-        `)
-    document.querySelector('.change-panel .close-button').addEventListener('click', closePanel)
-    const changeProfile = document.getElementById('change-profile-button')
-    changeProfile.addEventListener('click',() => {
-        renderChangeProfileSubmitWindow()
-    })
-
-}
-
-// 关闭面板
-function closePanel(){
-      const dimOverlay = document.querySelector('.dim-overlay')
-      const changePanel = document.querySelector('.change-panel')
-      if(!(dimOverlay && changePanel)){
-          console.log('没找到控制板或遮光罩')
-          return
-      }
-      dimOverlay.remove()
-      changePanel.remove()
-}
-
-// 召唤修改面板
-function renderChangeProfileSubmitWindow(){
-    document.body.insertAdjacentHTML('beforeend',`
-        <div class="change-profile-submit-window">
-        <button class="close-button-plus ">X</button>
-        <div>
-            <p>你修改用户名为：<input type="text" id="changed-name"></p>
-        </div>
-        <div class="change-profile-submit-window-password">
-            <p>请先输入原密码：<input type="password" id="origin-password"></p>
-            <p>请输入新的密码：<input type="password" id="new-password-first"></p>
-            <p>再次输入新密码：<input type="password" id="new-password-second"></p>
-        </div>
-        <div class="change-profile-submit-window-button">
-            <button>确定提交</button>
-        </div>
-    </div>`)
-    const dimOverlay = document.querySelector('.dim-overlay')
-    const closeButtonPlus = document.querySelector('.close-button-plus')
-    const changeProfileSubmitWindowButton = document.querySelector('.change-profile-submit-window-button')
-    const changedName  = document.querySelector('#changed-name')
-    const originPassword = document.querySelector('#origin-password')
-    const newPasswordFirst = document.querySelector('#new-password-first')
-    const newPasswordSecond  = document.querySelector('#new-password-second')
-    dimOverlay.style.zIndex = 600
-    closeButtonPlus.addEventListener('click',() => {
-        dimOverlay.style.zIndex = 400
-        const changeProfileSubmitWindow = document.body.querySelector('.change-profile-submit-window')
-        changeProfileSubmitWindow.remove()
-    })
-    changeProfileSubmitWindowButton.addEventListener('click',async () => {
-        if(checkPassword(newPasswordFirst)){
-            const originPasswordString = originPassword.value
-            const newPasswordFirstString  = newPasswordFirst.value
-            const newPasswordSecondString = newPasswordSecond.value
-            if(!originPasswordString){
-                console.log('原密码不能为空')
-                return
-            }
-            if(!newPasswordFirst){
-                Toast.warning('第一次密码不能为空')
-                return
-            }
-            if(!newPasswordSecondString){
-                Toast.warning('第二次密码不能为空')
-            }
-            if(newPasswordFirstString !== newPasswordSecondString){
-                Toast.warning("两次密码输入不一致")
-                return
-            }
-
-            const temUserName = (await getPersonalData(apiChoose())).username
-            if(!await sendSubmit(temUserName,originPasswordString,apiChoose())){
-                Toast.failure('原密码输入错误')
-                return
-            }
-
-            const temName = (await getPersonalData(apiChoose())).name
-            if(await changePersonalData({
-                name : changedName.value || temName,
-                password : newPasswordFirst.value
-            },apiChoose())){
-                Toast.failure('修改失败')
-            }else{
-                Toast.success('修改成功')
-            }
-        }
-    })
-}
-
-
 start.addEventListener('click', () =>{
      defaultQueryData.page = 1;
      pageNow = 1
@@ -339,15 +227,6 @@ dataCard.addEventListener('mousemove', (e) => {
     }
     
     
-})
-
-profilePictureBox.addEventListener('click',() => {
-    renderChangePanel().then(() => {
-        document.body.insertAdjacentHTML('beforeend',`
-            <div class="dim-overlay"></div>
-            `)
-    })
-
 })
 
 searchWayChoose.addEventListener('change',(e) =>{
@@ -821,11 +700,16 @@ function callRecordDetailWindow(detail){
     }))
 }
 
+// 记录视图首次进入时才创建，因此切回设备列表时需要兼容它尚未挂载。
+function showEquipmentView(){
+    const recordView = document.querySelector('#record-view')
+    const dataView = document.querySelector('#data-view')
+    if(recordView) recordView.style.display = 'none'
+    if(dataView) dataView.style.display = 'flex'
+}
+
 // 导航：数据展示 / 我的记录
-document.querySelector('#data-showing-button').addEventListener('click',() => {
-    document.querySelector('#record-view').style.display = 'none'
-    document.querySelector('#data-view').style.display = 'flex'
-})
+document.querySelector('#data-showing-button').addEventListener('click', showEquipmentView)
 
 document.querySelector('#my-record-button').addEventListener('click',() => {
     callRecordShowing()
@@ -854,6 +738,8 @@ document.addEventListener('borrow-returned', event => {
         : new QueryBorrowRecordData({ page: 1, size: PAGE_SIZE })
     renderRecordData(defaultRecordQueryData)
 })
+
+document.addEventListener('profile-updated', renderPersonalData)
 
 renderData(defaultQueryData)
 renderPersonalData()
