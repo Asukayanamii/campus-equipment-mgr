@@ -1,0 +1,231 @@
+.repair-orders-view {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    padding: 28px 32px;
+}
+
+.repair-orders-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.repair-orders-heading p,
+.repair-order-dialog header p {
+    color: #0f766e;
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.repair-orders-heading h1 {
+    font-size: 2.4rem;
+    font-weight: 700;
+}
+
+.repair-orders-refresh,
+.repair-orders-filters button {
+    min-height: 38px;
+    padding: 7px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    background: #ffffff;
+    font-weight: 700;
+}
+
+.repair-orders-filters {
+    display: flex;
+    align-items: end;
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-light);
+    background: #ffffff;
+}
+
+.repair-orders-filters label {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.repair-orders-filters input,
+.repair-orders-filters select {
+    min-height: 38px;
+    padding: 7px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    background: #ffffff;
+    font-weight: 400;
+}
+
+.repair-orders-result {
+    min-height: 320px;
+    overflow-x: auto;
+}
+
+.repair-orders-table {
+    width: 100%;
+    background: #ffffff;
+}
+
+.repair-orders-table th,
+.repair-orders-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-light);
+    text-align: left;
+    font-size: 1.35rem;
+}
+
+.repair-orders-table th {
+    color: var(--text-secondary);
+    background: #f8fafc;
+}
+
+.repair-orders-table tbody tr {
+    cursor: pointer;
+}
+
+.repair-orders-table tbody tr:hover,
+.repair-orders-table tbody tr:focus-visible {
+    background: #f0fdfa;
+}
+
+.repair-orders-loading,
+.repair-orders-empty {
+    padding: 80px 20px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.repair-orders-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.repair-orders-pagination button {
+    min-height: 36px;
+    padding: 6px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    background: #ffffff;
+}
+
+.repair-orders-pagination button:disabled {
+    cursor: default;
+    opacity: 0.45;
+}
+
+.repair-order-dialog {
+    position: fixed;
+    inset: 0;
+    width: min(760px, calc(100vw - 32px));
+    max-height: calc(100vh - 48px);
+    margin: auto;
+    padding: 24px;
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    background: #ffffff;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
+    overflow: auto;
+}
+
+.repair-order-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.62);
+}
+
+.repair-order-dialog header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.repair-order-dialog h2 {
+    font-size: 2.2rem;
+    font-weight: 700;
+}
+
+.repair-order-dialog header button {
+    width: 36px;
+    height: 36px;
+    font-size: 2.4rem;
+}
+
+.repair-order-detail-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--border-light);
+    background: var(--border-light);
+}
+
+.repair-order-detail-list > div {
+    min-width: 0;
+    padding: 10px 12px;
+    background: #ffffff;
+}
+
+.repair-order-detail-list dt {
+    color: var(--text-secondary);
+    font-size: 1.2rem;
+}
+
+.repair-order-detail-list dd {
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+    font-size: 1.35rem;
+}
+
+.repair-order-images h3 {
+    margin: 18px 0 8px;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.repair-order-gallery {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.repair-order-gallery a {
+    aspect-ratio: 1;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.repair-order-gallery img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+@media (max-width: 680px) {
+    .repair-orders-view {
+        padding: 18px 12px;
+    }
+
+    .repair-orders-filters {
+        align-items: stretch;
+        flex-direction: column;
+    }
+
+    .repair-order-detail-list {
+        grid-template-columns: 1fr;
+    }
+
+    .repair-order-gallery {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+}

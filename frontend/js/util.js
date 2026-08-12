@@ -206,6 +206,7 @@ const REPAIR_REPORT_STATUS_MAP = {
 // 维修工单状态编码与中文互转映射
 const REPAIR_ORDER_STATUS_MAP = {
     pending_assign : '待派单',
+    pending_accept : '待接单',
     pending_repair : '待维修',
     repairing : '维修中',
     pending_confirm : '待确认',
