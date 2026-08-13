@@ -440,6 +440,9 @@ async function renderCategory(QueryData = {}){
             addNewEquipmentPanel(bar.dataset.categoryId)
             addBackgroundShadow()
         })
+        document.dispatchEvent(new CustomEvent('admin-category-rendered', {
+            detail: { bar, categoryId: Number(bar.dataset.categoryId) }
+        }))
     })
 }
 

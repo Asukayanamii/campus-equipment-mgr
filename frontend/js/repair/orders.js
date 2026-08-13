@@ -161,6 +161,129 @@
         container.append(heading, gallery)
     }
 
+    function createOrderActions(dialog, detail){
+        const actions = document.createElement('div')
+        actions.className = 'repair-order-actions'
+
+        if(detail.status === 'pending_accept'){
+            const acceptButton = document.createElement('button')
+            acceptButton.type = 'button'
+            acceptButton.textContent = '接单'
+            acceptButton.addEventListener('click', () => runSimpleAction({
+                dialog,
+                button: acceptButton,
+                confirmation: `确认接收工单 #${detail.id} 吗？`,
+                successMessage: '接单成功',
+                request: () => acceptRepairOrder(detail.id)
+            }))
+            actions.appendChild(acceptButton)
+        }else if(detail.status === 'pending_repair'){
+            const startButton = document.createElement('button')
+            startButton.type = 'button'
+            startButton.textContent = '开始维修'
+            startButton.addEventListener('click', () => runSimpleAction({
+                dialog,
+                button: startButton,
+                confirmation: `确认开始维修工单 #${detail.id} 吗？`,
+                successMessage: '工单已进入维修中',
+                request: () => startRepairOrder(detail.id)
+            }))
+            actions.appendChild(startButton)
+        }else if(detail.status === 'repairing'){
+            actions.appendChild(createCompletionForm(dialog, detail))
+        }
+
+        if(actions.childElementCount > 0) dialog.appendChild(actions)
+    }
+
+    async function runSimpleAction({ dialog, button, confirmation, successMessage, request }){
+        if(!window.confirm(confirmation)) return
+        button.disabled = true
+        const originalText = button.textContent
+        button.textContent = '处理中...'
+        const result = await request()
+        if(!result){
+            button.disabled = false
+            button.textContent = originalText
+            return
+        }
+        Toast.success(successMessage)
+        dialog.close()
+        loadOrders()
+    }
+
+    function createCompletionForm(dialog, detail){
+        const form = document.createElement('form')
+        form.className = 'repair-completion-form'
+        form.innerHTML = `
+            <h3>提交维修结果</h3>
+            <label>结果状态
+                <select name="resultStatus" required>
+                    <option value="repaired">维修完成</option>
+                    <option value="unrepairable">无法维修</option>
+                </select>
+            </label>
+            <label>故障原因<textarea name="faultCause" maxlength="2000" rows="3" required></textarea></label>
+            <label>维修过程<textarea name="repairProcess" maxlength="4000" rows="4" required></textarea></label>
+            <label>维修结果<textarea name="repairResult" maxlength="2000" rows="3" required></textarea></label>
+            <div class="repair-completion-images">
+                <label>维修前图片（1 至 9 张）<input class="before-image-input" type="file" accept="image/*" multiple></label>
+                <div class="before-image-preview image-upload-preview"></div>
+                <label>维修后图片（1 至 9 张）<input class="after-image-input" type="file" accept="image/*" multiple></label>
+                <div class="after-image-preview image-upload-preview"></div>
+            </div>
+            <button class="repair-completion-submit" type="submit">提交维修结果</button>
+        `
+        const beforeUploader = createImageUploadController({
+            input: form.querySelector('.before-image-input'),
+            preview: form.querySelector('.before-image-preview'),
+            maxCount: 9
+        })
+        const afterUploader = createImageUploadController({
+            input: form.querySelector('.after-image-input'),
+            preview: form.querySelector('.after-image-preview'),
+            maxCount: 9
+        })
+        form.addEventListener('submit', event => submitCompletion(event, dialog, detail, beforeUploader, afterUploader))
+        return form
+    }
+
+    async function submitCompletion(event, dialog, detail, beforeUploader, afterUploader){
+        event.preventDefault()
+        const form = event.currentTarget
+        if(beforeUploader.isUploading() || afterUploader.isUploading()){
+            Toast.warning('图片仍在上传，请稍候')
+            return
+        }
+        const beforeImages = beforeUploader.getUrls()
+        const afterImages = afterUploader.getUrls()
+        if(beforeImages.length === 0 || afterImages.length === 0){
+            Toast.warning('维修前和维修后图片都至少需要一张')
+            return
+        }
+        if(!window.confirm('维修结果提交后将等待管理员确认，确认提交吗？')) return
+
+        const submitButton = form.querySelector('.repair-completion-submit')
+        submitButton.disabled = true
+        submitButton.textContent = '提交中...'
+        const result = await completeRepairOrder(detail.id, {
+            resultStatus: form.elements.resultStatus.value,
+            faultCause: form.elements.faultCause.value.trim(),
+            repairProcess: form.elements.repairProcess.value.trim(),
+            repairResult: form.elements.repairResult.value.trim(),
+            beforeImages,
+            afterImages
+        })
+        if(!result){
+            submitButton.disabled = false
+            submitButton.textContent = '提交维修结果'
+            return
+        }
+        Toast.success('维修结果已提交')
+        dialog.close()
+        loadOrders()
+    }
+
     async function openOrderDetail(orderId){
         const detail = await getMyRepairOrderDetail(orderId)
         if(!detail) return
@@ -188,6 +311,7 @@
         appendGallery(images, '损坏图片', detail.damageImages)
         appendGallery(images, '维修前图片', detail.beforeImages)
         appendGallery(images, '维修后图片', detail.afterImages)
+        createOrderActions(dialog, detail)
         document.body.appendChild(dialog)
         dialog.querySelector('header button').addEventListener('click', () => dialog.close())
         dialog.addEventListener('click', event => {

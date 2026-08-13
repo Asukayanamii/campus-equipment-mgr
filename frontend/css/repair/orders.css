@@ -211,6 +211,91 @@
     object-fit: cover;
 }
 
+.repair-order-actions {
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-light);
+}
+
+.repair-order-actions > button,
+.repair-completion-submit {
+    min-height: 40px;
+    padding: 8px 16px;
+    border-radius: 5px;
+    color: #ffffff;
+    background: #0f766e;
+    font-size: 1.4rem;
+    font-weight: 700;
+}
+
+.repair-order-actions button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+}
+
+.repair-completion-form h3 {
+    margin-bottom: 14px;
+    font-size: 1.7rem;
+    font-weight: 700;
+}
+
+.repair-completion-form > label,
+.repair-completion-images > label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 14px;
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.repair-completion-form select,
+.repair-completion-form textarea,
+.repair-completion-images input {
+    width: 100%;
+    padding: 9px 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 5px;
+    background: #ffffff;
+    font-weight: 400;
+}
+
+.repair-completion-form textarea {
+    resize: vertical;
+}
+
+.image-upload-preview {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.image-upload-preview-item {
+    position: relative;
+    aspect-ratio: 1;
+    border: 1px solid var(--border-light);
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.image-upload-preview-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-upload-preview-item button {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    color: #ffffff;
+    background: rgba(15, 23, 42, 0.8);
+}
+
 @media (max-width: 680px) {
     .repair-orders-view {
         padding: 18px 12px;
