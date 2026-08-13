@@ -1,4 +1,6 @@
 .admin-repair-page {
+    display: flex;
+    flex-direction: column;
     min-height: 100vh;
     padding: 28px 32px;
     color: var(--text-primary);
@@ -87,6 +89,7 @@
 }
 
 .repair-table-wrap {
+    flex: 1;
     min-height: 360px;
     overflow-x: auto;
 }
@@ -121,6 +124,8 @@
     justify-content: flex-end;
     gap: 10px;
     padding-top: 18px;
+    margin-top: auto;
+    flex-shrink: 0;
     font-size: 1.3rem;
 }
 
