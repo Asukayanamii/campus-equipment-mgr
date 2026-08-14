@@ -21,11 +21,8 @@ def register_by_password(register_in: AdminRegisterIn, db: Session) -> None:
         registration_code = getattr(register_in, "registration_code", None)
         if not registration_code:
             raise BussinessException("注册码不能为空", status_code=422)
-        matched_code = None
-        for code in registration_code_crud.get_unused_registration_codes(db):
-            if bcrypt.checkpw(registration_code.encode("utf-8"), code.code.encode("utf-8")):
-                matched_code = code
-                break
+        # 注册码以明文存储，按注册码和未使用状态精确查询，避免遍历全部记录。
+        matched_code = registration_code_crud.get_unused_registration_code_by_code(db, registration_code)
         if not matched_code:
             raise BussinessException("注册码无效或已使用", status_code=400)
         # 校验管理员用户名是否已注册。

@@ -18,8 +18,16 @@ def get_registration_code_by_id(session: Session, code_id: int) -> RegistrationC
     return session.scalar(select(RegistrationCode).where(RegistrationCode.id == code_id))
 
 
-def get_unused_registration_codes(session: Session) -> list[RegistrationCode]:
-    return list(session.scalars(select(RegistrationCode).where(RegistrationCode.is_used.is_(False))).all())
+def get_unused_registration_code_by_code(session: Session, code: str) -> RegistrationCode | None:
+    stmt = select(RegistrationCode).where(
+        RegistrationCode.code == code,
+        RegistrationCode.is_used.is_(False),
+    )
+    return session.scalar(stmt)
+
+
+def get_registration_code_by_code(session: Session, code: str) -> RegistrationCode | None:
+    return session.scalar(select(RegistrationCode).where(RegistrationCode.code == code))
 
 
 def add_registration_code(code: RegistrationCode, session: Session) -> None:

@@ -14,7 +14,7 @@ class RegistrationCode(Base):
     )
 
     id: Mapped[int] = mapped_column(BIGINT, autoincrement=True, primary_key=True, comment="注册码 ID")
-    code: Mapped[str] = mapped_column(VARCHAR(128), nullable=False, comment="bcrypt encrypted registration code")
+    code: Mapped[str] = mapped_column(VARCHAR(128), nullable=False, comment="plain registration code")
     is_used: Mapped[bool] = mapped_column(BOOLEAN, nullable=False, default=False, comment="whether used")
     create_time: Mapped[datetime] = mapped_column(DATETIME, nullable=False, default=datetime.now, comment="create time")
     update_time: Mapped[datetime] = mapped_column(
