@@ -232,7 +232,10 @@ window.fetch = async function (input , init ){
         if(isRedirecting === false){
             isRedirecting = true;
             clearAuthSession();
-            window.location.replace(`/campus-equipment-mgr/frontend/login.html`);
+            const loginPath = window.location.pathname.includes('/pages/')
+                ? '../login.html'
+                : './login.html'
+            window.location.replace(loginPath)
         }
     }
 

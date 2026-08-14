@@ -303,21 +303,14 @@ function callDataShowing(){
     rightSide.insertAdjacentHTML('beforeend',`
         <!-- 搜索框 -->
          <div class="search-box">
-            <p>搜索：<input type="text" class="search" id="search"></p>
-            <select id="search-way-choose" class="search-way-choose">
-                <option value="no">请选择查询方式（支持联查）</option>
-                <option value="reset">重置搜索</option>
-                <option value="categoryId">设备分类ID</option>
-                <option value="status">设备状态</option>
-                <option value="equipmentName">设备名称</option>
-                <option value="equipmentNo">设备编号</option>
-                <option value="location">设备存放位置</option>
-                <option value="brand">设备品牌</option>
-                <option value="spec">设备规格型号</option>
-                <option value="startTime">设备采购开始时间</option>
-                <option value="endTime">设备采购结束时间</option>
-            </select>
-            <button class="add-equipment">+</button>
+            <label>分类ID<input data-equipment-filter="categoryId" type="number"></label>
+            <label>设备名称<input data-equipment-filter="equipmentName"></label>
+            <label>设备编号<input data-equipment-filter="equipmentNo"></label>
+            <label>位置<input data-equipment-filter="location"></label>
+            <label>品牌<input data-equipment-filter="brand"></label>
+            <label>规格<input data-equipment-filter="spec"></label>
+            <label>状态<select data-equipment-filter="status"><option value="">全部</option>${Object.entries(EQUIPMENT_STATUS_MAP).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+            <button type="button" class="equipment-filter-submit">查询</button><button type="button" class="equipment-filter-reset">重置</button><button type="button" class="add-equipment">新增设备</button>
          </div>
         <!-- 数据展示 -->
         <div class="data-showing" id="data-showing">
@@ -337,7 +330,7 @@ function callDataShowing(){
     )
     attachEventsForPageButton()
     attachEventsForDataCard()
-    attachEventsForSearchWayChoose()
+    attachEquipmentFilters()
     attachEventsForAddButton()
 }
 
@@ -346,14 +339,9 @@ function callCategoryShowing(){
     rightSide.insertAdjacentHTML('beforeend',`
         <!-- 搜索框 -->
          <div class="search-box">
-            <p>搜索：<input type="text" class="search" id="search"></p>
-            <select id="search-way-choose" class="search-way-choose">
-                <option value="no">请选择查询方式（支持联查）</option>
-                <option value="reset">重置搜索</option>
-                <option value="id">设备分类ID</option>
-                <option value="categoryName">设备分类名称</option>
-            </select>
-            <button class="add-category">+</button>
+            <label>分类ID<input data-category-filter="id" type="number"></label>
+            <label>分类名称<input data-category-filter="categoryName"></label>
+            <button type="button" class="category-filter-submit">查询</button><button type="button" class="category-filter-reset">重置</button><button type="button" class="add-category">新增分类</button>
          </div>
         <!-- 分类列表 -->
         <div class="category-showing" id="category-showing">
@@ -372,9 +360,23 @@ function callCategoryShowing(){
         </div>`
     )
     attachEventsForCategoryPageButton()
-    attachEventsForCategorySearchWayChoose()
+    attachCategoryFilters()
     attachEventsForAddCategoryButton()
     renderCategory(defaultCategoryQueryData)
+}
+
+function attachEquipmentFilters(){
+    const root = document.querySelector('.search-box')
+    const apply = () => { defaultQueryData = {page:1,size:PAGE_SIZE}; root.querySelectorAll('[data-equipment-filter]').forEach(el=>{if(el.value) defaultQueryData[el.dataset.equipmentFilter]=el.value}); pageNow=1; renderData(defaultQueryData) }
+    root.querySelector('.equipment-filter-submit').addEventListener('click', apply)
+    root.querySelector('.equipment-filter-reset').addEventListener('click', ()=>{root.querySelectorAll('[data-equipment-filter]').forEach(el=>el.value=''); apply()})
+}
+
+function attachCategoryFilters(){
+    const root = document.querySelector('.search-box')
+    const apply = () => { defaultCategoryQueryData = {page:1,size:PAGE_SIZE}; root.querySelectorAll('[data-category-filter]').forEach(el=>{if(el.value) defaultCategoryQueryData[el.dataset.categoryFilter]=el.value}); categoryPageNow=1; renderCategory(defaultCategoryQueryData) }
+    root.querySelector('.category-filter-submit').addEventListener('click', apply)
+    root.querySelector('.category-filter-reset').addEventListener('click', ()=>{root.querySelectorAll('[data-category-filter]').forEach(el=>el.value=''); apply()})
 }
 
 // 重置分类查询数据
@@ -747,7 +749,7 @@ function addNewEquipmentPanel(categoryId){
                     <select id="purchaseDateDay">${daySelectOptions()}</select>日
                 </p>
                 <p>价格:<input type="text" id="price"></p>
-                <p>封面图片:<input type="text" id="coverImg"></p>
+                <p>封面图片:<input type="file" id="coverImgFile" accept="image/*"><input type="hidden" id="coverImg"></p>
                 <p>状态:<select id="status">${statusSelectOptions(EQUIPMENT_STATUS_MAP)}</select></p>
                 <p>备注:<input type="text" id="remark"></p>
             </div>
@@ -759,6 +761,9 @@ function addNewEquipmentPanel(categoryId){
     const closeButtonPlus = addEquipmentPanel.querySelector('.close-button-plus')
     const addEquipmentPanelButton = addEquipmentPanel.querySelector('.add-equipment-panel-submit-button')
     closeButtonPlus.addEventListener('click',closeAddEquipmentPanel)
+    addEquipmentPanel.querySelector('#coverImgFile').addEventListener('change', async event => {
+        const url = await uploadImage(event.target.files[0]); if(url) addEquipmentPanel.querySelector('#coverImg').value = url
+    })
     addEquipmentPanelButton.addEventListener('click',async() =>{
         const temEquipmentCreate = new EquipmentCreate()
         addEquipmentPanel.querySelectorAll('.add-equipment-panel-change p input, .add-equipment-panel-change p select').forEach( (e) =>{
@@ -968,7 +973,7 @@ function callEquipmentDetailWindow(EquipmentOut){
                     <select id="purchaseDateDay">${daySelectOptions(EquipmentOut.purchaseDate)}</select>日
                 </p>
                 <p>价格:<input type="text" id="price" value="${EquipmentOut.price ?? ''}"></p>
-                <p>封面图片:<input type="text" id="coverImg" value="${EquipmentOut.coverImg ?? ''}"></p>
+                <p>封面图片:<input type="file" id="coverImgFile" accept="image/*"><input type="hidden" id="coverImg" value="${EquipmentOut.coverImg ?? ''}"></p>
                 <p>状态:<select id="status">${statusSelectOptions(EQUIPMENT_STATUS_MAP, EquipmentOut.status)}</select></p>
                 <p>备注:<input type="text" id="remark" value="${EquipmentOut.remark ?? ''}"></p>
             </div>
@@ -979,9 +984,14 @@ function callEquipmentDetailWindow(EquipmentOut){
             
         </div>
         `)
+    const equipmentWindow = document.querySelector('.equipment-detail-window')
+    if(EquipmentOut.coverImg) equipmentWindow.style.backgroundImage = `linear-gradient(rgba(255,255,255,.86), rgba(255,255,255,.86)), url("${EquipmentOut.coverImg}")`
     document.querySelector('#close-button-equipment-detail-window').addEventListener('click', () =>{
         document.querySelector('.equipment-detail-window').remove()
         document.querySelector('.dim-overlay')?.remove()
+    })
+    document.querySelector('#coverImgFile').addEventListener('change', async event => {
+        const url = await uploadImage(event.target.files[0]); if(url) document.querySelector('#coverImg').value = url
     })
     document.querySelector('#equipment-detail-window-submit-button').addEventListener('click',async() =>{
         const temEquipmentUpdate = new EquipmentUpdate()

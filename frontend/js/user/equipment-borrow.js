@@ -66,6 +66,11 @@
     }
 
     function renderEquipmentDetail(dialog, equipment){
+        if(equipment.coverImg){
+            dialog.querySelector('.equipment-dialog-content').style.backgroundImage = `linear-gradient(rgba(255,255,255,.88), rgba(255,255,255,.88)), url("${equipment.coverImg}")`
+            dialog.querySelector('.equipment-dialog-content').style.backgroundSize = 'cover'
+            dialog.querySelector('.equipment-dialog-content').style.backgroundPosition = 'center'
+        }
         dialog.querySelector('#equipment-dialog-title').textContent = equipment.equipmentName
         const cover = dialog.querySelector('.equipment-dialog-cover')
         if(equipment.coverImg){

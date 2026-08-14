@@ -20,6 +20,10 @@ const registerCode = document.getElementById('register-code')
 const registerSubmit = document.getElementById('register-submit')
 const registerClose = document.getElementById('register-close')
 const registerCancel = document.getElementById('register-cancel')
+const emailLoginPanel = document.getElementById('email-login-panel')
+const emailLoginToggle = document.getElementById('email-login-toggle')
+const sendCodeButton = document.getElementById('send-code-button')
+let emailLoginMode = false
 
 let identity = 1;
 let registeringIdentity = 1;
@@ -61,6 +65,14 @@ function chooseIdentity(target){
     target.classList.add('is-active');
     target.setAttribute('aria-checked', 'true')
     identity = showIdentity(target);
+    if(identity !== 1){
+        emailLoginMode = false
+        emailLoginPanel.hidden = true
+        emailLoginToggle.hidden = true
+        document.querySelector('.input-data').hidden = false
+    } else {
+        emailLoginToggle.hidden = false
+    }
     prepareRoleLogin(identityApi(identity))
 }
 
@@ -117,8 +129,28 @@ async function register(){
 
 //登录
 async function submit(){
+    if(emailLoginMode) return await submitEmailLogin(document.getElementById('login-email').value.trim(), document.getElementById('login-code').value.trim())
     return await sendSubmit(account.value,password.value,apiChoose())
 }
+
+emailLoginToggle.addEventListener('click', () => {
+    if(identity !== 1) return
+    emailLoginMode = !emailLoginMode
+    emailLoginPanel.hidden = !emailLoginMode
+    document.querySelector('.input-data').hidden = emailLoginMode
+    emailLoginToggle.textContent = emailLoginMode ? '使用账号密码登录' : '使用邮箱验证码登录'
+})
+
+sendCodeButton.addEventListener('click', async () => {
+    const email = document.getElementById('login-email').value.trim()
+    if(!email) { Toast.warning('请输入邮箱'); return }
+    sendCodeButton.disabled = true
+    if(await sendEmailVerificationCode(email)){
+        let remaining = 60
+        sendCodeButton.textContent = `${remaining}s后重发`
+        const timer = setInterval(() => { remaining -= 1; sendCodeButton.textContent = remaining ? `${remaining}s后重发` : '发送验证码'; if(!remaining){clearInterval(timer); sendCodeButton.disabled = false} }, 1000)
+    } else sendCodeButton.disabled = false
+})
 
 
 
@@ -145,10 +177,19 @@ registerForm.addEventListener('submit', async event => {
 })
 loginForm.addEventListener('submit', async event => {
     event.preventDefault()
-    if(await submit() === true){
-        Toast.nextPage("登录成功")
-        const targetPage = `/campus-equipment-mgr/frontend/pages/${apiChoose()}.html`
-        window.location.replace(targetPage)
+    const button = document.getElementById('submit-button')
+    if(button.disabled) return
+    button.disabled = true
+    button.textContent = '登录中...'
+    try {
+        if(await submit() === true){
+            Toast.nextPage("登录成功")
+            const targetPage = `./pages/${apiChoose()}.html`
+            window.location.replace(targetPage)
+        }
+    } finally {
+        button.disabled = false
+        button.textContent = '登录'
     }
 })
 

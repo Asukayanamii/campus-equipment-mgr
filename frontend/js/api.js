@@ -1,4 +1,6 @@
-const BASE_URL = `https://frp-put.com:58235`
+// 可通过页面加载前设置 window.API_BASE 覆盖，开发环境默认使用本地 FastAPI。
+// 例如部署到外网时，在 HTML 中先写：window.API_BASE = 'https://example.com'
+const BASE_URL = String(window.API_BASE || 'https://frp-put.com:58235').replace(/\/$/, '')
 
 
 // 跳转
@@ -550,6 +552,30 @@ async function getRepairReportDetail(repairReportId){
         console.error('根据id获取报修记录详情失败')
         return false
     }
+}
+
+async function sendEmailVerificationCode(email){
+    try {
+        const response = await fetch(`${BASE_URL}/user/email-verification-code`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email})
+        })
+        const result = await response.json().catch(() => ({message: '服务返回的数据格式不正确'}))
+        if(!response.ok || result.code !== 0){ Toast.failure(result.message || '验证码发送失败'); return false }
+        return true
+    } catch { Toast.failure('网络异常，请稍后重试'); return false }
+}
+
+async function submitEmailLogin(email, verificationCode){
+    try {
+        prepareRoleLogin('user')
+        const response = await fetch(`${BASE_URL}/user/email-login`, {
+            method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({email, verificationCode})
+        })
+        const result = await response.json().catch(() => ({message: '服务返回的数据格式不正确'}))
+        if(!response.ok || result.code !== 0){ Toast.failure(result.message || '邮箱登录失败'); return false }
+        saveAuthSession('user', result.data)
+        return true
+    } catch { Toast.failure('网络异常，请稍后重试'); return false }
 }
 
 // 学生提交借用申请。身份由 token 确定，前端只提交设备和借用信息。
