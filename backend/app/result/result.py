@@ -29,3 +29,11 @@ class Result(BaseModel,Generic[T]):
     # 新增：直接返回响应对象
     def to_json(self,code: int = 200) -> JSONResponse:
         return JSONResponse(content=self.model_dump(), status_code=code)
+
+
+class ErrorResult(BaseModel):
+    """全局异常处理器返回的统一错误响应，用于 OpenAPI 文档。"""
+
+    code: int = Field(ResultCode.FAIL_CODE, description="业务状态码，失败时固定为 1")
+    message: str = Field(..., description="错误信息")
+    data: None = Field(None, description="错误响应不返回业务数据")

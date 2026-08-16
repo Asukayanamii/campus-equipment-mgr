@@ -5,7 +5,8 @@ from app.core.auth import admin_verity
 from app.core.logger import logger
 from app.db.session import get_db
 from app.result.result import Result
-from app.schema.common_schema import AdminRegisterIn, LoginIn, LoginOut, UpdateIn, UpdateInDTO, GetMeOut
+from app.schema.common_schema import LoginIn, LoginOut, UpdateIn, UpdateInDTO, GetMeOut
+from app.schema.admin_register_schema import AdminRegisterIn
 from app.service import admin_service
 
 router = APIRouter(prefix="/admin", tags=["管理端"])

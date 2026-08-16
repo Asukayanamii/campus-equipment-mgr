@@ -1,18 +1,9 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import (
-    AuditBusinessType,
-    AuditOperationType,
-    BorrowRecordStatus,
-    ItemStatusCode,
-)
+from app.constant.status_constant import BorrowRecordStatus, ItemStatusCode
 from app.core.exceptions import BussinessException
-from app.crud import (
-    borrow_record_crud,
-    borrow_return_image_crud,
-    equipment_crud,
-)
+from app.crud import borrow_record_crud, borrow_return_image_crud, equipment_crud
 from app.schema.admin_borrow_record_schema import (
     AdminBorrowRecordOut,
     AdminBorrowRecordPageOut,
@@ -20,7 +11,6 @@ from app.schema.admin_borrow_record_schema import (
     BorrowRecordReview,
     BorrowRecordReviewOut,
 )
-from app.service.audit_service import create_audit_record_service
 from app.service.equipment_service import change_equipment_status_service
 
 
@@ -132,20 +122,5 @@ def review_borrow_record_service(
             session=session,
             equipment=equipment,
             target_status=equipment_status,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            admin_id=admin_id,
-            reason=review_in.review_remark,
-        )
-
-        # 统一写入审核记录，提供后续审计追溯。
-        create_audit_record_service(
-            session=session,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            operation_type=AuditOperationType.REVIEW,
-            admin_id=admin_id,
-            result=result_status,
-            remark=review_in.review_remark,
         )
         return BorrowRecordReviewOut.model_validate(borrow_record)

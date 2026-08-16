@@ -12,6 +12,26 @@ application-test.yml
 application-local.yml
 *.properties.local
 
+# ===================== Python / FastAPI backend =====================
+__pycache__/
+*.py[cod]
+*.pyc.*
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
+env/
+ENV/
+
+# Local backend configuration and generated test reports
+backend/.env
+backend/测试结果.json
+backend/测试结果总结.md
+
 # ===================== Vue Node 前端 =====================
 node_modules/
 dist/

@@ -36,14 +36,27 @@ def upload(file: bytes, object_name: str):
 
     return file_url
 
-def upload_image(file: bytes, object_name: str):
-    ALLOW_EXT = settings.IMAGE_ALLOWED_EXTENSIONS.split(',')
+def upload_image(file: bytes, object_name: str, content_type: str | None = None):
+    """校验图片类型和大小后上传 OSS，供所有图片业务统一使用。"""
+    allow_ext = {
+        extension.strip().lower().lstrip(".")
+        for extension in settings.IMAGE_ALLOWED_EXTENSIONS.split(",")
+        if extension.strip()
+    }
+    allow_content_types = {
+        value.strip().lower()
+        for value in settings.IMAGE_ALLOWED_CONTENT_TYPES.split(",")
+        if value.strip()
+    }
 
     ext = object_name.split(".")[-1].lower()
 
-    if ext not in ALLOW_EXT:
+    if ext not in allow_ext:
         logger.error("文件格式错误")
-        raise BussinessException("只支持 jpg/png/gif 图片")
+        raise BussinessException("图片格式不支持")
+    if content_type and content_type.lower() not in allow_content_types:
+        logger.error("文件 MIME 类型错误")
+        raise BussinessException("图片 MIME 类型不支持")
     if len(file) > settings.IMAGE_MAX_SIZE * 1024 * 1024:
         logger.error("文件过大")
         raise BussinessException(f"文件必须小于{settings.IMAGE_MAX_SIZE}MB")
@@ -54,3 +67,8 @@ def upload_image(file: bytes, object_name: str):
         logger.error(e)
         raise BussinessException("上传失败")
     return s
+
+
+def upload_evidence_image(file: bytes, object_name: str, content_type: str | None = None):
+    """上传归还损坏或维修凭证图片，复用统一图片上传和校验逻辑。"""
+    return upload_image(file, object_name, content_type)

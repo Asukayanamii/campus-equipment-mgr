@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+from fastapi_pagination import Params
 from pydantic import Field, field_validator
 
 from app.constant.regex_constant import RegexConstant
@@ -9,7 +10,7 @@ from app.schema.base_schema import BaseSchema
 
 
 
-class PageQuery(BaseSchema):
+class PageQuery(BaseSchema, Params):
     page: int = Field(default=1, ge=1, le=1000, description="页码")
     size: int = Field(default=10, ge=1, le=100, description="每页条数")
 
@@ -53,6 +54,27 @@ class AdminRegisterIn(RegisterIn):
 class LoginIn(InfoRegexBaseSchema):
     username: str = Field(..., description="用户名")
     password: str = Field(..., description="密码")
+
+class EmailVerificationCodeIn(InfoRegexBaseSchema):
+    """学生邮箱验证码发送请求。"""
+    email: str = Field(..., description="邮箱")
+
+
+class EmailLoginIn(InfoRegexBaseSchema):
+    """学生邮箱验证码注册并登录请求。"""
+    email: str = Field(..., description="邮箱")
+    verification_code: str = Field(..., min_length=6, max_length=6, description="六位邮箱验证码")
+
+
+class EmailLoginOut(BaseSchema):
+    """学生邮箱验证码注册或登录成功响应。"""
+    id: int = Field(..., description="用户 ID")
+    name: str = Field(..., description="昵称")
+    username: str = Field(..., description="系统生成的账号")
+    image: str | None = Field(None, description="头像图片 URL")
+    email: str = Field(..., description="邮箱")
+    token: str = Field(..., description="登录令牌")
+
 
 class LoginOut(InfoRegexBaseSchema):
     """登录成功返回结果"""

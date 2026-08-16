@@ -4,7 +4,7 @@ from decimal import Decimal
 from fastapi_pagination import Params
 from pydantic import field_serializer, Field, field_validator
 
-from app.constant.status_constant import CONFIRM_STATUS_MAP, ITEM_STATUS_MAP, REPAIR_ORDER_STATUS_MAP, REPAIR_REPORT_STATUS_CODES, REPAIR_REPORT_STATUS_MAP
+from app.constant.status_constant import ITEM_STATUS_MAP, REPAIR_ORDER_STATUS_MAP, REPAIR_REPORT_STATUS_CODES, REPAIR_REPORT_STATUS_MAP
 from app.schema.base_schema import BaseSchema
 
 
@@ -46,10 +46,6 @@ class RepairReportOut(RepairReportStatusOut):
     remark: str | None = Field(None, description="设备备注")
     damage_description: str = Field(..., description="损坏说明")
     damage_images: list[str] = Field(default_factory=list, description="损坏图片地址")
-    confirm_status: str = Field(..., description="管理员确认状态")
-    confirm_remark: str | None = Field(None, description="管理员确认备注")
-    confirmer_id: int | None = Field(None, description="确认管理员 ID")
-    confirm_time: datetime | None = Field(None, description="确认时间")
     repair_order_id: int | None = Field(None, description="维修工单 ID")
     repair_user_id: int | None = Field(None, description="维修人员 ID")
     repair_status: str | None = Field(None, description="维修工单状态")
@@ -58,6 +54,8 @@ class RepairReportOut(RepairReportStatusOut):
     fault_cause: str | None = Field(None, description="故障原因")
     repair_process: str | None = Field(None, description="维修过程")
     repair_result: str | None = Field(None, description="维修结果")
+    before_images: list[str] = Field(default_factory=list, description="维修前图片地址")
+    after_images: list[str] = Field(default_factory=list, description="维修后图片地址")
     completion_time: datetime | None = Field(None, description="提交维修完成时间")
     create_time: datetime = Field(..., description="创建时间")
     update_time: datetime = Field(..., description="更新时间")
@@ -77,10 +75,6 @@ class RepairReportOut(RepairReportStatusOut):
         if value is None:
             return None
         return ITEM_STATUS_MAP.get(value, value)
-
-    @field_serializer("confirm_status")
-    def serialize_confirm_status(self, value: str):
-        return CONFIRM_STATUS_MAP.get(value, value)
 
     @field_serializer("repair_status")
     def serialize_repair_status(self, value: str | None):

@@ -3,7 +3,7 @@ from datetime import datetime
 from sqlalchemy import BIGINT, VARCHAR, TEXT, DATETIME, UniqueConstraint, Index
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.constant.status_constant import ConfirmStatus, RepairReportStatus
+from app.constant.status_constant import RepairReportStatus
 from app.db.session import Base
 
 
@@ -52,31 +52,6 @@ class RepairReport(Base):
         default=RepairReportStatus.PENDING,
         nullable=False,
         comment="报修状态"
-    )
-
-    confirm_status: Mapped[str] = mapped_column(
-        VARCHAR(30),
-        default=ConfirmStatus.PENDING,
-        nullable=False,
-        comment="管理员确认状态"
-    )
-
-    confirm_remark: Mapped[str | None] = mapped_column(
-        TEXT,
-        nullable=True,
-        comment="管理员确认备注"
-    )
-
-    confirmer_id: Mapped[int | None] = mapped_column(
-        BIGINT,
-        nullable=True,
-        comment="确认管理员 ID"
-    )
-
-    confirm_time: Mapped[datetime | None] = mapped_column(
-        DATETIME,
-        nullable=True,
-        comment="确认时间"
     )
 
     create_time: Mapped[datetime] = mapped_column(

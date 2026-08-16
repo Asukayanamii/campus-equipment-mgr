@@ -9,7 +9,6 @@ from app.result.result import Result
 from app.schema.equipment_category_schema import CategoryQuery, CategoryResp
 from app.service.equipment_category_service import query_categories_service
 
-
 router = APIRouter(
     prefix="/user/equipment-category",
     tags=["学生端/设备分类相关"],

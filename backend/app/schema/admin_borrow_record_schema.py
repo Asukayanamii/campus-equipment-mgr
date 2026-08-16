@@ -7,6 +7,7 @@ from pydantic import Field, field_serializer, field_validator
 from app.constant.status_constant import (
     BORROW_RECORD_STATUS_CODES,
     BORROW_RECORD_STATUS_MAP,
+    BORROW_RETURN_STATUS_CODES,
     BORROW_RETURN_STATUS_MAP,
     ITEM_STATUS_MAP,
     REPAIR_ORDER_STATUS_MAP,
@@ -62,7 +63,6 @@ class AdminBorrowRecordPageOut(BaseSchema):
     @field_serializer("status")
     def serialize_status(self, value: str):
         return BORROW_RECORD_STATUS_MAP.get(value, value)
-
     @field_serializer("return_status")
     def serialize_return_status(self, value: str | None):
         return BORROW_RETURN_STATUS_MAP.get(value, value) if value else None
