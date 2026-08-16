@@ -3,8 +3,11 @@
         const { bar, categoryId } = event.detail
         const actions = bar.querySelector('.category-actions')
         if(actions.querySelector('.category-edit')) return
+        const categoryName = bar.querySelector('.category-name').textContent
         const edit = document.createElement('button');edit.type='button';edit.className='category-edit';edit.title='编辑分类';edit.textContent='编辑'
         const remove = document.createElement('button');remove.type='button';remove.className='category-delete';remove.title='删除分类';remove.textContent='删除'
+        edit.setAttribute('aria-label', `编辑${categoryName}分类`)
+        remove.setAttribute('aria-label', `删除${categoryName}分类`)
         edit.addEventListener('click',e=>{e.stopPropagation();openEditor(categoryId)})
         remove.addEventListener('click',e=>{e.stopPropagation();deleteCategory(categoryId,bar.querySelector('.category-name').textContent)})
         actions.prepend(edit,remove)

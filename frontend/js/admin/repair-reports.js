@@ -171,10 +171,13 @@
         if(!report) return
         const dialog = document.createElement('dialog')
         dialog.className = 'admin-repair-dialog'
+        dialog.setAttribute('aria-labelledby', 'admin-repair-dialog-title')
         dialog.innerHTML = `
-            <header><h2>报修记录详情</h2><button class="repair-dialog-close" type="button" aria-label="关闭">×</button></header>
-            <dl class="admin-repair-detail-list"></dl>
-            <section class="admin-damage-section"><h3>损坏图片</h3><div class="admin-damage-gallery"></div></section>
+            <header><div><p>报修管理</p><h2 id="admin-repair-dialog-title">报修记录详情</h2></div><button class="repair-dialog-close" type="button" aria-label="关闭">×</button></header>
+            <div class="admin-repair-dialog-body">
+                <dl class="admin-repair-detail-list"></dl>
+                <section class="admin-damage-section"><h3>损坏图片</h3><div class="admin-damage-gallery"></div></section>
+            </div>
             <footer class="admin-repair-dialog-actions"></footer>
         `
         const list = dialog.querySelector('.admin-repair-detail-list')

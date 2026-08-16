@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>学生端</title>
+    <meta name="theme-color" content="#12352f">
+    <title>学生工作台 | 校园设备管理</title>
     <link rel="stylesheet" href="../css/reset.css">
     <link rel="stylesheet" href="../css/pagination-layout.css">
     <link rel="stylesheet" href="../css/user/user.css">
@@ -13,15 +14,21 @@
     <link rel="stylesheet" href="../css/user/profile-center.css">
     <link rel="stylesheet" href="../css/polish.css">
     <link rel="stylesheet" href="../css/modal-polish.css">
+    <link rel="stylesheet" href="../css/workspace.css">
 </head>
-<body>
+<body class="workspace-app user-app">
+
+    <button class="mobile-menu-button" type="button" aria-label="打开导航" aria-controls="nav" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <button class="nav-backdrop" type="button" aria-label="关闭导航" tabindex="-1"></button>
 
    
     <!-- 左侧导航栏 -->
-    <div class="nav" id="nav">
+    <nav class="nav" id="nav" aria-label="学生端主导航">
         <!-- 欢迎语句 -->
         <div class="nav-title">
-            <p>Welcome!</p>
+            <a class="workspace-brand" href="../index.html" aria-label="校园设备管理首页"><span class="workspace-brand-mark">校</span><span><strong>校园设备管理</strong><small>STUDENT PORTAL</small></span></a>
         </div>
 
         <!-- 正式选项卡 -->
@@ -39,7 +46,7 @@
                 <p class="profile-name" id="profile-name"></p>
             </div>
         </div>
-    </div>
+    </nav>
     
     <div class="place-holder">
         
@@ -93,5 +100,6 @@
     <script src="../js/user/repair-report-detail.js"></script>
     <script src="../js/user/profile-center.js"></script>
     <script src="../js/user/index.js"> </script>
+    <script src="../js/workspace.js"></script>
 </body>
 </html>
