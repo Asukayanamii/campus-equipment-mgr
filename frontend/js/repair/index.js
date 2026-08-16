@@ -24,6 +24,21 @@ const aft2 = document.getElementById('aft-2')
 const end = document.getElementById('end')
 
 const dataCard = document.getElementById('data-showing') 
+const equipmentStatusFilter = document.querySelector('[data-equipment-filter="status"]')
+if(equipmentStatusFilter?.tagName === 'INPUT'){ const select=document.createElement('select'); select.dataset.equipmentFilter='status'; select.innerHTML='<option value="">全部</option><option value="available">可用</option><option value="borrowed">已借出</option><option value="repair_pending">待维修</option><option value="repairing">维修中</option><option value="repaired">已维修</option><option value="damaged">已损坏</option><option value="scrapped">已报废</option>'; equipmentStatusFilter.replaceWith(select) }
+
+document.addEventListener('click', event => {
+    if(event.target.closest('.multi-filter-submit')){
+        defaultQueryData = {page:1,size:PAGE_SIZE}
+        document.querySelectorAll('[data-equipment-filter]').forEach(el=>{if(el.value) defaultQueryData[el.dataset.equipmentFilter]=el.value})
+        pageNow=1
+        renderData(defaultQueryData)
+    }
+    if(event.target.closest('.multi-filter-reset')){
+        document.querySelectorAll('[data-equipment-filter]').forEach(el=>el.value='')
+        defaultQueryData = {page:1,size:PAGE_SIZE}; pageNow=1; renderData(defaultQueryData)
+    }
+})
 
 let pageNow = 1;
 let pageAll = 1;
@@ -102,7 +117,7 @@ function renderData(QueryData = {}){
         dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card">
+                <div class="data-card status-${chineseToStatus(EQUIPMENT_STATUS_MAP, i.status || 'unknown')}" data-equipment-id="${i.id}">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">

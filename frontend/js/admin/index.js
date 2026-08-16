@@ -127,7 +127,7 @@ function renderData(QueryData = {}){
         dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card" data-id="${i.id}">
+                <div class="data-card status-${chineseToStatus(EQUIPMENT_STATUS_MAP, i.status || 'unknown')}" data-id="${i.id}">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">

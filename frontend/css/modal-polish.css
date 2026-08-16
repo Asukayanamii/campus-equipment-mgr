@@ -1,0 +1,31 @@
+dialog,.equipment-detail-window,.record-detail-window,.change-panel,.add-equipment-panel-window{border:1px solid #dbe5ef!important;border-radius:14px!important;background:rgba(255,255,255,.98)!important;box-shadow:0 28px 90px rgba(15,35,65,.28)!important;color:#1e293b}
+.equipment-detail-window::before,.record-detail-window::before,.admin-repair-dialog::before,.repair-order-dialog::before{content:"详情信息";display:block;margin:-26px -26px 20px;padding:18px 26px;color:#fff;background:linear-gradient(110deg,#173b68,#2d6ca7);font-size:1.35rem;font-weight:750;letter-spacing:.04em}
+.equipment-detail-window-change,.record-detail-content,.admin-repair-detail-list,.repair-order-detail-list{position:relative;z-index:1;box-shadow:inset 0 0 0 1px rgba(219,229,239,.65),0 6px 18px rgba(30,55,90,.05)}
+.equipment-detail-window-change p:first-child,.record-detail-content p:first-child{padding-top:4px;color:#173b68;font-weight:750}
+.equipment-dialog-content{position:relative;overflow:hidden;border:1px solid #dbe5ef;border-radius:10px;padding:16px!important;background-color:#f8fafc}
+.equipment-dialog-cover{width:100%!important;max-height:190px;object-fit:cover;border-radius:9px;margin-bottom:14px;box-shadow:0 8px 20px rgba(30,55,90,.12)}
+.equipment-detail-list,.admin-repair-detail-list,.repair-order-detail-list{background:rgba(248,250,252,.9);border-radius:9px;padding:10px}
+.admin-repair-detail-list,.repair-order-detail-list{padding:0!important;overflow:hidden;border:1px solid #aeb9c6}.admin-repair-detail-list>div,.repair-order-detail-list>div{padding:9px 12px!important;border-bottom:1px solid #aeb9c6!important;background:#fff}.admin-repair-detail-list>div:nth-child(even),.repair-order-detail-list>div:nth-child(even){background:#f8fafc}.admin-repair-detail-list>div:last-child,.repair-order-detail-list>div:last-child{border-bottom:0!important}
+.equipment-detail-list dd,.admin-repair-detail-list dd,.repair-order-detail-list dd{color:#1e3a5f;font-weight:600}
+.operation-dialog,.borrow-return-dialog,.profile-center-dialog{padding:26px!important}
+.operation-dialog header,.equipment-dialog-heading,.return-dialog-heading{padding-bottom:14px;border-bottom:1px solid #e4ebf2}
+.operation-dialog header h2,.equipment-dialog-heading h2,.return-dialog-heading h2{letter-spacing:.01em}
+dialog::backdrop{background:rgba(15,35,65,.58);backdrop-filter:blur(3px)}
+.equipment-detail-window,.record-detail-window,.change-panel,.add-equipment-panel-window{padding:26px!important}
+.equipment-detail-window h1,.record-detail-window h1,.change-panel h1,dialog h2{color:#173b68!important;font-weight:750!important}
+.close-button,.close-button-plus,.close-button-equipment-detail-window,.dialog-close,.equipment-dialog-close,.return-dialog-close,.repair-dialog-close{width:34px!important;height:34px!important;border-radius:50%!important;background:#eef3f8!important;color:#476078!important;font-size:1.8rem!important;transition:background .2s ease,transform .2s ease}
+.close-button:hover,.close-button-plus:hover,.close-button-equipment-detail-window:hover,.dialog-close:hover,.equipment-dialog-close:hover,.return-dialog-close:hover{background:#dce9f8!important;transform:rotate(4deg) scale(1.04)}
+.equipment-detail-window-change,.record-detail-content,.profile-detail-showing{border-radius:10px;background:#f8fafc;padding:16px!important}
+.equipment-detail-window-change,.record-detail-content{padding:0!important;overflow:hidden;border:1px solid #aeb9c6;border-radius:6px;background:#fff}
+.detail-grid-row{display:grid;grid-template-columns:140px minmax(0,1fr);min-height:42px;border-bottom:1px solid #c8d2de}.detail-grid-row:last-child{border-bottom:0}.detail-grid-label,.detail-grid-value{display:flex;align-items:center;padding:8px 12px}.detail-grid-label{border-right:1px solid #c8d2de;background:#eef3f8;color:#263b55;font-weight:750}.detail-grid-value{min-width:0;background:#fff;color:#52657d;overflow-wrap:anywhere;word-break:break-word}
+.equipment-detail-window-change p,.record-detail-content p{display:grid;grid-template-columns:132px minmax(0,1fr);align-items:center;min-height:40px;margin:0!important;padding:7px 12px;border-bottom:1px solid #aeb9c6;color:#52657d;background:#fff}
+.equipment-detail-window-change p:last-child,.record-detail-content p:last-child{border-bottom:0}
+.equipment-detail-window-change p::first-line,.record-detail-content p::first-line{color:#263b55;font-weight:700}
+.equipment-detail-window-change p:nth-child(even),.record-detail-content p:nth-child(even){background:#f8fafc}
+.equipment-detail-window-change input,.equipment-detail-window-change select,.record-detail-content input,.record-detail-content select{min-height:36px;padding:7px 10px;border:1px solid #cbd8e5;border-radius:7px;background:#fff}
+.equipment-detail-window-buttons,.record-detail-buttons,.dialog-actions,.return-dialog-actions,.operation-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.equipment-detail-window-buttons button,.record-detail-buttons button,.dialog-actions button,.return-dialog-actions button,.operation-actions button{min-height:38px;padding:8px 16px;border-radius:7px;background:#2563eb;color:#fff;font-weight:700;transition:transform .18s ease,box-shadow .18s ease}
+.equipment-detail-window-buttons button:hover,.record-detail-buttons button:hover,.dialog-actions button:hover,.return-dialog-actions button:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(37,99,235,.2)}
+.repair-report-detail-images,.repair-order-images,.image-preview-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:10px;margin-top:12px}
+.repair-report-detail-images img,.repair-order-images img,.image-preview-list img{width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;border:1px solid #dbe5ef}
+@media(max-width:640px){.equipment-detail-window,.record-detail-window,.change-panel,.add-equipment-panel-window{inset:12px!important;width:auto!important;max-height:calc(100vh - 24px)!important;padding:16px!important}.equipment-detail-window-change p,.record-detail-content p{grid-template-columns:96px minmax(0,1fr);padding:7px 8px}.detail-grid-row{grid-template-columns:105px minmax(0,1fr)}.detail-grid-label,.detail-grid-value{padding:7px 8px}.equipment-detail-window-change input,.equipment-detail-window-change select{width:100%}}

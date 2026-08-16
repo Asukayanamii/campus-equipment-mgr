@@ -1,0 +1,22 @@
+:root{--ui-bg:#f3f6fa;--ui-ink:#172033;--ui-muted:#64748b;--ui-blue:#2563eb;--ui-line:#dbe3ec;--ui-shadow:0 10px 28px rgba(30,55,90,.09)}
+body{background:var(--ui-bg);color:var(--ui-ink)}
+.right-side{align-items:center!important;padding:0 20px 28px}.right-side>.search-box,.right-side>.data-showing,.right-side>.record-view,.right-side>.record-showing,.right-side>.page-choose-box,.right-side>.admin-operation-view{width:min(100%,1420px);margin-left:auto;margin-right:auto}.right-side>.data-showing{justify-content:center}.right-side>.page-choose-box{justify-content:center}.admin-operation-view{align-self:stretch;margin-left:auto!important;margin-right:auto!important}
+.nav{background:linear-gradient(180deg,#172b49,#203d63);box-shadow:4px 0 24px rgba(15,35,65,.16)}
+.nav-options button{transition:background .2s ease,transform .2s ease,color .2s ease}
+.nav-options button:hover,.nav-options button:focus-visible{background:rgba(255,255,255,.12);color:#fff;transform:translateX(3px)}
+.data-card{overflow:visible;background:#fff;border:1px solid var(--ui-line);box-shadow:var(--ui-shadow);transition:transform .22s ease,box-shadow .22s ease}
+.data-card:hover{box-shadow:0 16px 34px rgba(30,55,90,.16)}
+.data-card[class*="status-"]{border-width:2px;border-left-width:4px}.data-card.status-available{border-color:#55a878}.data-card.status-pending_borrow{border-color:#7aa7e8}.data-card.status-borrowed{border-color:#3b82f6}.data-card.status-repair_pending{border-color:#e2a23b}.data-card.status-repairing{border-color:#c982d8}.data-card.status-repaired{border-color:#42a58c}.data-card.status-damaged{border-color:#dc7777}.data-card.status-scrapped{border-color:#8c98a6}.data-card.status-offline{border-color:#a8b0bb}
+.data-card.status-unknown{border-color:#b8c2cf}
+.data-detail-showing{z-index:1000!important;min-height:220px;height:auto!important;width:260px!important;padding:16px!important;border:1px solid #dbe5f0!important;border-radius:10px!important;background:rgba(255,255,255,.98)!important;color:#22324a!important;box-shadow:0 18px 42px rgba(15,35,60,.2)!important;opacity:0;visibility:hidden;transform:translateY(6px);transition:opacity .18s ease,transform .18s ease,visibility .18s ease!important;overflow:auto}
+.data-card:hover .data-detail-showing{opacity:1;visibility:visible;transform:translateY(0)}
+.data-detail-showing p{margin:3px 0!important;font-size:1.25rem!important;line-height:1.5!important;color:#52657d!important}
+.data-card h1{color:#17345d}
+.search-box{box-shadow:var(--ui-shadow)}
+.search-box{display:grid!important;grid-template-columns:repeat(auto-fit,minmax(min(180px,100%),1fr));height:auto!important;min-height:96px;margin:16px 24px;padding:16px;gap:12px;background:#f8fafc;border:1px solid #dbe5ef;border-radius:10px;align-items:end}.search-box>p,.search-box>select[hidden],.search-box>input[type=hidden]{display:none!important}.search-box label{display:flex;min-width:0;flex-direction:column;gap:5px;font-size:1.35rem;color:#40536c;font-weight:650}.search-box label input,.search-box label select{box-sizing:border-box;width:100%;min-width:0;min-height:36px;padding:6px 9px;border:1px solid #cbd8e5;border-radius:6px;background:#fff}.search-box button{box-sizing:border-box;white-space:nowrap}.search-box .multi-filter-submit,.search-box .multi-filter-reset{position:static;width:auto;min-height:36px;padding:7px 16px;border-radius:6px;background:#2563eb;color:#fff;font-weight:700}.search-box .multi-filter-reset{background:#64748b}
+.page-choose-box button{border:1px solid var(--ui-line);border-radius:6px;transition:background .2s ease,color .2s ease,transform .2s ease}
+.page-choose-box button:hover{transform:translateY(-1px);background:#e8f0ff}
+.equipment-detail-window,.record-detail-window,.repair-report-detail-dialog,.equipment-borrow-dialog{animation:ui-pop .2s ease-out both;box-shadow:0 24px 70px rgba(15,35,60,.24)}
+@keyframes ui-pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@media(max-width:760px){.place-holder{width:76px}.nav{width:76px;padding:0 8px}.nav-title p{font-size:1.4rem}.nav-options button{padding:10px 6px;text-align:center;font-size:1.15rem}.profile-name-box{display:none}.data-showing{padding:18px 12px;gap:14px}.data-card{width:min(100%,220px)}}
+@media(max-width:560px){.search-box{grid-template-columns:1fr;margin:12px;padding:12px}.search-box button{width:100%!important}.admin-operation-view{padding:16px 10px!important}}

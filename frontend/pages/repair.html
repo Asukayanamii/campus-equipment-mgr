@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="../css/reset.css">
     <link rel="stylesheet" href="../css/pagination-layout.css">
     <link rel="stylesheet" href="../css/repair/repair.css">
+    <link rel="stylesheet" href="../css/polish.css">
+    <link rel="stylesheet" href="../css/modal-polish.css">
     <link rel="stylesheet" href="../css/repair/orders.css">
     <link rel="stylesheet" href="../css/profile-center.css">
 </head>
@@ -45,8 +47,9 @@
      <div class="right-side">
         <!-- 搜索框 -->
          <div class="search-box">
-            <p>搜索：<input type="text" class="search" id="search"></p>
-            <select id="search-way-choose" class="search-way-choose">
+            <label>分类ID<input data-equipment-filter="categoryId" type="number"></label><label>状态<input data-equipment-filter="status"></label><label>设备名称<input data-equipment-filter="equipmentName"></label><label>设备编号<input data-equipment-filter="equipmentNo"></label><label>位置<input data-equipment-filter="location"></label><label>品牌<input data-equipment-filter="brand"></label><label>规格<input data-equipment-filter="spec"></label><button type="button" class="multi-filter-submit">查询</button><button type="button" class="multi-filter-reset">重置</button>
+            <input type="hidden" id="search">
+            <select hidden id="search-way-choose" class="search-way-choose">
                 <option value="no">请选择查询方式（支持联查）</option>
                 <option value="reset">重置搜索</option>
                 <option value="categoryId">设备分类ID</option>

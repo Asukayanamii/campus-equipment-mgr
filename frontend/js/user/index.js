@@ -24,6 +24,23 @@ const aft2 = document.getElementById('aft-2')
 const end = document.getElementById('end')
 
 const dataCard = document.getElementById('data-showing') 
+const equipmentStatusFilter = document.querySelector('[data-equipment-filter="status"]')
+if(equipmentStatusFilter?.tagName === 'INPUT'){ const select=document.createElement('select'); select.dataset.equipmentFilter='status'; select.innerHTML='<option value="">全部</option><option value="available">可用</option><option value="borrowed">已借出</option><option value="repair_pending">待维修</option><option value="repairing">维修中</option><option value="repaired">已维修</option><option value="damaged">已损坏</option><option value="scrapped">已报废</option>'; equipmentStatusFilter.replaceWith(select) }
+const recordStatusFilter = document.querySelector('[data-record-filter="status"]')
+if(recordStatusFilter?.tagName === 'INPUT'){ const select=document.createElement('select'); select.dataset.recordFilter='status'; select.innerHTML='<option value="">全部</option><option value="pending">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option><option value="borrowed">借用中</option><option value="completed">已完成</option>'; recordStatusFilter.replaceWith(select) }
+
+document.addEventListener('click', event => {
+    if(event.target.closest('.multi-filter-submit')){
+        defaultQueryData = {page:1,size:PAGE_SIZE}
+        document.querySelectorAll('[data-equipment-filter]').forEach(el=>{if(el.value) defaultQueryData[el.dataset.equipmentFilter]=el.value})
+        pageNow=1
+        renderData(defaultQueryData)
+    }
+    if(event.target.closest('.multi-filter-reset')){
+        document.querySelectorAll('[data-equipment-filter]').forEach(el=>el.value='')
+        defaultQueryData = {page:1,size:PAGE_SIZE}; pageNow=1; renderData(defaultQueryData)
+    }
+})
 
 let pageNow = 1;
 let pageAll = 1;
@@ -112,7 +129,7 @@ function renderData(QueryData = {}){
         dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card">
+                <div class="data-card status-${chineseToStatus(EQUIPMENT_STATUS_MAP, i.status || 'unknown')}" data-equipment-id="${i.id}">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">
@@ -320,8 +337,9 @@ function callRecordShowing(){
             </div>
             <!-- 搜索框 -->
             <div class="search-box">
-                <p>搜索：<input type="text" class="search" id="record-search"></p>
-                <select id="record-search-way-choose" class="search-way-choose">
+                <label>状态<select data-record-filter="status"><option value="">全部</option><option value="pending">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option><option value="borrowed">借用中</option><option value="completed">已完成</option></select></label><label>设备名称<input data-record-filter="equipmentName"></label><label>开始时间<input data-record-filter="startTime" type="datetime-local"></label><label>结束时间<input data-record-filter="endTime" type="datetime-local"></label><button type="button" class="record-filter-submit">查询</button><button type="button" class="record-filter-reset">重置</button>
+                <input type="hidden" id="record-search">
+                <select hidden id="record-search-way-choose" class="search-way-choose">
                     <option value="no">请选择查询方式（支持联查）</option>
                     <option value="reset">重置搜索</option>
                     <option value="status">借用状态</option>
@@ -646,42 +664,18 @@ function attachEventsForRecordSearchWayChoose(){
 
 // 呼出记录详情弹窗
 function callRecordDetailWindow(detail){
+    const row = (label, value) => `<div class="detail-grid-row"><span class="detail-grid-label">${label}</span><span class="detail-grid-value">${value ?? ''}</span></div>`
     let content
     let title
     if(recordType === 'borrow'){
         title = '借用记录详情'
         content = `
-            <p>记录ID:${detail.id}</p>
-            <p>设备名称:${detail.equipmentName}</p>
-            <p>设备编号:${detail.equipmentNo}</p>
-            <p>设备分类:${detail.categoryName}</p>
-            <p>设备品牌:${detail.brand}</p>
-            <p>存放位置:${detail.location}</p>
-            <p>借用开始时间:${detail.borrowStartTime}</p>
-            <p>借用结束时间:${detail.borrowEndTime}</p>
-            <p>借用用途:${detail.purpose || ''}</p>
-            <p>审核备注:${detail.reviewRemark || ''}</p>
-            <p>借用状态:${statusToChinese(BORROW_RECORD_STATUS_MAP,detail.status)}</p>
-            <p>创建时间:${detail.createTime}</p>
-            <p>更新时间:${detail.updateTime}</p>
+            ${row('记录ID',detail.id)}${row('设备名称',detail.equipmentName)}${row('设备编号',detail.equipmentNo)}${row('设备分类',detail.categoryName)}${row('设备品牌',detail.brand)}${row('存放位置',detail.location)}${row('借用开始时间',detail.borrowStartTime)}${row('借用结束时间',detail.borrowEndTime)}${row('借用用途',detail.purpose)}${row('审核备注',detail.reviewRemark)}${row('借用状态',statusToChinese(BORROW_RECORD_STATUS_MAP,detail.status))}${row('创建时间',detail.createTime)}${row('更新时间',detail.updateTime)}
         `
     }else{
         title = '报修记录详情'
         content = `
-            <p>记录ID:${detail.id}</p>
-            <p>设备名称:${detail.equipmentName}</p>
-            <p>设备编号:${detail.equipmentNo}</p>
-            <p>设备分类:${detail.categoryName}</p>
-            <p>损坏说明:${detail.damageDescription || ''}</p>
-            <p>管理员确认状态:${detail.confirmStatus || ''}</p>
-            <p>管理员确认备注:${detail.confirmRemark || ''}</p>
-            <p>报修状态:${statusToChinese(REPAIR_REPORT_STATUS_MAP,detail.status)}</p>
-            <p>维修工单状态:${statusToChinese(REPAIR_ORDER_STATUS_MAP,detail.repairStatus)}</p>
-            <p>故障原因:${detail.faultCause || ''}</p>
-            <p>维修过程:${detail.repairProcess || ''}</p>
-            <p>维修结果:${detail.repairResult || ''}</p>
-            <p>创建时间:${detail.createTime}</p>
-            <p>更新时间:${detail.updateTime}</p>
+            ${row('记录ID',detail.id)}${row('设备名称',detail.equipmentName)}${row('设备编号',detail.equipmentNo)}${row('设备分类',detail.categoryName)}${row('损坏说明',detail.damageDescription)}${row('管理员确认状态',detail.confirmStatus)}${row('管理员确认备注',detail.confirmRemark)}${row('报修状态',statusToChinese(REPAIR_REPORT_STATUS_MAP,detail.status))}${row('维修工单状态',statusToChinese(REPAIR_ORDER_STATUS_MAP,detail.repairStatus))}${row('故障原因',detail.faultCause)}${row('维修过程',detail.repairProcess)}${row('维修结果',detail.repairResult)}${row('创建时间',detail.createTime)}${row('更新时间',detail.updateTime)}
         `
     }
     document.body.insertAdjacentHTML('beforeend',`
@@ -707,6 +701,21 @@ function showEquipmentView(){
     if(recordView) recordView.style.display = 'none'
     if(dataView) dataView.style.display = 'flex'
 }
+
+document.addEventListener('click', event => {
+    if(event.target.closest('.record-filter-submit')){
+        defaultRecordQueryData = { page: 1, size: PAGE_SIZE }
+        document.querySelectorAll('[data-record-filter]').forEach(el => { if(el.value) defaultRecordQueryData[el.dataset.recordFilter] = el.value })
+        recordPageNow = 1
+        renderRecordData(defaultRecordQueryData)
+    }
+    if(event.target.closest('.record-filter-reset')){
+        document.querySelectorAll('[data-record-filter]').forEach(el => { el.value = '' })
+        defaultRecordQueryData = { page: 1, size: PAGE_SIZE }
+        recordPageNow = 1
+        renderRecordData(defaultRecordQueryData)
+    }
+})
 
 // 导航：数据展示 / 我的记录
 document.querySelector('#data-showing-button').addEventListener('click', showEquipmentView)
