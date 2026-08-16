@@ -6,7 +6,7 @@ class ItemStatus:
     PENDING_BORROW = "借用审核中"
     # 已借出
     BORROWED = "已借出"
-    # 待确认归还
+    # 待确认归还（预留扩展状态）
     PENDING_RETURN = "待确认归还"
     # 已损坏
     DAMAGED = "已损坏"
@@ -53,7 +53,6 @@ class BorrowRecordStatus:
     APPROVED = "approved"
     REJECTED = "rejected"
     BORROWED = "borrowed"
-    PENDING_RETURN = "pending_return"
     COMPLETED = "completed"
 
 
@@ -62,7 +61,6 @@ BORROW_RECORD_STATUS_MAP = {
     BorrowRecordStatus.APPROVED: "审核通过",
     BorrowRecordStatus.REJECTED: "审核驳回",
     BorrowRecordStatus.BORROWED: "已借出",
-    BorrowRecordStatus.PENDING_RETURN: "待确认归还",
     BorrowRecordStatus.COMPLETED: "已完成",
 }
 
@@ -82,21 +80,6 @@ BORROW_RETURN_STATUS_MAP = {
 BORROW_RETURN_STATUS_CODES = list(BORROW_RETURN_STATUS_MAP.keys())
 
 
-class ConfirmStatus:
-    PENDING = "pending"
-    CONFIRMED = "confirmed"
-    REJECTED = "rejected"
-
-
-CONFIRM_STATUS_MAP = {
-    ConfirmStatus.PENDING: "待确认",
-    ConfirmStatus.CONFIRMED: "已确认",
-    ConfirmStatus.REJECTED: "已驳回",
-}
-
-CONFIRM_STATUS_CODES = list(CONFIRM_STATUS_MAP.keys())
-
-
 class RepairReportStatus:
     PENDING = "pending"
     CONFIRMED = "confirmed"
@@ -114,6 +97,7 @@ REPAIR_REPORT_STATUS_CODES = list(REPAIR_REPORT_STATUS_MAP.keys())
 
 class RepairOrderStatus:
     PENDING_ASSIGN = "pending_assign"
+    PENDING_ACCEPT = "pending_accept"
     PENDING_REPAIR = "pending_repair"
     REPAIRING = "repairing"
     PENDING_CONFIRM = "pending_confirm"
@@ -125,6 +109,7 @@ class RepairOrderStatus:
 
 REPAIR_ORDER_STATUS_MAP = {
     RepairOrderStatus.PENDING_ASSIGN: "待派单",
+    RepairOrderStatus.PENDING_ACCEPT: "待接单",
     RepairOrderStatus.PENDING_REPAIR: "待维修",
     RepairOrderStatus.REPAIRING: "维修中",
     RepairOrderStatus.PENDING_CONFIRM: "待确认",
@@ -135,33 +120,6 @@ REPAIR_ORDER_STATUS_MAP = {
 }
 
 REPAIR_ORDER_STATUS_CODES = list(REPAIR_ORDER_STATUS_MAP.keys())
-
-
-class AuditBusinessType:
-    BORROW_RECORD = "borrow_record"
-    EQUIPMENT = "equipment"
-
-
-AUDIT_BUSINESS_TYPE_MAP = {
-    AuditBusinessType.BORROW_RECORD: "借用记录",
-    AuditBusinessType.EQUIPMENT: "设备",
-}
-
-AUDIT_BUSINESS_TYPE_CODES = list(AUDIT_BUSINESS_TYPE_MAP.keys())
-
-
-class AuditOperationType:
-    REVIEW = "review"
-    CONFIRM_RETURN = "confirm_return"
-
-
-AUDIT_OPERATION_TYPE_MAP = {
-    AuditOperationType.REVIEW: "审核借用申请",
-    AuditOperationType.CONFIRM_RETURN: "确认设备归还",
-}
-
-AUDIT_OPERATION_TYPE_CODES = list(AUDIT_OPERATION_TYPE_MAP.keys())
-
 
 
 # 可选：所有状态英文列表，用于参数校验

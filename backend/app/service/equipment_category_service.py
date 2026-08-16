@@ -5,6 +5,7 @@ from app.core.exceptions import BussinessException
 from app.crud import equipment_category_crud
 from app.db.models.equipment_category_model import EquipmentCategory
 from app.schema.equipment_category_schema import CategoryCreate, CategoryQuery, CategoryResp, CategoryUpdate
+from app.utils.redis_cache import mark_equipment_cache_invalidation
 
 
 def query_categories_service(session: Session, query: CategoryQuery) -> Page[CategoryResp]:
@@ -28,6 +29,8 @@ def create_category_service(session: Session, category_in: CategoryCreate) -> No
         if equipment_category_crud.get_category_by_name(session, category_in.category_name):
             raise BussinessException("设备分类名称已存在", status_code=409)
         equipment_category_crud.add_category(EquipmentCategory(**category_in.model_dump()), session)
+        # 设备响应包含分类名称，分类变更后需要使设备缓存失效。
+        mark_equipment_cache_invalidation(session)
 
 
 def update_category_service(session: Session, category_id: int, category_in: CategoryUpdate) -> None:
@@ -46,6 +49,7 @@ def update_category_service(session: Session, category_id: int, category_in: Cat
                 raise BussinessException("设备分类名称已存在", status_code=409)
         # 校验新分类名称后写入变更。
         equipment_category_crud.update_category(category, values, session)
+        mark_equipment_cache_invalidation(session)
 
 
 def delete_category_service(session: Session, category_id: int) -> None:
@@ -55,3 +59,4 @@ def delete_category_service(session: Session, category_id: int) -> None:
         if not category:
             raise BussinessException("设备分类不存在", status_code=404)
         equipment_category_crud.delete_category(category, session)
+        mark_equipment_cache_invalidation(session)

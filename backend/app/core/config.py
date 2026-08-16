@@ -10,6 +10,29 @@ backend_root = os.path.join(current_file_dir, "..", "..")
 env_file_abs = os.path.join(backend_root, ".env")
 
 class Settings(BaseSettings):
+    # SMTP 发件人配置；仅邮箱验证码接口使用。
+    MAIL_USERNAME: str | None = Field(None, description="SMTP 用户名")
+    MAIL_PASSWORD: str | None = Field(None, description="SMTP 授权码或密码")
+    MAIL_FROM: str | None = Field(None, description="发件人邮箱")
+    MAIL_FROM_NAME: str = Field("校园设备管理系统", description="发件人名称")
+    MAIL_PORT: int = Field(465, description="SMTP 端口")
+    MAIL_SERVER: str | None = Field(None, description="SMTP 服务器地址")
+    MAIL_STARTTLS: bool = Field(False, description="是否启用 STARTTLS")
+    MAIL_SSL_TLS: bool = Field(True, description="是否启用 SSL/TLS")
+    EMAIL_VERIFICATION_CODE_EXPIRE_SECONDS: int = Field(
+        60,
+        ge=1,
+        description="邮箱验证码有效期，单位秒",
+    )
+
+    # Redis 缓存配置；Redis 不可用时查询接口自动回源 MySQL。
+    REDIS_HOST: str = Field("127.0.0.1", description="Redis 主机地址")
+    REDIS_PORT: int = Field(6379, description="Redis 端口")
+    REDIS_DB: int = Field(0, description="Redis 数据库编号")
+    REDIS_PASSWORD: str | None = Field(None, description="Redis 密码")
+    REDIS_SOCKET_TIMEOUT: float = Field(0.5, description="Redis 请求超时时间，单位秒")
+    EQUIPMENT_QUERY_CACHE_TTL: int = Field(300, ge=1, description="设备查询缓存有效期，单位秒")
+
     #数据库配置
     DB_HOST: str = Field(..., description="数据库主机地址")
     DB_PORT: int = Field(..., description="数据库端口")
@@ -36,9 +59,14 @@ class Settings(BaseSettings):
     #图片上传配置
     IMAGE_MAX_SIZE: int = Field(..., description="图片上传大小上限")
     IMAGE_ALLOWED_EXTENSIONS: str = Field(..., description="允许上传的图片扩展名")
+    IMAGE_ALLOWED_CONTENT_TYPES: str = Field(
+        "image/jpeg,image/png,image/gif,image/webp",
+        description="允许上传的图片 MIME 类型",
+    )
     DEFAULT_EQUIPMENT_IMAGE_URL: str = Field(..., description="新增设备的默认图片 URL")
     DEFAULT_PROFILE_IMAGE_URL: str = Field(..., description="新账号的默认头像 URL")
 
+    SUPER_ADMIN_USERNAME: str = Field(..., description="super administrator username")
 
     @property
     def SQLALCHEMY_DATABASE_URL(self) -> str:

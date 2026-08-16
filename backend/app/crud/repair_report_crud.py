@@ -8,6 +8,7 @@ from app.db.models.repair_report_model import RepairReport
 from app.db.models.equipment_category_model import EquipmentCategory
 from app.db.models.equipment_model import Equipment
 from app.db.models.repair_order_model import RepairOrder
+from app.db.models.user_model import User
 from app.schema.repair_report_schema import RepairReportQuery
 
 
@@ -25,6 +26,37 @@ def update_repair_report(repair_report: RepairReport, values: dict, session: Ses
     for field, value in values.items():
         setattr(repair_report, field, value)
     session.flush()
+
+
+def get_repair_report_by_id_for_update(session: Session, repair_report_id: int) -> RepairReport | None:
+    stmt = select(RepairReport).where(RepairReport.id == repair_report_id).with_for_update()
+    return session.scalar(stmt)
+
+
+def query_repair_reports_by_admin(session: Session, query: RepairReportQuery):
+    stmt = (
+        select(RepairReport, User, Equipment, RepairOrder)
+        .outerjoin(User, RepairReport.user_id == User.id)
+        .outerjoin(Equipment, RepairReport.equipment_id == Equipment.id)
+        .outerjoin(RepairOrder, RepairReport.id == RepairOrder.repair_report_id)
+    )
+    if query.status:
+        stmt = stmt.where(RepairReport.status == query.status)
+    if query.equipment_name:
+        stmt = stmt.where(Equipment.equipment_name.like(f"%{query.equipment_name}%"))
+    stmt = stmt.order_by(desc(RepairReport.create_time))
+    return paginate(session, stmt, query)
+
+
+def get_repair_report_detail_by_id(session: Session, repair_report_id: int):
+    stmt = (
+        select(RepairReport, User, Equipment, RepairOrder)
+        .outerjoin(User, RepairReport.user_id == User.id)
+        .outerjoin(Equipment, RepairReport.equipment_id == Equipment.id)
+        .outerjoin(RepairOrder, RepairReport.id == RepairOrder.repair_report_id)
+        .where(RepairReport.id == repair_report_id)
+    )
+    return session.execute(stmt).one_or_none()
 
 
 def query_repair_report_by_user(

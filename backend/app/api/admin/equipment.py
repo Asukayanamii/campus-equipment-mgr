@@ -45,11 +45,10 @@ def create_equipment(equipment_in: EquipmentCreate, db: Session = Depends(get_db
 def update_equipment(
     equipment_in: EquipmentUpdate,
     equipment_id: int = Path(..., alias="equipmentId", ge=1),
-    info: dict = Depends(admin_verity),
     db: Session = Depends(get_db),
 ):
     logger.info("管理端根据 ID 更新设备，设备 ID：%s", equipment_id)
-    update_equipment_service(db, equipment_id, equipment_in, info["id"])
+    update_equipment_service(db, equipment_id, equipment_in)
     return Result.success()
 
 

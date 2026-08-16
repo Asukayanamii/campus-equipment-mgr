@@ -11,11 +11,20 @@ from app.db.models.admin_model import Admin
 import bcrypt
 import jwt
 
-from app.schema.common_schema import LoginIn, LoginOut, RegisterIn, UpdateIn, GetMeOut
+from app.schema.common_schema import LoginIn, LoginOut, UpdateIn, GetMeOut
+from app.schema.admin_register_schema import AdminRegisterIn
+from app.crud import registration_code_crud
 
 
-def register_by_password(register_in: RegisterIn, db: Session) -> None:
+def register_by_password(register_in: AdminRegisterIn, db: Session) -> None:
     with db.begin():
+        registration_code = getattr(register_in, "registration_code", None)
+        if not registration_code:
+            raise BussinessException("注册码不能为空", status_code=422)
+        # 注册码以明文存储，按注册码和未使用状态精确查询，避免遍历全部记录。
+        matched_code = registration_code_crud.get_unused_registration_code_by_code(db, registration_code)
+        if not matched_code:
+            raise BussinessException("注册码无效或已使用", status_code=400)
         # 校验管理员用户名是否已注册。
         admin = admin_crud.query_admin_by_username(register_in.username, db)
         if admin:
@@ -23,11 +32,13 @@ def register_by_password(register_in: RegisterIn, db: Session) -> None:
         # 加密密码并补齐系统生成的昵称、默认头像。
         salt = bcrypt.gensalt()
         register_in.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt).decode('utf-8')
-        admin = Admin(**register_in.model_dump())
+        admin = Admin(**register_in.model_dump(exclude={"registration_code"}))
         admin.name = 'admin'+ uuid.uuid5(uuid.NAMESPACE_DNS, register_in.username).hex[:5]
         admin.image = settings.DEFAULT_PROFILE_IMAGE_URL
         # 在当前事务中保存管理员账号。
         admin_crud.add_admin(admin, db)
+        matched_code.is_used = True
+        matched_code.update_time = datetime.now()
         return None
 
 

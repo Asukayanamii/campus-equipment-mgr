@@ -1,39 +1,16 @@
-from datetime import datetime
-
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import (
-    AuditBusinessType,
-    AuditOperationType,
-    BorrowRecordStatus,
-    BorrowReturnStatus,
-    ConfirmStatus,
-    ItemStatusCode,
-    RepairOrderStatus,
-    RepairReportStatus,
-)
+from app.constant.status_constant import BorrowRecordStatus, ItemStatusCode
 from app.core.exceptions import BussinessException
-from app.crud import (
-    borrow_record_crud,
-    borrow_return_image_crud,
-    borrow_return_record_crud,
-    equipment_crud,
-    repair_order_crud,
-    repair_report_crud,
-)
-from app.db.models.repair_order_model import RepairOrder
-from app.db.models.repair_report_model import RepairReport
+from app.crud import borrow_record_crud, borrow_return_image_crud, equipment_crud
 from app.schema.admin_borrow_record_schema import (
     AdminBorrowRecordOut,
     AdminBorrowRecordPageOut,
     AdminBorrowRecordQuery,
     BorrowRecordReview,
     BorrowRecordReviewOut,
-    BorrowReturnConfirm,
-    BorrowReturnConfirmOut,
 )
-from app.service.audit_service import create_audit_record_service
 from app.service.equipment_service import change_equipment_status_service
 
 
@@ -61,7 +38,7 @@ def _build_borrow_record_detail_out(session: Session, borrow_record_detail) -> A
         borrow_record_out.equipment_status = equipment.status
         borrow_record_out.remark = equipment.remark
 
-    # 补充学生归还申报、管理员确认和损坏图片信息。
+    # 补充学生归还申报和损坏图片信息。
     if borrow_return_record:
         borrow_record_out.return_record_id = borrow_return_record.id
         borrow_record_out.return_status = borrow_return_record.return_status
@@ -75,11 +52,6 @@ def _build_borrow_record_detail_out(session: Session, borrow_record_detail) -> A
             )
         ]
         borrow_record_out.return_time = borrow_return_record.return_time
-        borrow_record_out.confirm_status = borrow_return_record.confirm_status
-        borrow_record_out.confirmed_status = borrow_return_record.confirmed_status
-        borrow_record_out.confirm_remark = borrow_return_record.confirm_remark
-        borrow_record_out.confirmer_id = borrow_return_record.confirmer_id
-        borrow_record_out.confirm_time = borrow_return_record.confirm_time
 
     # 补充关联报修和维修工单摘要。
     if repair_report:
@@ -104,8 +76,6 @@ def query_borrow_record_by_admin_service(
         borrow_record_out.username = user.username if user else None
         borrow_record_out.equipment_name = equipment.equipment_name if equipment else None
         borrow_record_out.return_status = borrow_return_record.return_status if borrow_return_record else None
-        borrow_record_out.confirm_status = borrow_return_record.confirm_status if borrow_return_record else None
-        borrow_record_out.confirmed_status = borrow_return_record.confirmed_status if borrow_return_record else None
         records.append(borrow_record_out)
     # 保留分页器元数据并返回展示模型。
     return Page(items=records, total=res.total, page=query.page, size=res.size, pages=res.pages)
@@ -152,163 +122,5 @@ def review_borrow_record_service(
             session=session,
             equipment=equipment,
             target_status=equipment_status,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            admin_id=admin_id,
-            reason=review_in.review_remark,
-        )
-
-        # 统一写入审核记录，提供后续审计追溯。
-        create_audit_record_service(
-            session=session,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            operation_type=AuditOperationType.REVIEW,
-            admin_id=admin_id,
-            result=result_status,
-            remark=review_in.review_remark,
         )
         return BorrowRecordReviewOut.model_validate(borrow_record)
-
-
-def confirm_borrow_return_service(
-    session: Session,
-    borrow_record_id: int,
-    admin_id: int,
-    confirm_in: BorrowReturnConfirm,
-) -> BorrowReturnConfirmOut:
-    with session.begin():
-        # 锁定借用记录并限制为待确认归还状态，防止重复确认。
-        borrow_record = borrow_record_crud.get_borrow_record_by_id_for_update(session, borrow_record_id)
-        if not borrow_record:
-            raise BussinessException("借用记录不存在", status_code=404)
-        if borrow_record.status != BorrowRecordStatus.PENDING_RETURN:
-            raise BussinessException("当前借用记录不能确认归还", status_code=400)
-
-        # 锁定归还记录和设备，保证归还确认、维修流程、设备状态原子一致。
-        borrow_return_record = borrow_return_record_crud.get_borrow_return_record_by_borrow_record_id_for_update(
-            session,
-            borrow_record_id,
-        )
-        if not borrow_return_record:
-            raise BussinessException("归还记录不存在", status_code=404)
-        if borrow_return_record.confirm_status != ConfirmStatus.PENDING:
-            raise BussinessException("当前归还记录已确认", status_code=400)
-        equipment = equipment_crud.get_equipment_by_id_for_update(session, borrow_record.equipment_id)
-        if not equipment:
-            raise BussinessException("设备不存在", status_code=404)
-
-        # 根据管理员最终判定维护报修和维修工单，避免学生申报与最终验收不一致。
-        repair_report = repair_report_crud.get_repair_report_by_return_record_id(session, borrow_return_record.id)
-        if confirm_in.confirmed_status == BorrowReturnStatus.DAMAGED:
-            if not repair_report:
-                repair_report = RepairReport(
-                    return_record_id=borrow_return_record.id,
-                    user_id=borrow_record.user_id,
-                    equipment_id=borrow_record.equipment_id,
-                    damage_description=(
-                        borrow_return_record.damage_description
-                        or confirm_in.confirm_remark
-                        or "管理员验收发现设备损坏"
-                    ),
-                    status=RepairReportStatus.CONFIRMED,
-                    confirm_status=ConfirmStatus.CONFIRMED,
-                    confirm_remark=confirm_in.confirm_remark,
-                    confirmer_id=admin_id,
-                    confirm_time=datetime.now(),
-                )
-                repair_report_crud.add_repair_report(repair_report, session)
-            else:
-                repair_report_crud.update_repair_report(
-                    repair_report,
-                    {
-                        "status": RepairReportStatus.CONFIRMED,
-                        "confirm_status": ConfirmStatus.CONFIRMED,
-                        "confirm_remark": confirm_in.confirm_remark,
-                        "confirmer_id": admin_id,
-                        "confirm_time": datetime.now(),
-                    },
-                    session,
-                )
-            if not repair_order_crud.get_repair_order_by_repair_report_id(session, repair_report.id):
-                repair_order_crud.add_repair_order(
-                    RepairOrder(
-                        repair_report_id=repair_report.id,
-                        equipment_id=borrow_record.equipment_id,
-                        status=RepairOrderStatus.PENDING_ASSIGN,
-                    ),
-                    session,
-                )
-            target_equipment_status = ItemStatusCode.REPAIR_PENDING
-        else:
-            if repair_report:
-                repair_report_crud.update_repair_report(
-                    repair_report,
-                    {
-                        "status": RepairReportStatus.REJECTED,
-                        "confirm_status": ConfirmStatus.REJECTED,
-                        "confirm_remark": confirm_in.confirm_remark,
-                        "confirmer_id": admin_id,
-                        "confirm_time": datetime.now(),
-                    },
-                    session,
-                )
-                repair_order = repair_order_crud.get_repair_order_by_repair_report_id(session, repair_report.id)
-                if repair_order and repair_order.status in (
-                    RepairOrderStatus.PENDING_ASSIGN,
-                    RepairOrderStatus.PENDING_REPAIR,
-                ):
-                    repair_order_crud.update_repair_order(
-                        repair_order,
-                        {"status": RepairOrderStatus.CANCELLED},
-                        session,
-                    )
-            target_equipment_status = ItemStatusCode.AVAILABLE
-
-        # 回写管理员确认结果，并同步完成借用记录和设备状态。
-        confirm_time = datetime.now()
-        borrow_return_record_crud.update_borrow_return_record(
-            borrow_return_record,
-            {
-                "confirm_status": ConfirmStatus.CONFIRMED,
-                "confirmed_status": confirm_in.confirmed_status,
-                "confirm_remark": confirm_in.confirm_remark,
-                "confirmer_id": admin_id,
-                "confirm_time": confirm_time,
-            },
-            session,
-        )
-        borrow_record_crud.update_borrow_record(
-            borrow_record,
-            {"status": BorrowRecordStatus.COMPLETED},
-            session,
-        )
-        change_equipment_status_service(
-            session=session,
-            equipment=equipment,
-            target_status=target_equipment_status,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            admin_id=admin_id,
-            reason=confirm_in.confirm_remark,
-        )
-
-        # 统一写入管理员确认记录，确保处理过程可审计。
-        create_audit_record_service(
-            session=session,
-            business_type=AuditBusinessType.BORROW_RECORD,
-            business_id=borrow_record.id,
-            operation_type=AuditOperationType.CONFIRM_RETURN,
-            admin_id=admin_id,
-            result=confirm_in.confirmed_status,
-            remark=confirm_in.confirm_remark,
-        )
-        return BorrowReturnConfirmOut(
-            borrow_record_id=borrow_record.id,
-            borrow_record_status=borrow_record.status,
-            return_record_id=borrow_return_record.id,
-            confirm_status=borrow_return_record.confirm_status,
-            confirmed_status=borrow_return_record.confirmed_status,
-            confirm_remark=borrow_return_record.confirm_remark,
-            confirm_time=borrow_return_record.confirm_time,
-        )
