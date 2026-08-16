@@ -1,0 +1,19 @@
+.search-box {
+  box-sizing: border-box;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  align-items: end;
+  height: auto !important;
+  min-height: 96px;
+  margin: 18px 24px;
+  padding: 18px;
+  border: 1px solid #dfe6ee;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+.search-box label { display: flex; flex-direction: column; gap: 6px; color: #334155; font-size: 14px; font-weight: 600; }
+.search-box input, .search-box select { box-sizing: border-box; width: 100%; min-height: 38px; padding: 7px 10px; border: 1px solid #cbd5e1; border-radius: 6px; background: #fff; }
+.search-box button { position: static !important; width: auto !important; min-height: 38px; padding: 8px 18px; border: 0; border-radius: 6px; background: #1d4ed8; color: #fff; font-weight: 700; cursor: pointer; }
+.search-box .equipment-filter-reset, .search-box .category-filter-reset { background: #64748b; }
+@media (max-width: 700px) { .search-box { grid-template-columns: 1fr; margin: 12px; } }

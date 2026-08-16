@@ -38,7 +38,6 @@ let defaultCategoryQueryData = new QueryCategoryData({
 // 记录页独立的分页与搜索状态
 let recordPageNow = 1;
 let recordPageAll = 1;
-let recordQueryDataYouChange  = ''
 let defaultRecordQueryData = new QueryBorrowRecordData({
     page : 1,
     size : PAGE_SIZE
@@ -127,7 +126,7 @@ function renderData(QueryData = {}){
         dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card" data-id="${i.id}">
+                <div class="data-card status-${chineseToStatus(EQUIPMENT_STATUS_MAP, i.status || 'unknown')}" data-id="${i.id}">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">
@@ -150,6 +149,15 @@ function renderData(QueryData = {}){
             card.style.background = i.coverImg
                 ? `linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url("${i.coverImg}")`
                 : 'rgba(255,255,255,0.5)'
+            if(i.coverImg){
+                const previewButton = document.createElement('button')
+                previewButton.type = 'button'
+                previewButton.className = 'data-card-image-preview'
+                previewButton.dataset.imagePreviewSrc = i.coverImg
+                previewButton.setAttribute('aria-label', `放大查看${i.equipmentName}封面`)
+                previewButton.title = '查看封面大图'
+                card.appendChild(previewButton)
+            }
         });
         pageAll = res.data.pages;
         renderButton()
@@ -268,20 +276,20 @@ function renderChangeProfileSubmitWindow(){
                 return
             }
             if(!newPasswordFirst){
-                alert('第一次密码不能为空')
+                Toast.warning('第一次密码不能为空')
                 return
             }
             if(!newPasswordSecondString){
-                alert('第二次密码不能为空')
+                Toast.warning('第二次密码不能为空')
             }
             if(newPasswordFirstString !== newPasswordSecondString){
-                alert("两次密码输入不一致")
+                Toast.warning("两次密码输入不一致")
                 return
             }
 
             const temUserName = (await getPersonalData(apiChoose())).username
             if(!await sendSubmit(temUserName,originPasswordString,apiChoose())){
-                alert('原密码输入错误')
+                Toast.failure('原密码输入错误')
                 return
             }
 
@@ -290,9 +298,9 @@ function renderChangeProfileSubmitWindow(){
                 name : changedName.value || temName,
                 password : newPasswordFirst.value
             },apiChoose())){
-                alert('修改失败')
+                Toast.failure('修改失败')
             }else{
-                alert('修改成功')
+                Toast.success('修改成功')
             }
         }
     })
@@ -302,22 +310,19 @@ function renderChangeProfileSubmitWindow(){
 function callDataShowing(){
     rightSide.insertAdjacentHTML('beforeend',`
         <!-- 搜索框 -->
-         <div class="search-box">
-            <p>搜索：<input type="text" class="search" id="search"></p>
-            <select id="search-way-choose" class="search-way-choose">
-                <option value="no">请选择查询方式（支持联查）</option>
-                <option value="reset">重置搜索</option>
-                <option value="categoryId">设备分类ID</option>
-                <option value="status">设备状态</option>
-                <option value="equipmentName">设备名称</option>
-                <option value="equipmentNo">设备编号</option>
-                <option value="location">设备存放位置</option>
-                <option value="brand">设备品牌</option>
-                <option value="spec">设备规格型号</option>
-                <option value="startTime">设备采购开始时间</option>
-                <option value="endTime">设备采购结束时间</option>
-            </select>
-            <button class="add-equipment">+</button>
+        <div class="search-box">
+            <div class="filter-fields equipment-filter-fields">
+                <label>设备分类<select data-equipment-filter="categoryId" disabled><option value="">正在加载分类...</option></select></label>
+                <label>设备名称<input data-equipment-filter="equipmentName"></label>
+                <label>设备编号<input data-equipment-filter="equipmentNo"></label>
+                <label>位置<input data-equipment-filter="location"></label>
+                <label>品牌<input data-equipment-filter="brand"></label>
+                <label>规格<input data-equipment-filter="spec"></label>
+                <label>状态<select data-equipment-filter="status"><option value="">全部</option>${Object.entries(EQUIPMENT_STATUS_MAP).map(([k,v])=>`<option value="${k}">${v}</option>`).join('')}</select></label>
+            </div>
+            <div class="filter-actions">
+                <button type="button" class="equipment-filter-submit">查询</button><button type="button" class="equipment-filter-reset">重置</button><button type="button" class="add-equipment">新增设备</button>
+            </div>
          </div>
         <!-- 数据展示 -->
         <div class="data-showing" id="data-showing">
@@ -337,24 +342,25 @@ function callDataShowing(){
     )
     attachEventsForPageButton()
     attachEventsForDataCard()
-    attachEventsForSearchWayChoose()
+    attachEquipmentFilters()
     attachEventsForAddButton()
+    populateEquipmentCategorySelect(document.querySelector('select[data-equipment-filter="categoryId"]'))
 }
 
 // 召唤分类展示页
 function callCategoryShowing(){
     rightSide.insertAdjacentHTML('beforeend',`
+        <section class="category-management-view">
         <!-- 搜索框 -->
-         <div class="search-box">
-            <p>搜索：<input type="text" class="search" id="search"></p>
-            <select id="search-way-choose" class="search-way-choose">
-                <option value="no">请选择查询方式（支持联查）</option>
-                <option value="reset">重置搜索</option>
-                <option value="id">设备分类ID</option>
-                <option value="categoryName">设备分类名称</option>
-            </select>
-            <button class="add-category">+</button>
-         </div>
+        <div class="search-box">
+            <div class="filter-fields">
+                <label>设备分类<select data-category-filter="id" disabled><option value="">正在加载分类...</option></select></label>
+                <label>分类名称<input data-category-filter="categoryName"></label>
+            </div>
+            <div class="filter-actions">
+                <button type="button" class="category-filter-submit">查询</button><button type="button" class="category-filter-reset">重置</button><button type="button" class="add-category">新增分类</button>
+            </div>
+        </div>
         <!-- 分类列表 -->
         <div class="category-showing" id="category-showing">
 
@@ -369,12 +375,28 @@ function callCategoryShowing(){
             <button id="aft-1"></button>
             <button id="aft-2"></button>
             <button id="end"></button>
-        </div>`
+        </div>
+        </section>`
     )
     attachEventsForCategoryPageButton()
-    attachEventsForCategorySearchWayChoose()
+    attachCategoryFilters()
     attachEventsForAddCategoryButton()
+    populateEquipmentCategorySelect(document.querySelector('select[data-category-filter="id"]'))
     renderCategory(defaultCategoryQueryData)
+}
+
+function attachEquipmentFilters(){
+    const root = document.querySelector('.search-box')
+    const apply = () => { defaultQueryData = {page:1,size:PAGE_SIZE}; root.querySelectorAll('[data-equipment-filter]').forEach(el=>{if(el.value) defaultQueryData[el.dataset.equipmentFilter]=el.value}); pageNow=1; renderData(defaultQueryData) }
+    root.querySelector('.equipment-filter-submit').addEventListener('click', apply)
+    root.querySelector('.equipment-filter-reset').addEventListener('click', ()=>{root.querySelectorAll('[data-equipment-filter]').forEach(el=>el.value=''); apply()})
+}
+
+function attachCategoryFilters(){
+    const root = document.querySelector('.search-box')
+    const apply = () => { defaultCategoryQueryData = {page:1,size:PAGE_SIZE}; root.querySelectorAll('[data-category-filter]').forEach(el=>{if(el.value) defaultCategoryQueryData[el.dataset.categoryFilter]=el.value}); categoryPageNow=1; renderCategory(defaultCategoryQueryData) }
+    root.querySelector('.category-filter-submit').addEventListener('click', apply)
+    root.querySelector('.category-filter-reset').addEventListener('click', ()=>{root.querySelectorAll('[data-category-filter]').forEach(el=>el.value=''); apply()})
 }
 
 // 重置分类查询数据
@@ -394,7 +416,26 @@ function renderCurrentView(){
     }
 }
 
-// 渲染分类细长条列表，轮流放进 6 个竖列，展开只占自己那一列
+function layoutCategoryColumns(categoryShowing){
+    const cells = Array.from(categoryShowing.querySelectorAll('.category-cell'))
+        .sort((left, right) => Number(left.dataset.categoryOrder) - Number(right.dataset.categoryOrder))
+    if(cells.length === 0) return
+
+    const minColumnWidth = 300
+    const columnGap = 14
+    const columnCount = Math.max(1, Math.min(cells.length, Math.floor((categoryShowing.clientWidth + columnGap) / (minColumnWidth + columnGap))))
+    categoryShowing.style.setProperty('--category-column-count', columnCount)
+    const columns = Array.from({ length: columnCount }, () => {
+        const column = document.createElement('div')
+        column.className = 'category-col'
+        return column
+    })
+
+    categoryShowing.replaceChildren(...columns)
+    cells.forEach((cell, index) => columns[index % columnCount].appendChild(cell))
+}
+
+// 渲染响应式分类卡片，展开设备时只影响当前分类卡片。
 async function renderCategory(QueryData = {}){
     const categoryShowing = document.getElementById('category-showing')
     const res = await getCategoryData(QueryData)
@@ -407,26 +448,26 @@ async function renderCategory(QueryData = {}){
         `)
         return
     }
-    const columns = ['','','','','','']
     list.forEach((category, index) => {
-        columns[index % 6] += `
-            <div class="category-cell">
-                <div class="category-bar" data-category-id="${category.id}">
-                    <span class="category-name">${category.categoryName}</span>
+        categoryShowing.insertAdjacentHTML('beforeend', `
+            <div class="category-cell" data-category-order="${index}">
+                <div class="category-bar" data-category-id="${category.id}" aria-expanded="false">
+                    <span class="category-info">
+                        <span class="category-id">分类 #${category.id}</span>
+                        <span class="category-name">${category.categoryName}</span>
+                    </span>
                     <span class="category-actions">
-                        <button class="category-add-equipment" title="新增设备">＋</button>
-                        <span class="category-arrow">▸</span>
+                        <button class="category-add-equipment" type="button" title="向该分类新增设备" aria-label="向${category.categoryName}分类新增设备">＋</button>
+                        <span class="category-arrow" aria-hidden="true">▸</span>
                     </span>
                 </div>
-                <div class="category-members" id="category-members-${category.id}"></div>
+                <div class="category-members" id="category-members-${category.id}">
+                    <div class="category-members-inner"></div>
+                </div>
             </div>
-        `
-    })
-    columns.forEach(columnHtml => {
-        categoryShowing.insertAdjacentHTML('beforeend',`
-            <div class="category-col">${columnHtml}</div>
         `)
     })
+    layoutCategoryColumns(categoryShowing)
     categoryPageAll = res.data.pages || 1
     renderCategoryButton()
     checkCategoryButton()
@@ -440,6 +481,9 @@ async function renderCategory(QueryData = {}){
             addNewEquipmentPanel(bar.dataset.categoryId)
             addBackgroundShadow()
         })
+        document.dispatchEvent(new CustomEvent('admin-category-rendered', {
+            detail: { bar, categoryId: Number(bar.dataset.categoryId) }
+        }))
     })
 }
 
@@ -461,32 +505,44 @@ async function getAllEquipmentByCategory(categoryId){
 // 展开/收起分类下的成员
 async function toggleCategoryMembers(bar){
     const categoryId = bar.dataset.categoryId
-    const arrow = bar.querySelector('.category-arrow')
     const membersBox = document.getElementById(`category-members-${categoryId}`)
     if(!membersBox) return
-    if(membersBox.querySelector('.member-row') || membersBox.querySelector('.member-empty')){
-        // 已展开，点击收起
-        membersBox.innerHTML = ''
-        arrow.textContent = '▸'
+    const cell = bar.closest('.category-cell')
+    const membersInner = membersBox.querySelector('.category-members-inner') || membersBox
+
+    if(membersBox.dataset.loading === 'true') return
+    if(membersBox.classList.contains('is-open')){
+        membersBox.classList.remove('is-open')
+        cell?.classList.remove('is-open')
+        bar.setAttribute('aria-expanded', 'false')
+        window.setTimeout(() => {
+            if(!membersBox.classList.contains('is-open')) membersInner.innerHTML = ''
+        }, 280)
         return
     }
+
+    membersInner.innerHTML = ''
+    membersBox.dataset.loading = 'true'
     const members = await getAllEquipmentByCategory(categoryId)
+    delete membersBox.dataset.loading
     if(members.length === 0){
-        membersBox.insertAdjacentHTML('beforeend',`
-            <p class="member-empty">该分类下暂无设备</p>
+        membersInner.insertAdjacentHTML('beforeend', `
+            <p class="member-empty">&#x8BE5;&#x5206;&#x7C7B;&#x6682;&#x65E0;&#x8BBE;&#x5907;</p>
         `)
     }else{
         const membersHtml = members.map(equipment => `
             <div class="member-row" data-equipment-id="${equipment.id}">
                 <span class="member-name">${equipment.equipmentName}</span>
-                <span class="member-meta">${equipment.equipmentNo} · ${statusToChinese(EQUIPMENT_STATUS_MAP,equipment.status)} · ${equipment.location}</span>
+                <span class="member-meta">${equipment.equipmentNo} - ${statusToChinese(EQUIPMENT_STATUS_MAP,equipment.status)} - ${equipment.location}</span>
             </div>
         `).join('')
-        membersBox.insertAdjacentHTML('beforeend', membersHtml)
+        membersInner.insertAdjacentHTML('beforeend', membersHtml)
     }
-    arrow.textContent = '▾'
-    // 成员行点击，弹出设备编辑/删除弹窗
-    membersBox.querySelectorAll('.member-row').forEach(row => {
+    void membersBox.offsetHeight
+    cell?.classList.add('is-open')
+    membersBox.classList.add('is-open')
+    bar.setAttribute('aria-expanded', 'true')
+    membersInner.querySelectorAll('.member-row').forEach(row => {
         row.addEventListener('click', async () => {
             const equipment = await getDataById(row.dataset.equipmentId, apiChoose())
             if(!equipment) return
@@ -618,7 +674,7 @@ function attachEventsForCategorySearchWayChoose(){
     search.addEventListener('keydown',(e) =>{
         if(e.key === 'Enter'){
             if(!categoryQueryDataYouChange){
-                alert('请选择搜索类型')
+                Toast.warning('请选择搜索类型')
                 return
             }
             defaultCategoryQueryData[categoryQueryDataYouChange]  = e.target.value
@@ -636,13 +692,13 @@ function attachEventsForCategorySearchWayChoose(){
                 resetCategoryQueryData()
                 categoryQueryDataYouChange = ''
                 search.value = ''
-                searchWayChoose.querySelector('option[value="id"]').textContent = '设备分类ID'
+                searchWayChoose.querySelector('option[value="id"]').textContent = '设备分类名称'
                 searchWayChoose.querySelector('option[value="categoryName"]').textContent = '设备分类名称'
                 renderCategory(defaultCategoryQueryData)
                 break
             case 'id':
                 categoryQueryDataYouChange  = 'id'
-                searchWayChoose.querySelector('option[value="id"]').textContent = '设备分类ID（已指定）'
+                searchWayChoose.querySelector('option[value="id"]').textContent = '设备分类名称（已指定）'
                 break
             case 'categoryName':
                 categoryQueryDataYouChange  = 'categoryName'
@@ -696,7 +752,9 @@ function addNewCategoryPanel(){
         })
         const ok = await addNewCategory(temCategoryCreate)
         if(!ok) return
-        alert('新增分类成功')
+        Toast.success('新增分类成功')
+        invalidateEquipmentCategoryMap()
+        populateEquipmentCategorySelect(document.querySelector('select[data-category-filter="id"]'))
 
         closeAddEquipmentPanel()
         renderCategory(defaultCategoryQueryData)
@@ -744,7 +802,7 @@ function addNewEquipmentPanel(categoryId){
                     <select id="purchaseDateDay">${daySelectOptions()}</select>日
                 </p>
                 <p>价格:<input type="text" id="price"></p>
-                <p>封面图片:<input type="text" id="coverImg"></p>
+                <p>封面图片:<input type="file" id="coverImgFile" accept="image/*"><input type="hidden" id="coverImg"></p>
                 <p>状态:<select id="status">${statusSelectOptions(EQUIPMENT_STATUS_MAP)}</select></p>
                 <p>备注:<input type="text" id="remark"></p>
             </div>
@@ -756,6 +814,9 @@ function addNewEquipmentPanel(categoryId){
     const closeButtonPlus = addEquipmentPanel.querySelector('.close-button-plus')
     const addEquipmentPanelButton = addEquipmentPanel.querySelector('.add-equipment-panel-submit-button')
     closeButtonPlus.addEventListener('click',closeAddEquipmentPanel)
+    addEquipmentPanel.querySelector('#coverImgFile').addEventListener('change', async event => {
+        const url = await uploadImage(event.target.files[0]); if(url) addEquipmentPanel.querySelector('#coverImg').value = url
+    })
     addEquipmentPanelButton.addEventListener('click',async() =>{
         const temEquipmentCreate = new EquipmentCreate()
         addEquipmentPanel.querySelectorAll('.add-equipment-panel-change p input, .add-equipment-panel-change p select').forEach( (e) =>{
@@ -769,7 +830,7 @@ function addNewEquipmentPanel(categoryId){
 
         const ok = await addNewEquipment(temEquipmentCreate,apiChoose())
         if(!ok) return
-        alert('新增设备成功')
+        Toast.success('新增设备成功')
 
         closeAddEquipmentPanel()
         renderCurrentView()
@@ -869,7 +930,7 @@ function attachEventsForSearchWayChoose(){
     search.addEventListener('keydown',(e) =>{
         if(e.key === 'Enter'){
             if(!queryDataYouChange){
-                alert('请选择搜索类型')
+                Toast.warning('请选择搜索类型')
                 return
             }
             defaultQueryData[queryDataYouChange]  = e.target.value
@@ -887,7 +948,7 @@ function attachEventsForSearchWayChoose(){
                 resetQueryData()
                 queryDataYouChange = ''
                 search.value = ''
-                searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID'
+                searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类名称'
                 searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态'
                 searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称'
                 searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号'
@@ -900,7 +961,7 @@ function attachEventsForSearchWayChoose(){
                 break
             case 'categoryId':
                 queryDataYouChange  = 'categoryId'
-                searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID（已指定）'
+            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类名称（已指定）'
                 break
             case 'status':
                 queryDataYouChange  = 'status'
@@ -949,53 +1010,78 @@ function callEquipmentDetailWindow(EquipmentOut){
         return
     }
     document.body.insertAdjacentHTML('beforeend',`
-        <div class="equipment-detail-window">
-            <button class="close-button-equipment-detail-window" id="close-button-equipment-detail-window">X</button>
+        <div class="equipment-detail-window" role="dialog" aria-modal="true" aria-labelledby="equipment-edit-title">
+            <header class="equipment-detail-header">
+                <div><p>设备管理</p><h2 id="equipment-edit-title">编辑设备信息</h2></div>
+                <button class="close-button-equipment-detail-window" id="close-button-equipment-detail-window" type="button" aria-label="关闭">×</button>
+            </header>
             <div class="equipment-detail-window-change">
-                <p>设备编号:<input type="text" id="equipmentNo" value="${EquipmentOut.equipmentNo ?? ''}"></p>
-                <p>设备名称:<input type="text" id="equipmentName" value="${EquipmentOut.equipmentName ?? ''}"></p>
-                <p>分类ID:<input type="text" id="categoryId" value="${EquipmentOut.categoryId ?? ''}"></p>
-                <p>规格:<input type="text" id="spec" value="${EquipmentOut.spec ?? ''}"></p>
-                <p>品牌:<input type="text" id="brand" value="${EquipmentOut.brand ?? ''}"></p>
-                <p>单位:<input type="text" id="unit" value="${EquipmentOut.unit ?? ''}"></p>
-                <p>位置:<input type="text" id="location" value="${EquipmentOut.location ?? ''}"></p>
-                <p class="date-choose-box">购买日期:
-                    <select id="purchaseDateYear">${yearSelectOptions(EquipmentOut.purchaseDate)}</select>年
-                    <select id="purchaseDateMonth">${monthSelectOptions(EquipmentOut.purchaseDate)}</select>月
-                    <select id="purchaseDateDay">${daySelectOptions(EquipmentOut.purchaseDate)}</select>日
-                </p>
-                <p>价格:<input type="text" id="price" value="${EquipmentOut.price ?? ''}"></p>
-                <p>封面图片:<input type="text" id="coverImg" value="${EquipmentOut.coverImg ?? ''}"></p>
-                <p>状态:<select id="status">${statusSelectOptions(EQUIPMENT_STATUS_MAP, EquipmentOut.status)}</select></p>
-                <p>备注:<input type="text" id="remark" value="${EquipmentOut.remark ?? ''}"></p>
+                <label class="equipment-edit-field"><span>设备编号</span><input data-equipment-edit-field type="text" id="equipmentNo" value="${EquipmentOut.equipmentNo ?? ''}"></label>
+                <label class="equipment-edit-field"><span>设备名称</span><input data-equipment-edit-field type="text" id="equipmentName" value="${EquipmentOut.equipmentName ?? ''}"></label>
+                <label class="equipment-edit-field"><span>分类 ID</span><input data-equipment-edit-field type="number" id="categoryId" value="${EquipmentOut.categoryId ?? ''}"></label>
+                <label class="equipment-edit-field"><span>规格型号</span><input data-equipment-edit-field type="text" id="spec" value="${EquipmentOut.spec ?? ''}"></label>
+                <label class="equipment-edit-field"><span>品牌</span><input data-equipment-edit-field type="text" id="brand" value="${EquipmentOut.brand ?? ''}"></label>
+                <label class="equipment-edit-field"><span>计量单位</span><input data-equipment-edit-field type="text" id="unit" value="${EquipmentOut.unit ?? ''}"></label>
+                <label class="equipment-edit-field"><span>存放位置</span><input data-equipment-edit-field type="text" id="location" value="${EquipmentOut.location ?? ''}"></label>
+                <div class="equipment-edit-field date-choose-box"><span>购买日期</span><div class="equipment-date-inputs">
+                    <label><select id="purchaseDateYear" aria-label="购买年份">${yearSelectOptions(EquipmentOut.purchaseDate)}</select><span>年</span></label>
+                    <label><select id="purchaseDateMonth" aria-label="购买月份">${monthSelectOptions(EquipmentOut.purchaseDate)}</select><span>月</span></label>
+                    <label><select id="purchaseDateDay" aria-label="购买日期">${daySelectOptions(EquipmentOut.purchaseDate)}</select><span>日</span></label>
+                </div></div>
+                <label class="equipment-edit-field"><span>采购价格</span><input data-equipment-edit-field type="number" id="price" min="0" step="0.01" value="${EquipmentOut.price ?? ''}"></label>
+                <label class="equipment-edit-field"><span>设备状态</span><select data-equipment-edit-field id="status">${statusSelectOptions(EQUIPMENT_STATUS_MAP, EquipmentOut.status)}</select></label>
+                <div class="equipment-edit-field equipment-cover-field"><span>封面图片</span><img class="equipment-cover-preview" alt="设备封面" hidden><div class="equipment-file-control"><label class="equipment-file-picker" for="coverImgFile">选择图片</label><span class="equipment-file-name">${EquipmentOut.coverImg ? '已上传封面，可重新选择' : '暂未上传封面'}</span></div><input type="file" id="coverImgFile" accept="image/*"><input data-equipment-edit-field type="hidden" id="coverImg" value="${EquipmentOut.coverImg ?? ''}"></div>
+                <label class="equipment-edit-field equipment-edit-field-wide"><span>备注</span><textarea data-equipment-edit-field id="remark" rows="3">${EquipmentOut.remark ?? ''}</textarea></label>
             </div>
             <div class="equipment-detail-window-buttons">
-                <button class="equipment-detail-window-delete-button">删除设备</button>
-                <button class="equipment-detail-window-submit-button" id="equipment-detail-window-submit-button">提交修改</button>
+                <button class="equipment-detail-window-delete-button" type="button">删除设备</button>
+                <button class="equipment-detail-window-submit-button" id="equipment-detail-window-submit-button" type="button">保存修改</button>
             </div>
             
         </div>
         `)
-    document.querySelector('#close-button-equipment-detail-window').addEventListener('click', () =>{
-        document.querySelector('.equipment-detail-window').remove()
+    const equipmentWindow = document.querySelector('.equipment-detail-window')
+    const coverPreview = equipmentWindow.querySelector('.equipment-cover-preview')
+    if(EquipmentOut.coverImg){
+        coverPreview.src = EquipmentOut.coverImg
+        coverPreview.hidden = false
+    }
+    if(EquipmentOut.coverImg) equipmentWindow.style.backgroundImage = `linear-gradient(rgba(255,255,255,.86), rgba(255,255,255,.86)), url("${EquipmentOut.coverImg}")`
+    equipmentWindow.querySelector('#close-button-equipment-detail-window').addEventListener('click', () =>{
+        equipmentWindow.remove()
         document.querySelector('.dim-overlay')?.remove()
     })
-    document.querySelector('#equipment-detail-window-submit-button').addEventListener('click',async() =>{
+    equipmentWindow.querySelector('#coverImgFile').addEventListener('change', async event => {
+        const file = event.target.files[0]
+        if(!file) return
+        const fileName = equipmentWindow.querySelector('.equipment-file-name')
+        fileName.textContent = '正在上传...'
+        const url = await uploadImage(file)
+        if(url){
+            equipmentWindow.querySelector('#coverImg').value = url
+            coverPreview.src = url
+            coverPreview.hidden = false
+            fileName.textContent = file.name
+        }else{
+            fileName.textContent = '上传失败，请重新选择'
+        }
+    })
+    equipmentWindow.querySelector('#equipment-detail-window-submit-button').addEventListener('click',async() =>{
         const temEquipmentUpdate = new EquipmentUpdate()
-        document.querySelectorAll('.equipment-detail-window-change p input, .equipment-detail-window-change p select').forEach( (e) =>{
+        equipmentWindow.querySelectorAll('[data-equipment-edit-field]').forEach( (e) =>{
             if(e.id === 'status'){
                 temEquipmentUpdate[e.id] = chineseToStatus(EQUIPMENT_STATUS_MAP,e.value)
-            }else if(e.id !== 'purchaseDateYear' && e.id !== 'purchaseDateMonth' && e.id !== 'purchaseDateDay'){
+            }else{
                 temEquipmentUpdate[e.id] = e.value
             }
         })
-        temEquipmentUpdate.purchaseDate = `${document.querySelector('#purchaseDateYear').value}-${document.querySelector('#purchaseDateMonth').value}-${document.querySelector('#purchaseDateDay').value}`
+        temEquipmentUpdate.purchaseDate = `${equipmentWindow.querySelector('#purchaseDateYear').value}-${equipmentWindow.querySelector('#purchaseDateMonth').value}-${equipmentWindow.querySelector('#purchaseDateDay').value}`
 
         const ok = await updateEquipment(EquipmentOut.id,temEquipmentUpdate,apiChoose())
         if(!ok) return
-        alert('更新设备成功')
+        Toast.success('更新设备成功')
 
-        document.querySelector('#equipment-detail-window').remove()
+        equipmentWindow.remove()
         document.querySelector('.dim-overlay')?.remove()
 
         const fresh = await getDataById(EquipmentOut.id, apiChoose())
@@ -1004,10 +1090,10 @@ function callEquipmentDetailWindow(EquipmentOut){
         addBackgroundShadow()
         callEquipmentDetailWindow(fresh)
     })
-    document.querySelector('.equipment-detail-window-delete-button').addEventListener('click',async() =>{
-        if(confirm(`你确定要删除${EquipmentOut.equipmentName}吗，改操作不可逆`)){
+    equipmentWindow.querySelector('.equipment-detail-window-delete-button').addEventListener('click',async() =>{
+        if(confirm(`确定要删除“${EquipmentOut.equipmentName}”吗？该操作不可逆。`)){
             if(await deleteEquipment(EquipmentOut.id,apiChoose())){
-            alert('删除成功')
+            Toast.success('删除成功')
             document.querySelector('.equipment-detail-window').remove()
             document.querySelector('.dim-overlay')?.remove()
             renderCurrentView()
@@ -1038,24 +1124,25 @@ profilePictureBox.addEventListener('click',() => {
 
 
 
-// ============ 我的记录（全部借用记录） ============
+// ============ 借用记录（全部借用记录） ============
 
-// 召唤我的记录页
+// 召唤借用记录页
 function callRecordShowing(){
     rightSide.insertAdjacentHTML('beforeend',`
         <!-- 搜索框 -->
         <div class="search-box">
-            <p>搜索：<input type="text" class="search" id="search"></p>
-            <select id="search-way-choose" class="search-way-choose">
-                <option value="no">请选择查询方式（支持联查）</option>
-                <option value="reset">重置搜索</option>
-                <option value="status">借用状态</option>
-                <option value="keyword">申请人或设备关键字</option>
-                <option value="userId">申请人ID</option>
-                <option value="equipmentId">设备ID</option>
-                <option value="startTime">借用开始时间下限</option>
-                <option value="endTime">借用结束时间上限</option>
-            </select>
+            <div class="filter-fields record-filter-fields">
+                <label>借用状态<select data-admin-record-filter="status"><option value="">全部状态</option>${Object.entries(BORROW_RECORD_STATUS_MAP).map(([value,label]) => `<option value="${value}">${label}</option>`).join('')}</select></label>
+                <label>申请人或设备<input data-admin-record-filter="keyword" maxlength="100"></label>
+                <label>申请人 ID<input data-admin-record-filter="userId" type="number" min="1"></label>
+                <label>设备 ID<input data-admin-record-filter="equipmentId" type="number" min="1"></label>
+                <label>开始时间下限<input data-admin-record-filter="startTime" type="datetime-local"></label>
+                <label>结束时间上限<input data-admin-record-filter="endTime" type="datetime-local"></label>
+            </div>
+            <div class="filter-actions">
+                <button class="record-filter-submit admin-record-filter-submit" type="button">查询</button>
+                <button class="record-filter-reset admin-record-filter-reset" type="button">重置</button>
+            </div>
         </div>
         <!-- 记录列表 -->
         <div class="record-showing" id="record-showing">
@@ -1073,8 +1160,31 @@ function callRecordShowing(){
         </div>`
     )
     attachEventsForRecordPageButton()
-    attachEventsForRecordSearchWayChoose()
+    attachAdminRecordFilters()
     renderRecordData(defaultRecordQueryData)
+}
+
+function attachAdminRecordFilters(){
+    const root = document.querySelector('.record-filter-fields')?.closest('.search-box')
+    if(!root) return
+    const apply = () => {
+        defaultRecordQueryData = new QueryBorrowRecordData({ page: 1, size: PAGE_SIZE })
+        root.querySelectorAll('[data-admin-record-filter]').forEach(field => {
+            if(field.value) defaultRecordQueryData[field.dataset.adminRecordFilter] = field.value
+        })
+        recordPageNow = 1
+        renderRecordData(defaultRecordQueryData)
+    }
+    root.querySelector('.admin-record-filter-submit').addEventListener('click', apply)
+    root.querySelector('.admin-record-filter-reset').addEventListener('click', () => {
+        root.querySelectorAll('[data-admin-record-filter]').forEach(field => { field.value = '' })
+        apply()
+    })
+    root.querySelectorAll('[data-admin-record-filter]').forEach(field => {
+        field.addEventListener('keydown', event => {
+            if(event.key === 'Enter') apply()
+        })
+    })
 }
 
 // 渲染全部借用记录列表
@@ -1097,14 +1207,13 @@ async function renderRecordData(QueryData = {}){
                 <td>${i.borrowEndTime || ''}</td>
                 <td>${statusToChinese(BORROW_RECORD_STATUS_MAP,i.status)}</td>
                 <td>${i.returnStatus || ''}</td>
-                <td>${i.confirmStatus || ''}</td>
                 <td>${i.createTime || ''}</td>
             </tr>
         `).join('')
         recordShowing.insertAdjacentHTML('beforeend',`
             <table class="record-table">
                 <thead>
-                    <tr><th>申请人</th><th>设备名称</th><th>借用开始时间</th><th>借用结束时间</th><th>借用状态</th><th>归还申报</th><th>确认状态</th><th>创建时间</th></tr>
+                    <tr><th>申请人</th><th>设备名称</th><th>借用开始时间</th><th>借用结束时间</th><th>借用状态</th><th>归还状态</th><th>创建时间</th></tr>
                 </thead>
                 <tbody>${rows}</tbody>
             </table>
@@ -1113,7 +1222,7 @@ async function renderRecordData(QueryData = {}){
     recordPageAll = res.data.pages || 1
     renderRecordButton()
     checkRecordButton()
-    // 点击一行，弹详情（带审核/确认归还）
+    // 点击一行，弹出借用记录详情和待审核操作。
     recordShowing.querySelectorAll('tbody tr[data-record-id]').forEach(row => {
         row.addEventListener('click', async () => {
             const detail = await getBorrowRecordDetail(row.dataset.recordId)
@@ -1240,136 +1349,77 @@ function attachEventsForRecordPageButton(){
     })
 }
 
-// 给记录搜索下拉框绑定事件
-function attachEventsForRecordSearchWayChoose(){
-    const search = document.getElementById('search')
-    search.addEventListener('keydown',(e) =>{
-        if(e.key === 'Enter'){
-            if(!recordQueryDataYouChange){
-                alert('请选择搜索类型')
-                return
-            }
-            defaultRecordQueryData[recordQueryDataYouChange]  = e.target.value
-            defaultRecordQueryData.page = 1
-            recordPageNow = 1;
-            renderRecordData(defaultRecordQueryData)
-        }
-    })
-    const searchWayChoose = document.getElementById('search-way-choose')
-    searchWayChoose.addEventListener('change',(e) =>{
-        switch (e.target.value){
-            case 'no':
-                break
-            case 'reset':
-                defaultRecordQueryData = new QueryBorrowRecordData({
-                    page : recordPageNow,
-                    size : PAGE_SIZE
-                })
-                recordQueryDataYouChange = ''
-                search.value = ''
-                searchWayChoose.querySelectorAll('option').forEach(opt => {
-                    opt.textContent = opt.textContent.replace('（已指定）','')
-                })
-                renderRecordData(defaultRecordQueryData)
-                break
-            case 'status':
-                recordQueryDataYouChange  = 'status'
-                searchWayChoose.querySelector('option[value="status"]').textContent = '借用状态（已指定）'
-                break
-            case 'keyword':
-                recordQueryDataYouChange  = 'keyword'
-                searchWayChoose.querySelector('option[value="keyword"]').textContent = '申请人或设备关键字（已指定）'
-                break
-            case 'userId':
-                recordQueryDataYouChange  = 'userId'
-                searchWayChoose.querySelector('option[value="userId"]').textContent = '申请人ID（已指定）'
-                break
-            case 'equipmentId':
-                recordQueryDataYouChange  = 'equipmentId'
-                searchWayChoose.querySelector('option[value="equipmentId"]').textContent = '设备ID（已指定）'
-                break
-            case 'startTime':
-                recordQueryDataYouChange  = 'startTime'
-                searchWayChoose.querySelector('option[value="startTime"]').textContent = '借用开始时间下限（已指定）'
-                break
-            case 'endTime':
-                recordQueryDataYouChange  = 'endTime'
-                searchWayChoose.querySelector('option[value="endTime"]').textContent = '借用结束时间上限（已指定）'
-                break
-        }
-    })
-}
-
-// 呼出管理端借用记录详情弹窗（带审核/确认归还）
+// 呼出管理端借用记录详情弹窗。
 function callAdminRecordDetailWindow(detail){
+    const recordStatus = chineseToStatus(BORROW_RECORD_STATUS_MAP, detail.status)
+    const canReview = recordStatus === 'pending'
     document.body.insertAdjacentHTML('beforeend',`
         <div class="record-detail-window" id="admin-record-detail-window">
             <button class="close-button-plus" id="close-record-detail">X</button>
             <h1>借用记录详情</h1>
-            <div class="record-detail-content">
-                <p>记录ID:${detail.id}</p>
-                <p>申请人ID:${detail.userId}</p>
-                <p>设备名称:${detail.equipmentName}</p>
-                <p>设备编号:${detail.equipmentNo}</p>
-                <p>设备分类:${detail.categoryName}</p>
-                <p>存放位置:${detail.location}</p>
-                <p>借用开始时间:${detail.borrowStartTime}</p>
-                <p>借用结束时间:${detail.borrowEndTime}</p>
-                <p>借用用途:${detail.purpose || ''}</p>
-                <p>借用状态:${statusToChinese(BORROW_RECORD_STATUS_MAP,detail.status)}</p>
-                <p>审核备注:${detail.reviewRemark || ''}</p>
-                <p>创建时间:${detail.createTime}</p>
-                <p>更新时间:${detail.updateTime}</p>
-            </div>
-            <div class="record-detail-buttons">
-                <button class="record-detail-review-pass">审核通过</button>
-                <button class="record-detail-review-reject">审核驳回</button>
-            </div>
-            <div class="record-confirm-return-box">
-                <p>确认归还——最终设备状态:<select id="record-confirmed-status">${statusSelectOptions(EQUIPMENT_STATUS_MAP)}</select></p>
-                <p>确认备注:<input type="text" id="record-confirm-remark"></p>
-                <button id="record-confirm-submit">提交确认归还</button>
-            </div>
+            <div class="record-detail-content"></div>
+            ${canReview ? `
+                <div class="record-detail-buttons">
+                    <button class="record-detail-review-pass">审核通过</button>
+                    <button class="record-detail-review-reject">审核驳回</button>
+                </div>
+            ` : ''}
         </div>
     `)
     const detailWindow = document.querySelector('#admin-record-detail-window')
+    const detailContent = detailWindow.querySelector('.record-detail-content')
+    const fields = [
+        ['记录 ID', detail.id],
+        ['申请人 ID', detail.userId],
+        ['申请人', detail.userName || detail.username],
+        ['设备名称', detail.equipmentName],
+        ['设备编号', detail.equipmentNo],
+        ['设备分类', detail.categoryName],
+        ['存放位置', detail.location],
+        ['借用开始时间', detail.borrowStartTime],
+        ['借用结束时间', detail.borrowEndTime],
+        ['借用用途', detail.purpose],
+        ['借用状态', statusToChinese(BORROW_RECORD_STATUS_MAP,detail.status)],
+        ['审核备注', detail.reviewRemark],
+        ['创建时间', detail.createTime],
+        ['更新时间', detail.updateTime]
+    ]
+    fields.forEach(([label, value]) => {
+        const row = document.createElement('div')
+        row.className = 'detail-grid-row'
+        const labelElement = document.createElement('span')
+        labelElement.className = 'detail-grid-label'
+        labelElement.textContent = label
+        const valueElement = document.createElement('span')
+        valueElement.className = 'detail-grid-value'
+        valueElement.textContent = value === null || value === undefined || value === '' ? '暂无' : String(value)
+        row.append(labelElement, valueElement)
+        detailContent.appendChild(row)
+    })
     document.querySelector('#close-record-detail').addEventListener('click',() => {
         detailWindow.remove()
         document.querySelector('.dim-overlay')?.remove()
     })
-    // 审核通过 / 驳回
-    detailWindow.querySelector('.record-detail-review-pass').addEventListener('click',async () => {
-        if(!confirm(`确定审核通过记录${detail.id}吗？`)) return
-        if(await reviewBorrowRecord(detail.id,new BorrowRecordReview({ approved : true }),apiChoose())){
-            alert('审核通过成功')
-            detailWindow.remove()
-            document.querySelector('.dim-overlay')?.remove()
-            renderRecordData(defaultRecordQueryData)
-        }
-    })
-    detailWindow.querySelector('.record-detail-review-reject').addEventListener('click',async () => {
-        if(!confirm(`确定审核驳回记录${detail.id}吗？`)) return
-        if(await reviewBorrowRecord(detail.id,new BorrowRecordReview({ approved : false }),apiChoose())){
-            alert('审核驳回成功')
-            detailWindow.remove()
-            document.querySelector('.dim-overlay')?.remove()
-            renderRecordData(defaultRecordQueryData)
-        }
-    })
-    // 确认归还
-    detailWindow.querySelector('#record-confirm-submit').addEventListener('click',async () => {
-        const confirmedStatus = chineseToStatus(EQUIPMENT_STATUS_MAP,detailWindow.querySelector('#record-confirmed-status').value)
-        if(!confirm(`确定确认记录${detail.id}的设备归还吗？`)) return
-        if(await confirmReturnBorrowRecord(detail.id,new BorrowReturnConfirm({
-            confirmedStatus,
-            confirmRemark : detailWindow.querySelector('#record-confirm-remark').value || ''
-        }),apiChoose())){
-            alert('确认归还成功')
-            detailWindow.remove()
-            document.querySelector('.dim-overlay')?.remove()
-            renderRecordData(defaultRecordQueryData)
-        }
-    })
+    if(canReview){
+        detailWindow.querySelector('.record-detail-review-pass').addEventListener('click',async () => {
+            if(!confirm(`确定审核通过记录${detail.id}吗？`)) return
+            if(await reviewBorrowRecord(detail.id,new BorrowRecordReview({ approved : true }),apiChoose())){
+                Toast.success('审核通过成功')
+                detailWindow.remove()
+                document.querySelector('.dim-overlay')?.remove()
+                renderRecordData(defaultRecordQueryData)
+            }
+        })
+        detailWindow.querySelector('.record-detail-review-reject').addEventListener('click',async () => {
+            if(!confirm(`确定审核驳回记录${detail.id}吗？`)) return
+            if(await reviewBorrowRecord(detail.id,new BorrowRecordReview({ approved : false }),apiChoose())){
+                Toast.success('审核驳回成功')
+                detailWindow.remove()
+                document.querySelector('.dim-overlay')?.remove()
+                renderRecordData(defaultRecordQueryData)
+            }
+        })
+    }
 }
 
 document.querySelector('#data-showing-button').addEventListener('click',() =>{

@@ -48,6 +48,9 @@ class RegisterIn(InfoRegexBaseSchema):
     username: str = Field(..., description="用户名")
     password: str = Field(..., description="密码")
 
+class AdminRegisterIn(RegisterIn):
+    registration_code: str = Field(..., min_length=1, max_length=100, description="管理员注册码")
+
 class LoginIn(InfoRegexBaseSchema):
     username: str = Field(..., description="用户名")
     password: str = Field(..., description="密码")

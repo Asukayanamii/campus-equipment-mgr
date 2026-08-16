@@ -3,13 +3,187 @@ const ACCOUNT_RULE_DESCRIPTION = "字母或数字或下划线 ，长度在6-24"
 const PASSWORD_RULE = /^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9_\!@#\$%\^&\*\(\)\-=]{6,24}$/
 const PASSWORD_RULE_DESCRIPTION = "6-24 位，至少 1 个字母、至少 1 个数字，支持常用符号"
 
+class Toast {
+    static container = null
+    static styleId = 'toast-component-styles'
+    static pendingKey = 'pending-toast-message'
+
+    static success(message, duration = 3000){
+        return this.show(message, 'success', duration)
+    }
+
+    static failure(message, duration = 4000){
+        return this.show(message, 'failure', duration)
+    }
+
+    static warning(message, duration = 3500){
+        return this.show(message, 'warning', duration)
+    }
+
+    static nextPage(message, type = 'success', duration = 3000){
+        sessionStorage.setItem(this.pendingKey, JSON.stringify({ message, type, duration }))
+    }
+
+    static restore(){
+        const pending = sessionStorage.getItem(this.pendingKey)
+        if(!pending) return
+        sessionStorage.removeItem(this.pendingKey)
+        try {
+            const { message, type, duration } = JSON.parse(pending)
+            this.show(message, type, duration)
+        } catch (error) {
+            console.error('恢复页面提示失败', error)
+        }
+    }
+
+    static show(message, type = 'success', duration = 3000){
+        this.ensureMounted()
+
+        const toast = document.createElement('div')
+        const labels = {
+            success: { icon: '✓', title: '成功' },
+            failure: { icon: '×', title: '失败' },
+            warning: { icon: '!', title: '请注意' },
+        }
+        const content = labels[type] || labels.success
+
+        toast.className = `app-toast app-toast--${type}`
+        toast.setAttribute('role', type === 'failure' ? 'alert' : 'status')
+        toast.innerHTML = `
+            <span class="app-toast__icon" aria-hidden="true">${content.icon}</span>
+            <span class="app-toast__body">
+                <strong>${content.title}</strong>
+                <span class="app-toast__message"></span>
+            </span>
+        `
+        toast.querySelector('.app-toast__message').textContent = String(message)
+        this.container.appendChild(toast)
+
+        const removeToast = () => {
+            if(!toast.isConnected) return
+            toast.classList.add('is-leaving')
+            toast.addEventListener('animationend', () => toast.remove(), { once: true })
+            setTimeout(() => toast.remove(), 300)
+        }
+        setTimeout(removeToast, Math.max(1000, duration))
+        return toast
+    }
+
+    static ensureMounted(){
+        if(!document.getElementById(this.styleId)){
+            const style = document.createElement('style')
+            style.id = this.styleId
+            style.textContent = `
+                .app-toast-stack {
+                    position: fixed; inset: 24px auto auto 50%; z-index: 100000;
+                    width: min(360px, calc(100vw - 32px)); max-height: calc(100dvh - 32px);
+                    display: flex; flex-direction: column; gap: 10px;
+                    transform: translateX(-50%); pointer-events: none;
+                    margin: 0; padding: 0; border: 0; background: transparent;
+                }
+                .app-toast {
+                    width: 100%; min-height: 54px; padding: 10px 13px;
+                    display: grid; grid-template-columns: 28px minmax(0, 1fr); align-items: center; gap: 10px;
+                    border: 1px solid #dfe6e1; border-left-width: 4px; border-radius: 7px;
+                    color: #18231d; background: rgba(255, 255, 255, .78);
+                    box-shadow: 0 12px 34px rgba(15, 35, 25, .18);
+                    -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
+                    animation: app-toast-in .22s ease-out both;
+                }
+                .app-toast--success { border-left-color: #168052; }
+                .app-toast--failure { border-left-color: #c43d3d; }
+                .app-toast--warning { border-left-color: #d28a12; }
+                .app-toast__icon {
+                    width: 26px; height: 26px; display: grid; place-items: center;
+                    border-radius: 50%; color: #fff; font-size: 16px; font-weight: 800;
+                }
+                .app-toast--success .app-toast__icon { background: #168052; }
+                .app-toast--failure .app-toast__icon { background: #c43d3d; }
+                .app-toast--warning .app-toast__icon { background: #d28a12; }
+                .app-toast__body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+                .app-toast__body strong { font-size: 14px; line-height: 1.35; }
+                .app-toast__message { overflow-wrap: anywhere; color: #526059; font-size: 13px; line-height: 1.5; }
+                .app-toast.is-leaving { animation: app-toast-out .2s ease-in both; }
+                @keyframes app-toast-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
+                @keyframes app-toast-out { to { opacity: 0; transform: translateY(-8px) scale(.98); } }
+                @media (max-width: 480px) { .app-toast-stack { inset: 16px auto auto 50%; } }
+                @media (prefers-reduced-motion: reduce) { .app-toast, .app-toast.is-leaving { animation-duration: .01ms; } }
+            `
+            document.head.appendChild(style)
+        }
+
+        if(!this.container || !this.container.isConnected){
+            this.container = document.createElement('div')
+            this.container.className = 'app-toast-stack'
+            this.container.setAttribute('popover', 'manual')
+            this.container.setAttribute('aria-live', 'polite')
+            this.container.setAttribute('aria-relevant', 'additions')
+            document.body.appendChild(this.container)
+        }
+
+        // Reopen the popover so it is placed after any newer modal dialog in the top layer.
+        if(typeof this.container.showPopover === 'function'){
+            if(this.container.matches(':popover-open')) this.container.hidePopover()
+            this.container.showPopover()
+        }
+    }
+}
+
+Toast.restore()
+
+const AUTH_SESSION_KEYS = ['token', 'role', 'id', 'name', 'username']
+const ROLE_PAGE_MAP = {
+    user: 'user.html',
+    admin: 'admin.html',
+    repair: 'repair.html',
+}
+
+function clearAuthSession(){
+    AUTH_SESSION_KEYS.forEach(key => sessionStorage.removeItem(key))
+}
+
+function saveAuthSession(role, loginData){
+    clearAuthSession()
+    sessionStorage.setItem('token', loginData.token)
+    sessionStorage.setItem('role', role)
+    sessionStorage.setItem('id', String(loginData.id))
+    sessionStorage.setItem('name', loginData.name ?? '')
+    sessionStorage.setItem('username', loginData.username)
+}
+
+function prepareRoleLogin(role){
+    const savedRole = sessionStorage.getItem('role')
+    if(savedRole && savedRole !== role){
+        clearAuthSession()
+    }
+}
+
+function protectedPageRole(){
+    const pageName = window.location.pathname.split('/').pop()
+    return Object.keys(ROLE_PAGE_MAP).find(role => ROLE_PAGE_MAP[role] === pageName) ?? null
+}
+
+function guardRolePage(){
+    const expectedRole = protectedPageRole()
+    if(!expectedRole) return true
+
+    const hasToken = Boolean(sessionStorage.getItem('token'))
+    const roleMatches = sessionStorage.getItem('role') === expectedRole
+    if(hasToken && roleMatches) return true
+
+    clearAuthSession()
+    window.location.replace('../login.html')
+    return false
+}
+
+guardRolePage()
+
 
 // 设备状态编码与中文互转映射
 const EQUIPMENT_STATUS_MAP = {
     available : '可用',
     pending_borrow : '待借用',
     borrowed : '借用中',
-    pending_return : '待归还',
     damaged : '损坏',
     repair_pending : '待维修',
     repairing : '维修中',
@@ -24,13 +198,21 @@ const BORROW_RECORD_STATUS_MAP = {
     approved : '已通过',
     rejected : '已驳回',
     borrowed : '借用中',
-    pending_return : '待确认归还',
     completed : '已完成',
+}
+
+// 报修记录与维修工单是两个状态域，查询和展示时不能混用。
+const REPAIR_REPORT_STATUS_MAP = {
+    pending: '待处理',
+    confirmed: '已确认',
+    processing: '处理中',
+    completed: '已完成',
 }
 
 // 维修工单状态编码与中文互转映射
 const REPAIR_ORDER_STATUS_MAP = {
     pending_assign : '待派单',
+    pending_accept : '待接单',
     pending_repair : '待维修',
     repairing : '维修中',
     pending_confirm : '待确认',
@@ -55,8 +237,11 @@ window.fetch = async function (input , init ){
     if(response.status === 401){
         if(isRedirecting === false){
             isRedirecting = true;
-            sessionStorage.removeItem('token');
-            window.location.replace(`/campus-equipment-mgr/frontend/login.html`);
+            clearAuthSession();
+            const loginPath = window.location.pathname.includes('/pages/')
+                ? '../login.html'
+                : './login.html'
+            window.location.replace(loginPath)
         }
     }
 
@@ -68,12 +253,71 @@ window.fetch = async function (input , init ){
 }
 // 身份映射到接口
 function apiChoose(){
-    if(identity === 1){
-        return `user`
-    }else if(identity === 2){
-        return `admin`
-    }else if(identity === 3){
-        return `repair`
+    const pageRole = protectedPageRole()
+    if(pageRole) return pageRole
+
+    if(typeof identity !== 'undefined'){
+        return {1: 'user', 2: 'admin', 3: 'repair'}[identity]
+    }
+
+    return sessionStorage.getItem('role')
+}
+
+let equipmentCategoryMap = new Map()
+let equipmentCategoryMapPromise = null
+
+function invalidateEquipmentCategoryMap(){
+    equipmentCategoryMap = new Map()
+    equipmentCategoryMapPromise = null
+}
+
+async function loadEquipmentCategoryMap({ refresh = false } = {}){
+    if(refresh) invalidateEquipmentCategoryMap()
+    if(equipmentCategoryMapPromise) return equipmentCategoryMapPromise
+
+    equipmentCategoryMapPromise = (async () => {
+        const categories = new Map()
+        let page = 1
+        let pages = 1
+        do{
+            const response = await getCategoryData({ page, size: 100 })
+            if(!response || response.code !== 0 || !response.data){
+                throw new Error(response?.message || '设备分类接口返回异常')
+            }
+            const items = response.data.items || []
+            items.forEach(category => {
+                categories.set(String(category.id), category.categoryName)
+            })
+            pages = Math.max(1, Number(response.data.pages) || 1)
+            page += 1
+        }while(page <= pages)
+        equipmentCategoryMap = categories
+        return equipmentCategoryMap
+    })().catch(error => {
+        equipmentCategoryMapPromise = null
+        throw error
+    })
+
+    return equipmentCategoryMapPromise
+}
+
+async function populateEquipmentCategorySelect(select, { refresh = false } = {}){
+    if(!select) return
+    const selectedValue = select.value
+    select.disabled = true
+    select.replaceChildren(new Option('正在加载分类...', ''))
+    try{
+        const categories = await loadEquipmentCategoryMap({ refresh })
+        select.replaceChildren(new Option('全部分类', ''))
+        categories.forEach((categoryName, categoryId) => {
+            const option = new Option(categoryName, categoryId)
+            select.appendChild(option)
+        })
+        if(categories.has(String(selectedValue))) select.value = String(selectedValue)
+        select.disabled = false
+    }catch(error){
+        console.error('加载设备分类失败', error)
+        select.replaceChildren(new Option('分类加载失败', ''))
     }
 }
 
@@ -86,7 +330,7 @@ function apiChoose(){
 function checkAccount(account){
     const stringAccount = account.value;
     if(ACCOUNT_RULE.test(stringAccount) === false){
-        alert(`您提交的账号不符合要求，必须满足${ACCOUNT_RULE_DESCRIPTION}`);
+        Toast.warning(`您提交的账号不符合要求，必须满足${ACCOUNT_RULE_DESCRIPTION}`);
         return false;
     }
     return stringAccount;
@@ -101,7 +345,7 @@ function checkAccount(account){
 function checkPassword(password){
     const stringPassword = password.value;
     if(PASSWORD_RULE.test(stringPassword) === false){
-        alert(`您提交的密码不符合要求，必须满足${PASSWORD_RULE_DESCRIPTION}`);
+        Toast.warning(`您提交的密码不符合要求，必须满足${PASSWORD_RULE_DESCRIPTION}`);
         return false;
     }
     return stringPassword;
@@ -133,12 +377,15 @@ function chineseToStatus(statusMap,chinese){
 /**
  *
  * @param {Object} statusMap 状态映射对象
- * @param {string} currentStatus 当前英文状态编码，用于默认选中
+ * @param {string} currentStatus 当前状态编码或中文状态，用于默认选中
  * @returns {string}
  */
 function statusSelectOptions(statusMap,currentStatus){
+    const selectedStatus = Object.hasOwn(statusMap, currentStatus)
+        ? currentStatus
+        : chineseToStatus(statusMap, currentStatus)
     return Object.entries(statusMap).map(([key,chinese]) =>
-        `<option value="${chinese}" ${key === currentStatus ? 'selected' : ''}>${chinese}</option>`
+        `<option value="${chinese}" ${key === selectedStatus ? 'selected' : ''}>${chinese}</option>`
     ).join('')
 }
 
@@ -706,17 +953,6 @@ class BorrowRecordReview{
     } = {}){
         this.approved = approved;
         this.reviewRemark = reviewRemark;
-    }
-}
-
-// 管理员确认设备归还请求模型
-class BorrowReturnConfirm{
-    constructor({
-        confirmedStatus,
-        confirmRemark,
-    } = {}){
-        this.confirmedStatus = confirmedStatus;
-        this.confirmRemark = confirmRemark;
     }
 }
 

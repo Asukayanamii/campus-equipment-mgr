@@ -1,0 +1,14 @@
+/* 分页留在文档流底部，不使用 fixed，避免遮挡长列表内容。 */
+.admin-operation-view {
+    min-height: 100vh;
+}
+
+.operation-result {
+    flex: 1;
+}
+
+.operation-pagination {
+    margin-top: auto;
+    padding-top: 20px;
+    flex-shrink: 0;
+}

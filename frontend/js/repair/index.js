@@ -24,6 +24,22 @@ const aft2 = document.getElementById('aft-2')
 const end = document.getElementById('end')
 
 const dataCard = document.getElementById('data-showing') 
+const equipmentStatusFilter = document.querySelector('[data-equipment-filter="status"]')
+if(equipmentStatusFilter?.tagName === 'INPUT'){ const select=document.createElement('select'); select.dataset.equipmentFilter='status'; select.innerHTML='<option value="">全部</option><option value="available">可用</option><option value="borrowed">已借出</option><option value="repair_pending">待维修</option><option value="repairing">维修中</option><option value="repaired">已维修</option><option value="damaged">已损坏</option><option value="scrapped">已报废</option>'; equipmentStatusFilter.replaceWith(select) }
+populateEquipmentCategorySelect(document.querySelector('select[data-equipment-filter="categoryId"]'))
+
+document.addEventListener('click', event => {
+    if(event.target.closest('.multi-filter-submit')){
+        defaultQueryData = {page:1,size:PAGE_SIZE}
+        document.querySelectorAll('[data-equipment-filter]').forEach(el=>{if(el.value) defaultQueryData[el.dataset.equipmentFilter]=el.value})
+        pageNow=1
+        renderData(defaultQueryData)
+    }
+    if(event.target.closest('.multi-filter-reset')){
+        document.querySelectorAll('[data-equipment-filter]').forEach(el=>el.value='')
+        defaultQueryData = {page:1,size:PAGE_SIZE}; pageNow=1; renderData(defaultQueryData)
+    }
+})
 
 let pageNow = 1;
 let pageAll = 1;
@@ -102,7 +118,7 @@ function renderData(QueryData = {}){
         dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card">
+                <div class="data-card status-${chineseToStatus(EQUIPMENT_STATUS_MAP, i.status || 'unknown')}" data-equipment-id="${i.id}" role="button" tabindex="0" aria-label="查看${i.equipmentName}详情">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">
@@ -125,11 +141,74 @@ function renderData(QueryData = {}){
             card.style.background = i.coverImg
                 ? `linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url("${i.coverImg}")`
                 : 'rgba(255,255,255,0.5)'
+            if(i.coverImg){
+                const previewButton = document.createElement('button')
+                previewButton.type = 'button'
+                previewButton.className = 'data-card-image-preview'
+                previewButton.dataset.imagePreviewSrc = i.coverImg
+                previewButton.setAttribute('aria-label', `放大查看${i.equipmentName}封面`)
+                previewButton.title = '查看封面大图'
+                card.appendChild(previewButton)
+            }
         });
         pageAll = res.data.pages;
         renderButton()
         checkButton()
     })
+}
+
+function appendEquipmentDetail(list, label, value){
+    const row = document.createElement('div')
+    const term = document.createElement('dt')
+    const description = document.createElement('dd')
+    term.textContent = label
+    description.textContent = value === null || value === undefined || value === '' ? '暂无' : String(value)
+    row.append(term, description)
+    list.appendChild(row)
+}
+
+async function openEquipmentDetail(equipmentId){
+    const equipment = await getDataById(equipmentId, apiChoose())
+    if(!equipment) return
+
+    const dialog = document.createElement('dialog')
+    dialog.className = 'repair-equipment-dialog'
+    dialog.innerHTML = `
+        <header>
+            <div><p>设备 #${equipment.id}</p><h2></h2></div>
+            <button class="equipment-dialog-close" type="button" aria-label="关闭">×</button>
+        </header>
+        <img class="repair-equipment-cover" alt="设备封面" hidden>
+        <dl class="equipment-detail-list"></dl>
+    `
+    dialog.querySelector('h2').textContent = equipment.equipmentName || `设备 #${equipment.id}`
+    if(equipment.coverImg){
+        const cover = dialog.querySelector('.repair-equipment-cover')
+        cover.src = equipment.coverImg
+        cover.hidden = false
+    }
+    const list = dialog.querySelector('.equipment-detail-list')
+    const fields = [
+        ['设备编号', equipment.equipmentNo],
+        ['设备分类', equipment.categoryName],
+        ['设备状态', statusToChinese(EQUIPMENT_STATUS_MAP, equipment.status)],
+        ['存放位置', equipment.location],
+        ['品牌', equipment.brand],
+        ['规格型号', equipment.spec],
+        ['计量单位', equipment.unit],
+        ['采购日期', equipment.purchaseDate],
+        ['采购价格', equipment.price],
+        ['备注', equipment.remark],
+        ['创建时间', equipment.createTime || equipment.creatTime],
+        ['更新时间', equipment.updateTime]
+    ]
+    fields.forEach(([label, value]) => appendEquipmentDetail(list, label, value))
+
+    document.body.appendChild(dialog)
+    dialog.querySelector('.equipment-dialog-close').addEventListener('click', () => dialog.close())
+    dialog.addEventListener('click', event => { if(event.target === dialog) dialog.close() })
+    dialog.addEventListener('close', () => dialog.remove())
+    dialog.showModal()
 }
 
 // 渲染个人信息
@@ -232,20 +311,20 @@ function renderChangeProfileSubmitWindow(){
                 return
             }
             if(!newPasswordFirst){
-                alert('第一次密码不能为空')
+                Toast.warning('第一次密码不能为空')
                 return
             }
             if(!newPasswordSecondString){
-                alert('第二次密码不能为空')
+                Toast.warning('第二次密码不能为空')
             }
             if(newPasswordFirstString !== newPasswordSecondString){
-                alert("两次密码输入不一致")
+                Toast.warning("两次密码输入不一致")
                 return
             }
 
             const temUserName = (await getPersonalData(apiChoose())).username
             if(!await sendSubmit(temUserName,originPasswordString,apiChoose())){
-                alert('原密码输入错误')
+                Toast.failure('原密码输入错误')
                 return
             }
 
@@ -254,9 +333,9 @@ function renderChangeProfileSubmitWindow(){
                 name : changedName.value || temName,
                 password : newPasswordFirst.value
             },apiChoose())){
-                alert('修改失败')
+                Toast.failure('修改失败')
             }else{
-                alert('修改成功')
+                Toast.success('修改成功')
             }
         }
     })
@@ -326,6 +405,19 @@ dataCard.addEventListener('mousemove', (e) => {
     
 })
 
+dataCard.addEventListener('click', event => {
+    const card = event.target.closest('.data-card[data-equipment-id]')
+    if(card) openEquipmentDetail(card.dataset.equipmentId)
+})
+
+dataCard.addEventListener('keydown', event => {
+    if(event.key !== 'Enter' && event.key !== ' ') return
+    const card = event.target.closest('.data-card[data-equipment-id]')
+    if(!card) return
+    event.preventDefault()
+    openEquipmentDetail(card.dataset.equipmentId)
+})
+
 profilePictureBox.addEventListener('click',() => {
     renderChangePanel().then(() => {
         document.body.insertAdjacentHTML('beforeend',`
@@ -343,7 +435,7 @@ searchWayChoose.addEventListener('change',(e) =>{
             resetQueryData()
             queryDataYouChange = ''
             search.value = ''
-            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID'
+            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类名称'
             searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态'
             searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称'
             searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号'
@@ -356,7 +448,7 @@ searchWayChoose.addEventListener('change',(e) =>{
             break
         case 'categoryId':
             queryDataYouChange  = 'categoryId'
-            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID（已指定）'
+            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类名称（已指定）'
             break
         case 'status':
             queryDataYouChange  = 'status'
@@ -396,7 +488,7 @@ searchWayChoose.addEventListener('change',(e) =>{
 search.addEventListener('keydown',(e) =>{
     if(e.key === 'Enter'){
         if(!queryDataYouChange){
-            alert('请选择搜索类型')
+            Toast.warning('请选择搜索类型')
             return
         }
         defaultQueryData[queryDataYouChange]  = e.target.value

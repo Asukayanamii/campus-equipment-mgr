@@ -1,29 +1,48 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>管理端</title>
+    <meta name="theme-color" content="#12352f">
+    <title>管理工作台 | 校园设备管理</title>
+    <link rel="icon" type="image/png" href="../assets/images/all-icon..png">
     <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/pagination-layout.css">
     <link rel="stylesheet" href="../css/admin/admin.css">
+    <link rel="stylesheet" href="../css/admin/query-filters.css">
+    <link rel="stylesheet" href="../css/admin/repair-reports.css">
+    <link rel="stylesheet" href="../css/admin/operations.css">
+    <link rel="stylesheet" href="../css/profile-center.css">
+    <link rel="stylesheet" href="../css/polish.css">
+    <link rel="stylesheet" href="../css/modal-polish.css">
+    <link rel="stylesheet" href="../css/workspace.css">
+    <link rel="stylesheet" href="../css/image-preview.css">
 </head>
-<body>
+<body class="workspace-app admin-app">
+
+   <button class="mobile-menu-button" type="button" aria-label="打开导航" aria-controls="nav" aria-expanded="false">
+       <span></span><span></span><span></span>
+   </button>
+   <button class="nav-backdrop" type="button" aria-label="关闭导航" tabindex="-1"></button>
 
    <div class="add-equipment-panel">
     
    </div>
     <!-- 左侧导航栏 -->
-    <div class="nav" id="nav">
+    <nav class="nav" id="nav" aria-label="管理端主导航">
         <!-- 欢迎语句 -->
         <div class="nav-title">
-            <p>Welcome!</p>
+            <a class="workspace-brand" href="../index.html" aria-label="校园设备管理首页"><span class="workspace-brand-mark">校</span><span><strong>校园设备管理</strong><small>ADMIN CONSOLE</small></span></a>
         </div>
 
         <!-- 正式选项卡 -->
         <div class="nav-options">
-            <button id="data-showing-button">数据展示</button>
-            <button id="admin-equipment-button">分类展示</button>
-            <button id="my-record-button">我的记录</button>
+            <button id="data-showing-button">设备管理</button>
+            <button id="admin-equipment-button">设备分类管理</button>
+            <button id="my-record-button">借用记录</button>
+            <button id="repair-reports-button">报修处理</button>
+            <button id="repair-orders-button">维修工单</button>
+            <button id="registration-codes-button">注册码管理</button>
         </div>
 
         <!-- 放个人头像 -->
@@ -35,7 +54,7 @@
                 <p class="profile-name" id="profile-name"></p>
             </div>
         </div>
-    </div>
+    </nav>
     
     <div class="place-holder">
         
@@ -48,6 +67,17 @@
     
     <script src="../js/util.js"></script>
     <script src="../js/api.js"></script>
-    <script src="../js/admin/index.js"> </script>
+    <script src="../js/upload-image.js"></script>
+    <script src="../js/admin/view-manager.js"></script>
+    <script src="../js/admin/operations-api.js"></script>
+    <script src="../js/admin/repair-report-api.js"></script>
+    <script src="../js/admin/index.js?v=20260816-2"> </script>
+    <script src="../js/admin/repair-reports.js"></script>
+    <script src="../js/admin/repair-orders.js?v=20260816-2"></script>
+    <script src="../js/admin/registration-codes.js"></script>
+    <script src="../js/admin/categories.js"></script>
+    <script src="../js/profile-center.js"></script>
+    <script src="../js/workspace.js"></script>
+    <script src="../js/image-preview.js"></script>
 </body>
 </html>

@@ -24,6 +24,23 @@ const aft2 = document.getElementById('aft-2')
 const end = document.getElementById('end')
 
 const dataCard = document.getElementById('data-showing') 
+const equipmentStatusFilter = document.querySelector('[data-equipment-filter="status"]')
+if(equipmentStatusFilter?.tagName === 'INPUT'){ const select=document.createElement('select'); select.dataset.equipmentFilter='status'; select.innerHTML='<option value="">全部</option><option value="available">可用</option><option value="borrowed">已借出</option><option value="repair_pending">待维修</option><option value="repairing">维修中</option><option value="repaired">已维修</option><option value="damaged">已损坏</option><option value="scrapped">已报废</option>'; equipmentStatusFilter.replaceWith(select) }
+const recordStatusFilter = document.querySelector('[data-record-filter="status"]')
+if(recordStatusFilter?.tagName === 'INPUT'){ const select=document.createElement('select'); select.dataset.recordFilter='status'; select.innerHTML='<option value="">全部</option><option value="pending">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option><option value="borrowed">借用中</option><option value="completed">已完成</option>'; recordStatusFilter.replaceWith(select) }
+
+document.addEventListener('click', event => {
+    if(event.target.closest('.multi-filter-submit')){
+        defaultQueryData = {page:1,size:PAGE_SIZE}
+        document.querySelectorAll('[data-equipment-filter]').forEach(el=>{if(el.value) defaultQueryData[el.dataset.equipmentFilter]=el.value})
+        pageNow=1
+        renderData(defaultQueryData)
+    }
+    if(event.target.closest('.multi-filter-reset')){
+        document.querySelectorAll('[data-equipment-filter]').forEach(el=>el.value='')
+        defaultQueryData = {page:1,size:PAGE_SIZE}; pageNow=1; renderData(defaultQueryData)
+    }
+})
 
 let pageNow = 1;
 let pageAll = 1;
@@ -112,7 +129,7 @@ function renderData(QueryData = {}){
         dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card">
+                <div class="data-card status-${chineseToStatus(EQUIPMENT_STATUS_MAP, i.status || 'unknown')}" data-equipment-id="${i.id}">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">
@@ -132,9 +149,23 @@ function renderData(QueryData = {}){
                 </div>
             `)
             const card = dataShowing.lastElementChild
+            card.dataset.equipmentId = i.id
+            card.dataset.equipmentStatus = i.status
+            card.tabIndex = 0
+            card.setAttribute('role', 'button')
+            card.setAttribute('aria-label', `查看${i.equipmentName}详情`)
             card.style.background = i.coverImg
                 ? `linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url("${i.coverImg}")`
                 : 'rgba(255,255,255,0.5)'
+            if(i.coverImg){
+                const previewButton = document.createElement('button')
+                previewButton.type = 'button'
+                previewButton.className = 'data-card-image-preview'
+                previewButton.dataset.imagePreviewSrc = i.coverImg
+                previewButton.setAttribute('aria-label', `放大查看${i.equipmentName}封面`)
+                previewButton.title = '查看封面大图'
+                card.appendChild(previewButton)
+            }
         });
         pageAll = res.data.pages;
         renderButton()
@@ -160,118 +191,6 @@ async function renderPersonalData(){
         profilePicture.src = personalData.image
     }
 }
-
-// 渲染详情和修改面板
-async function renderChangePanel(){
-    const personalData = await getPersonalData(apiChoose())
-    document.body.insertAdjacentHTML('beforeend',`
-        <div class="change-panel">
-            <button class="close-button">X</button> 
-            <div class="profile-detail-showing">
-                <div class="profile-picture-change-box">
-                    <img src="${personalData.image || DEFAULT_PICTURE_URL}" alt="你的头像" class="profile-picture-box">
-                    <p class="profile-picture-update-box">点击确认修改头像<input type="file"></p>
-                </div>
-                <p>你的id:${personalData.id}</p>
-                <p>你的昵称:${personalData.name}</p>
-                <p>你的账号:${personalData.username}</p>
-                <p>你的邮箱:${personalData.email  || DEFAULT_EMAIL_DECRIPTION}</p>
-                <p>上传更新时间:${personalData.updateTime}</p>
-                <p>账号创建时间:${personalData.createTime}</p>
-                <button id="change-profile-button">点击修改个人信息</button>
-            </div>
-        </div>
-        `)
-    document.querySelector('.change-panel .close-button').addEventListener('click', closePanel)
-    const changeProfile = document.getElementById('change-profile-button')
-    changeProfile.addEventListener('click',() => {
-        renderChangeProfileSubmitWindow()
-    })
-
-}
-
-// 关闭面板
-function closePanel(){
-      const dimOverlay = document.querySelector('.dim-overlay')
-      const changePanel = document.querySelector('.change-panel')
-      if(!(dimOverlay && changePanel)){
-          console.log('没找到控制板或遮光罩')
-          return
-      }
-      dimOverlay.remove()
-      changePanel.remove()
-}
-
-// 召唤修改面板
-function renderChangeProfileSubmitWindow(){
-    document.body.insertAdjacentHTML('beforeend',`
-        <div class="change-profile-submit-window">
-        <button class="close-button-plus ">X</button>
-        <div>
-            <p>你修改用户名为：<input type="text" id="changed-name"></p>
-        </div>
-        <div class="change-profile-submit-window-password">
-            <p>请先输入原密码：<input type="password" id="origin-password"></p>
-            <p>请输入新的密码：<input type="password" id="new-password-first"></p>
-            <p>再次输入新密码：<input type="password" id="new-password-second"></p>
-        </div>
-        <div class="change-profile-submit-window-button">
-            <button>确定提交</button>
-        </div>
-    </div>`)
-    const dimOverlay = document.querySelector('.dim-overlay')
-    const closeButtonPlus = document.querySelector('.close-button-plus')
-    const changeProfileSubmitWindowButton = document.querySelector('.change-profile-submit-window-button')
-    const changedName  = document.querySelector('#changed-name')
-    const originPassword = document.querySelector('#origin-password')
-    const newPasswordFirst = document.querySelector('#new-password-first')
-    const newPasswordSecond  = document.querySelector('#new-password-second')
-    dimOverlay.style.zIndex = 600
-    closeButtonPlus.addEventListener('click',() => {
-        dimOverlay.style.zIndex = 400
-        const changeProfileSubmitWindow = document.body.querySelector('.change-profile-submit-window')
-        changeProfileSubmitWindow.remove()
-    })
-    changeProfileSubmitWindowButton.addEventListener('click',async () => {
-        if(checkPassword(newPasswordFirst)){
-            const originPasswordString = originPassword.value
-            const newPasswordFirstString  = newPasswordFirst.value
-            const newPasswordSecondString = newPasswordSecond.value
-            if(!originPasswordString){
-                console.log('原密码不能为空')
-                return
-            }
-            if(!newPasswordFirst){
-                alert('第一次密码不能为空')
-                return
-            }
-            if(!newPasswordSecondString){
-                alert('第二次密码不能为空')
-            }
-            if(newPasswordFirstString !== newPasswordSecondString){
-                alert("两次密码输入不一致")
-                return
-            }
-
-            const temUserName = (await getPersonalData(apiChoose())).username
-            if(!await sendSubmit(temUserName,originPasswordString,apiChoose())){
-                alert('原密码输入错误')
-                return
-            }
-
-            const temName = (await getPersonalData(apiChoose())).name
-            if(await changePersonalData({
-                name : changedName.value || temName,
-                password : newPasswordFirst.value
-            },apiChoose())){
-                alert('修改失败')
-            }else{
-                alert('修改成功')
-            }
-        }
-    })
-}
-
 
 start.addEventListener('click', () =>{
      defaultQueryData.page = 1;
@@ -336,15 +255,6 @@ dataCard.addEventListener('mousemove', (e) => {
     
 })
 
-profilePictureBox.addEventListener('click',() => {
-    renderChangePanel().then(() => {
-        document.body.insertAdjacentHTML('beforeend',`
-            <div class="dim-overlay"></div>
-            `)
-    })
-
-})
-
 searchWayChoose.addEventListener('change',(e) =>{
     switch (e.target.value){
         case 'no':
@@ -353,7 +263,7 @@ searchWayChoose.addEventListener('change',(e) =>{
             resetQueryData()
             queryDataYouChange = ''
             search.value = ''
-            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID'
+            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类名称'
             searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态'
             searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称'
             searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号'
@@ -366,7 +276,7 @@ searchWayChoose.addEventListener('change',(e) =>{
             break
         case 'categoryId':
             queryDataYouChange  = 'categoryId'
-            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID（已指定）'
+            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类名称（已指定）'
             break
         case 'status':
             queryDataYouChange  = 'status'
@@ -406,7 +316,7 @@ searchWayChoose.addEventListener('change',(e) =>{
 search.addEventListener('keydown',(e) =>{
     if(e.key === 'Enter'){
         if(!queryDataYouChange){
-            alert('请选择搜索类型')
+            Toast.warning('请选择搜索类型')
             return
         }
         defaultQueryData[queryDataYouChange]  = e.target.value
@@ -436,8 +346,9 @@ function callRecordShowing(){
             </div>
             <!-- 搜索框 -->
             <div class="search-box">
-                <p>搜索：<input type="text" class="search" id="record-search"></p>
-                <select id="record-search-way-choose" class="search-way-choose">
+                <label>状态<select data-record-filter="status"><option value="">全部</option><option value="pending">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option><option value="borrowed">借用中</option><option value="completed">已完成</option></select></label><label>设备名称<input data-record-filter="equipmentName"></label><label>开始时间<input data-record-filter="startTime" type="datetime-local"></label><label>结束时间<input data-record-filter="endTime" type="datetime-local"></label><button type="button" class="record-filter-submit">查询</button><button type="button" class="record-filter-reset">重置</button>
+                <input type="hidden" id="record-search">
+                <select hidden id="record-search-way-choose" class="search-way-choose">
                     <option value="no">请选择查询方式（支持联查）</option>
                     <option value="reset">重置搜索</option>
                     <option value="status">借用状态</option>
@@ -551,7 +462,7 @@ async function renderRecordData(QueryData = {}){
         const rows = list.map(i => `
             <tr data-record-id="${i.id}">
                 <td>${i.equipmentName || ''}</td>
-                <td>${statusToChinese(REPAIR_ORDER_STATUS_MAP,i.status)}</td>
+                <td>${statusToChinese(REPAIR_REPORT_STATUS_MAP,i.status)}</td>
                 <td>${i.createTime || ''}</td>
             </tr>
         `).join('')
@@ -707,7 +618,7 @@ function attachEventsForRecordSearchWayChoose(){
     search.addEventListener('keydown',(e) =>{
         if(e.key === 'Enter'){
             if(!recordQueryDataYouChange){
-                alert('请选择搜索类型')
+                Toast.warning('请选择搜索类型')
                 return
             }
             defaultRecordQueryData[recordQueryDataYouChange]  = e.target.value
@@ -762,42 +673,18 @@ function attachEventsForRecordSearchWayChoose(){
 
 // 呼出记录详情弹窗
 function callRecordDetailWindow(detail){
+    const row = (label, value) => `<div class="detail-grid-row"><span class="detail-grid-label">${label}</span><span class="detail-grid-value">${value ?? ''}</span></div>`
     let content
     let title
     if(recordType === 'borrow'){
         title = '借用记录详情'
         content = `
-            <p>记录ID:${detail.id}</p>
-            <p>设备名称:${detail.equipmentName}</p>
-            <p>设备编号:${detail.equipmentNo}</p>
-            <p>设备分类:${detail.categoryName}</p>
-            <p>设备品牌:${detail.brand}</p>
-            <p>存放位置:${detail.location}</p>
-            <p>借用开始时间:${detail.borrowStartTime}</p>
-            <p>借用结束时间:${detail.borrowEndTime}</p>
-            <p>借用用途:${detail.purpose || ''}</p>
-            <p>审核备注:${detail.reviewRemark || ''}</p>
-            <p>借用状态:${statusToChinese(BORROW_RECORD_STATUS_MAP,detail.status)}</p>
-            <p>创建时间:${detail.createTime}</p>
-            <p>更新时间:${detail.updateTime}</p>
+            ${row('记录ID',detail.id)}${row('设备名称',detail.equipmentName)}${row('设备编号',detail.equipmentNo)}${row('设备分类',detail.categoryName)}${row('设备品牌',detail.brand)}${row('存放位置',detail.location)}${row('借用开始时间',detail.borrowStartTime)}${row('借用结束时间',detail.borrowEndTime)}${row('借用用途',detail.purpose)}${row('审核备注',detail.reviewRemark)}${row('借用状态',statusToChinese(BORROW_RECORD_STATUS_MAP,detail.status))}${row('创建时间',detail.createTime)}${row('更新时间',detail.updateTime)}
         `
     }else{
         title = '报修记录详情'
         content = `
-            <p>记录ID:${detail.id}</p>
-            <p>设备名称:${detail.equipmentName}</p>
-            <p>设备编号:${detail.equipmentNo}</p>
-            <p>设备分类:${detail.categoryName}</p>
-            <p>损坏说明:${detail.damageDescription || ''}</p>
-            <p>管理员确认状态:${detail.confirmStatus || ''}</p>
-            <p>管理员确认备注:${detail.confirmRemark || ''}</p>
-            <p>报修状态:${statusToChinese(REPAIR_ORDER_STATUS_MAP,detail.status)}</p>
-            <p>维修工单状态:${statusToChinese(REPAIR_ORDER_STATUS_MAP,detail.repairStatus)}</p>
-            <p>故障原因:${detail.faultCause || ''}</p>
-            <p>维修过程:${detail.repairProcess || ''}</p>
-            <p>维修结果:${detail.repairResult || ''}</p>
-            <p>创建时间:${detail.createTime}</p>
-            <p>更新时间:${detail.updateTime}</p>
+            ${row('记录ID',detail.id)}${row('设备名称',detail.equipmentName)}${row('设备编号',detail.equipmentNo)}${row('设备分类',detail.categoryName)}${row('损坏说明',detail.damageDescription)}${row('管理员确认状态',detail.confirmStatus)}${row('管理员确认备注',detail.confirmRemark)}${row('报修状态',statusToChinese(REPAIR_REPORT_STATUS_MAP,detail.status))}${row('维修工单状态',statusToChinese(REPAIR_ORDER_STATUS_MAP,detail.repairStatus))}${row('故障原因',detail.faultCause)}${row('维修过程',detail.repairProcess)}${row('维修结果',detail.repairResult)}${row('创建时间',detail.createTime)}${row('更新时间',detail.updateTime)}
         `
     }
     document.body.insertAdjacentHTML('beforeend',`
@@ -811,20 +698,70 @@ function callRecordDetailWindow(detail){
         document.querySelector('.record-detail-window').remove()
         document.querySelector('.dim-overlay')?.remove()
     })
+    document.dispatchEvent(new CustomEvent('record-detail-opened', {
+        detail: { recordType, record: detail }
+    }))
 }
 
-// 导航：数据展示 / 我的记录
-document.querySelector('#data-showing-button').addEventListener('click',() => {
-    document.querySelector('#record-view').style.display = 'none'
-    document.querySelector('#data-view').style.display = 'flex'
+// 记录视图首次进入时才创建，因此切回设备列表时需要兼容它尚未挂载。
+function showEquipmentView(){
+    const recordView = document.querySelector('#record-view')
+    const dataView = document.querySelector('#data-view')
+    if(recordView) recordView.style.display = 'none'
+    if(dataView) dataView.style.display = 'flex'
+}
+
+document.addEventListener('click', event => {
+    if(event.target.closest('.record-filter-submit')){
+        defaultRecordQueryData = { page: 1, size: PAGE_SIZE }
+        document.querySelectorAll('[data-record-filter]').forEach(el => { if(el.value) defaultRecordQueryData[el.dataset.recordFilter] = el.value })
+        recordPageNow = 1
+        renderRecordData(defaultRecordQueryData)
+    }
+    if(event.target.closest('.record-filter-reset')){
+        document.querySelectorAll('[data-record-filter]').forEach(el => { el.value = '' })
+        defaultRecordQueryData = { page: 1, size: PAGE_SIZE }
+        recordPageNow = 1
+        renderRecordData(defaultRecordQueryData)
+    }
 })
+
+// 导航：数据展示 / 我的记录
+document.querySelector('#data-showing-button').addEventListener('click', showEquipmentView)
 
 document.querySelector('#my-record-button').addEventListener('click',() => {
     callRecordShowing()
 })
 
+// 借用模块提交成功后，通过事件刷新记录页，避免跨模块直接依赖内部函数。
+document.addEventListener('borrow-record-created', () => {
+    if(recordType !== 'borrow'){
+        switchRecordType('borrow')
+        return
+    }
+    recordPageNow = 1
+    defaultRecordQueryData = new QueryBorrowRecordData({ page: 1, size: PAGE_SIZE })
+    renderRecordData(defaultRecordQueryData)
+})
+
+document.addEventListener('borrow-returned', event => {
+    const nextType = event.detail.damaged ? 'repair' : 'borrow'
+    if(recordType !== nextType){
+        switchRecordType(nextType)
+        return
+    }
+    recordPageNow = 1
+    defaultRecordQueryData = nextType === 'repair'
+        ? new QueryRepairReportData({ page: 1, size: PAGE_SIZE })
+        : new QueryBorrowRecordData({ page: 1, size: PAGE_SIZE })
+    renderRecordData(defaultRecordQueryData)
+})
+
+document.addEventListener('profile-updated', renderPersonalData)
+
 renderData(defaultQueryData)
 renderPersonalData()
+populateEquipmentCategorySelect(document.querySelector('select[data-equipment-filter="categoryId"]'))
 
 
 

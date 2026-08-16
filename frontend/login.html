@@ -1,43 +1,110 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>登录界面</title>
-    <link rel="stylesheet" href="../frontend/css/reset.css">
-    <link rel="stylesheet" href="../frontend/css/login.css">
+    <meta name="description" content="登录校园设备借用与维修管理系统">
+    <meta name="theme-color" content="#176b4a">
+    <title>登录 | 校园设备管理系统</title>
+    <link rel="icon" type="image/png" href="./assets/images/all-icon..png">
+    <link rel="stylesheet" href="./css/reset.css">
+    <link rel="stylesheet" href="./css/login.css">
 </head>
 <body>
-    <!-- 主要登录区域 -->
-    <div class="login-box">
-        
+    <main class="login-page">
+        <section class="campus-panel" aria-label="校园设备管理系统">
+            <a class="back-home" href="./index.html" aria-label="返回首页">← 返回首页</a>
+            <div class="campus-copy">
+                <span class="brand-mark" aria-hidden="true">校</span>
+                <p class="eyebrow">CAMPUS EQUIPMENT SERVICE</p>
+                <h1>让校园设备<br>流转更简单</h1>
+                <p>统一管理设备借用、归还与维修进度。</p>
+            </div>
+        </section>
 
-        <form action="" class="login-form">
-            <!-- 选择身份区域 -->
-            <div class="identity-choose">
-                <div id="student-choose">我是学生</div>
-                <div id="admin-choose">我是管理</div>
-                <div id="repair-choose">我是维修</div>
-                
+        <section class="form-panel">
+            <div class="login-box">
+                <div class="form-heading">
+                    <p class="mobile-brand">校园设备管理</p>
+                    <h2>欢迎登录</h2>
+                    <p>请选择身份并输入账号信息</p>
+                </div>
+
+                <form action="" class="login-form" id="login-form">
+                    <fieldset class="identity-field">
+                        <legend>登录身份</legend>
+                        <div class="identity-choose" role="radiogroup" aria-label="登录身份">
+                            <button id="student-choose" class="identity-option is-active" type="button" role="radio" aria-checked="true">学生</button>
+                            <button id="admin-choose" class="identity-option" type="button" role="radio" aria-checked="false">管理员</button>
+                            <button id="repair-choose" class="identity-option" type="button" role="radio" aria-checked="false">维修人员</button>
+                        </div>
+                    </fieldset>
+
+                    <div class="input-data">
+                        <label class="field" for="account">
+                            <span>账号</span>
+                            <input type="text" class="account" id="account" name="account" autocomplete="username" placeholder="请输入账号" required>
+                        </label>
+                        <label class="field" for="password">
+                            <span>密码</span>
+                            <span class="password-wrap">
+                                <input type="password" class="password" id="password" name="password" autocomplete="current-password" placeholder="请输入密码" required>
+                                <button class="password-toggle" id="password-toggle" type="button" aria-label="显示密码">显示</button>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="email-login-panel" id="email-login-panel" hidden>
+                        <label class="field" for="login-email"><span>邮箱</span><input type="email" id="login-email" placeholder="请输入学生邮箱"></label>
+                        <label class="field" for="login-code"><span>验证码</span><span class="password-wrap"><input type="text" id="login-code" inputmode="numeric" maxlength="6" placeholder="请输入验证码"><button type="button" class="password-toggle" id="send-code-button">发送验证码</button></span></label>
+                    </div>
+                    <button type="button" class="link-button" id="email-login-toggle">使用邮箱验证码登录</button>
+
+                    <div class="button-showing">
+                        <button id="submit-button" class="primary-button" type="submit">登录</button>
+                        <button id="register-button" class="secondary-button" type="button">注册新账号</button>
+                    </div>
+                </form>
+                <p class="form-note">首次使用请先注册账号</p>
+            </div>
+        </section>
+    </main>
+
+    <dialog class="register-dialog" id="register-dialog" aria-labelledby="register-title">
+        <form class="register-form" id="register-form">
+            <div class="dialog-heading">
+                <div>
+                    <h2 id="register-title">注册学生账号</h2>
+                    <p>填写以下信息创建新账号</p>
+                </div>
+                <button class="dialog-close" id="register-close" type="button" aria-label="关闭注册弹窗">×</button>
             </div>
 
-            <div class="input-data">
-                <!-- 账号 -->
-                <div><span>账号：</span><input type="text" class="account" id="account"></div>
+            <div class="register-fields">
+                <label class="field" for="register-account">
+                    <span>账号</span>
+                    <input type="text" id="register-account" autocomplete="username" placeholder="请输入账号" required>
+                </label>
+                <label class="field" for="register-password">
+                    <span>密码</span>
+                    <input type="password" id="register-password" autocomplete="new-password" placeholder="请输入密码" required>
+                </label>
+                <label class="field" for="register-password-confirm">
+                    <span>确认密码</span>
+                    <input type="password" id="register-password-confirm" autocomplete="new-password" placeholder="请再次输入密码" required>
+                </label>
+                <label class="field" id="register-code-field" for="register-code" hidden>
+                    <span>管理员注册码</span>
+                    <input type="text" id="register-code" autocomplete="off" placeholder="请输入管理员注册码">
+                </label>
+            </div>
 
-                <!-- 密码 -->
-                <div><span>密码: </span><input type="password" class="password" id="password"></div>
+            <div class="dialog-actions">
+                <button class="secondary-button" id="register-cancel" type="button">取消</button>
+                <button class="primary-button" id="register-submit" type="submit">确认注册</button>
             </div>
-            
-            <div class="button-showing">
-                <button id="register-button" type="button">注册</button>
-                <button id ="submit-button" type="button">登录</button>
-            </div>
-            
         </form>
-        
-
-    </div>
+    </dialog>
     <script src="./js/util.js"></script>
     <script src="./js/api.js"></script>
     <script src="./js/login.js"></script>

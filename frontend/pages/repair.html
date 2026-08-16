@@ -1,26 +1,40 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>维修端</title>
+    <meta name="theme-color" content="#12352f">
+    <title>维修工作台 | 校园设备管理</title>
+    <link rel="icon" type="image/png" href="../assets/images/all-icon..png">
     <link rel="stylesheet" href="../css/reset.css">
+    <link rel="stylesheet" href="../css/pagination-layout.css">
     <link rel="stylesheet" href="../css/repair/repair.css">
+    <link rel="stylesheet" href="../css/polish.css">
+    <link rel="stylesheet" href="../css/modal-polish.css">
+    <link rel="stylesheet" href="../css/repair/orders.css">
+    <link rel="stylesheet" href="../css/profile-center.css">
+    <link rel="stylesheet" href="../css/workspace.css">
+    <link rel="stylesheet" href="../css/image-preview.css">
 </head>
-<body>
+<body class="workspace-app repair-app">
+
+    <button class="mobile-menu-button" type="button" aria-label="打开导航" aria-controls="nav" aria-expanded="false">
+        <span></span><span></span><span></span>
+    </button>
+    <button class="nav-backdrop" type="button" aria-label="关闭导航" tabindex="-1"></button>
 
    
     <!-- 左侧导航栏 -->
-    <div class="nav" id="nav">
+    <nav class="nav" id="nav" aria-label="维修端主导航">
         <!-- 欢迎语句 -->
         <div class="nav-title">
-            <p>Welcome!</p>
+            <a class="workspace-brand" href="../index.html" aria-label="校园设备管理首页"><span class="workspace-brand-mark">校</span><span><strong>校园设备管理</strong><small>MAINTENANCE</small></span></a>
         </div>
 
         <!-- 正式选项卡 -->
         <div class="nav-options">
-            <button>数据展示</button>
-            <button>我的记录</button>
+            <button id="repair-equipment-button">设备查询</button>
+            <button id="repair-orders-button">我的工单</button>
         </div>
 
         <!-- 放个人头像 -->
@@ -32,7 +46,7 @@
                 <p class="profile-name" id="profile-name"></p>
             </div>
         </div>
-    </div>
+    </nav>
     
     <div class="place-holder">
         
@@ -42,11 +56,12 @@
      <div class="right-side">
         <!-- 搜索框 -->
          <div class="search-box">
-            <p>搜索：<input type="text" class="search" id="search"></p>
-            <select id="search-way-choose" class="search-way-choose">
+            <label>设备分类<select data-equipment-filter="categoryId" disabled><option value="">正在加载分类...</option></select></label><label>状态<input data-equipment-filter="status"></label><label>设备名称<input data-equipment-filter="equipmentName"></label><label>设备编号<input data-equipment-filter="equipmentNo"></label><label>位置<input data-equipment-filter="location"></label><label>品牌<input data-equipment-filter="brand"></label><label>规格<input data-equipment-filter="spec"></label><div class="filter-actions"><button type="button" class="multi-filter-submit">查询</button><button type="button" class="multi-filter-reset">重置</button></div>
+            <input type="hidden" id="search">
+            <select hidden id="search-way-choose" class="search-way-choose">
                 <option value="no">请选择查询方式（支持联查）</option>
                 <option value="reset">重置搜索</option>
-                <option value="categoryId">设备分类ID</option>
+                <option value="categoryId">设备分类名称</option>
                 <option value="status">设备状态</option>
                 <option value="equipmentName">设备名称</option>
                 <option value="equipmentNo">设备编号</option>
@@ -76,6 +91,12 @@
     
     <script src="../js/util.js"></script>
     <script src="../js/api.js"></script>
+    <script src="../js/upload-image.js"></script>
+    <script src="../js/repair/orders-api.js"></script>
     <script src="../js/repair/index.js"> </script>
+    <script src="../js/repair/orders.js"></script>
+    <script src="../js/profile-center.js"></script>
+    <script src="../js/workspace.js"></script>
+    <script src="../js/image-preview.js"></script>
 </body>
 </html>
