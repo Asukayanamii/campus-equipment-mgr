@@ -7,9 +7,7 @@ from pydantic import Field, field_serializer, field_validator
 from app.constant.status_constant import (
     BORROW_RECORD_STATUS_CODES,
     BORROW_RECORD_STATUS_MAP,
-    BORROW_RETURN_STATUS_CODES,
     BORROW_RETURN_STATUS_MAP,
-    CONFIRM_STATUS_MAP,
     ITEM_STATUS_MAP,
     REPAIR_ORDER_STATUS_MAP,
     REPAIR_REPORT_STATUS_MAP,
@@ -59,21 +57,15 @@ class AdminBorrowRecordPageOut(BaseSchema):
     borrow_end_time: datetime = Field(..., description="借用结束时间")
     status: str = Field(..., description="借用状态")
     return_status: str | None = Field(None, description="学生申报归还状态")
-    confirm_status: str | None = Field(None, description="管理员确认状态")
-    confirmed_status: str | None = Field(None, description="管理员最终确认的设备状态")
     create_time: datetime = Field(..., description="创建时间")
 
     @field_serializer("status")
     def serialize_status(self, value: str):
         return BORROW_RECORD_STATUS_MAP.get(value, value)
 
-    @field_serializer("return_status", "confirmed_status")
+    @field_serializer("return_status")
     def serialize_return_status(self, value: str | None):
         return BORROW_RETURN_STATUS_MAP.get(value, value) if value else None
-
-    @field_serializer("confirm_status")
-    def serialize_confirm_status(self, value: str | None):
-        return CONFIRM_STATUS_MAP.get(value, value) if value else None
 
 
 class AdminBorrowRecordOut(BaseSchema):
@@ -107,11 +99,6 @@ class AdminBorrowRecordOut(BaseSchema):
     damage_description: str | None = Field(None, description="损坏说明")
     damage_images: list[str] = Field(default_factory=list, description="损坏图片地址")
     return_time: datetime | None = Field(None, description="提交归还时间")
-    confirm_status: str | None = Field(None, description="管理员确认状态")
-    confirmed_status: str | None = Field(None, description="管理员最终确认的设备状态")
-    confirm_remark: str | None = Field(None, description="管理员确认备注")
-    confirmer_id: int | None = Field(None, description="确认管理员 ID")
-    confirm_time: datetime | None = Field(None, description="确认时间")
     repair_report_id: int | None = Field(None, description="报修记录 ID")
     repair_report_status: str | None = Field(None, description="报修状态")
     repair_order_id: int | None = Field(None, description="维修工单 ID")
@@ -135,13 +122,9 @@ class AdminBorrowRecordOut(BaseSchema):
     def serialize_equipment_status(self, value: str | None):
         return ITEM_STATUS_MAP.get(value, value) if value else None
 
-    @field_serializer("return_status", "confirmed_status")
+    @field_serializer("return_status")
     def serialize_return_status(self, value: str | None):
         return BORROW_RETURN_STATUS_MAP.get(value, value) if value else None
-
-    @field_serializer("confirm_status")
-    def serialize_confirm_status(self, value: str | None):
-        return CONFIRM_STATUS_MAP.get(value, value) if value else None
 
     @field_serializer("repair_report_status")
     def serialize_repair_report_status(self, value: str | None):
@@ -158,18 +141,6 @@ class BorrowRecordReview(BaseSchema):
     review_remark: str | None = Field(None, max_length=2000, description="审核备注")
 
 
-class BorrowReturnConfirm(BaseSchema):
-    """管理员确认设备归还请求模型"""
-    confirmed_status: str = Field(..., description="管理员最终确认的设备状态")
-    confirm_remark: str | None = Field(None, max_length=2000, description="确认备注")
-
-    @field_validator("confirmed_status")
-    def validate_confirmed_status(cls, value: str):
-        if value not in BORROW_RETURN_STATUS_CODES:
-            raise ValueError("确认归还状态不合法")
-        return value
-
-
 class BorrowRecordReviewOut(BaseSchema):
     """审核借用申请响应模型"""
     id: int = Field(..., description="借用记录 ID")
@@ -180,26 +151,3 @@ class BorrowRecordReviewOut(BaseSchema):
     @field_serializer("status")
     def serialize_status(self, value: str):
         return BORROW_RECORD_STATUS_MAP.get(value, value)
-
-
-class BorrowReturnConfirmOut(BaseSchema):
-    """确认设备归还响应模型"""
-    borrow_record_id: int = Field(..., description="借用记录 ID")
-    borrow_record_status: str = Field(..., description="借用记录状态")
-    return_record_id: int = Field(..., description="归还记录 ID")
-    confirm_status: str = Field(..., description="管理员确认状态")
-    confirmed_status: str = Field(..., description="管理员最终确认的设备状态")
-    confirm_remark: str | None = Field(None, description="确认备注")
-    confirm_time: datetime = Field(..., description="确认时间")
-
-    @field_serializer("borrow_record_status")
-    def serialize_borrow_record_status(self, value: str):
-        return BORROW_RECORD_STATUS_MAP.get(value, value)
-
-    @field_serializer("confirm_status")
-    def serialize_confirm_status(self, value: str):
-        return CONFIRM_STATUS_MAP.get(value, value)
-
-    @field_serializer("confirmed_status")
-    def serialize_confirmed_status(self, value: str):
-        return BORROW_RETURN_STATUS_MAP.get(value, value)

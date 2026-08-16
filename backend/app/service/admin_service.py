@@ -11,10 +11,12 @@ from app.db.models.admin_model import Admin
 import bcrypt
 import jwt
 
-from app.schema.common_schema import LoginIn, LoginOut, RegisterIn, UpdateIn, GetMeOut
+from app.schema.common_schema import AdminRegisterIn, LoginIn, LoginOut, UpdateIn, GetMeOut
 
 
-def register_by_password(register_in: RegisterIn, db: Session) -> None:
+def register_by_password(register_in: AdminRegisterIn, db: Session) -> None:
+    if register_in.registration_code != settings.ADMIN_REGISTRATION_CODE:
+        raise BussinessException("管理员注册码错误", status_code=403)
     with db.begin():
         # 校验管理员用户名是否已注册。
         admin = admin_crud.query_admin_by_username(register_in.username, db)
@@ -23,7 +25,7 @@ def register_by_password(register_in: RegisterIn, db: Session) -> None:
         # 加密密码并补齐系统生成的昵称、默认头像。
         salt = bcrypt.gensalt()
         register_in.password = bcrypt.hashpw(register_in.password.encode('utf-8'), salt).decode('utf-8')
-        admin = Admin(**register_in.model_dump())
+        admin = Admin(**register_in.model_dump(exclude={"registration_code"}))
         admin.name = 'admin'+ uuid.uuid5(uuid.NAMESPACE_DNS, register_in.username).hex[:5]
         admin.image = settings.DEFAULT_PROFILE_IMAGE_URL
         # 在当前事务中保存管理员账号。

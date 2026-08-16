@@ -2,7 +2,7 @@
 
 本目录是校园设备借用与维修管理系统的 FastAPI 后端。系统面向学生、管理员和维修人员三类角色，目标是覆盖设备查询、借用归还、损坏报修、维修派单及结果确认等流程。
 
-当前已实现三端账号认证、个人信息维护、设备与分类管理、学生借用申请/归还/报修查询，以及管理员借用审核和归还确认。维修端工单处理和管理员维修工单管理仍待后续迭代。
+当前已实现三端账号认证、个人信息维护、设备与分类管理、学生借用申请/归还/报修查询，以及管理员借用审核。学生归还会直接完成借用；损坏归还会自动创建报修记录和维修工单。维修端工单处理和管理员维修工单管理仍待后续迭代。
 
 ## 技术栈
 
@@ -234,7 +234,6 @@ token: <student-token>
 | `available` | 可借用 |
 | `pending_borrow` | 借用审核中 |
 | `borrowed` | 已借出 |
-| `pending_return` | 待确认归还 |
 | `damaged` | 已损坏 |
 | `repair_pending` | 待维修 |
 | `repairing` | 维修中 |
@@ -257,15 +256,12 @@ token: <student-token>
 | GET | `/admin/borrow-records/page` | 管理员按申请人、设备、状态、关键字和时间范围分页查询全部借用记录 |
 | GET | `/admin/borrow-records/{borrowRecordId}` | 管理员查看借用、归还、报修和工单摘要 |
 | POST | `/admin/borrow-records/{borrowRecordId}/review` | 管理员审核待审核借用申请 |
-| POST | `/admin/borrow-records/{borrowRecordId}/confirm-return` | 管理员确认待归还设备 |
 
-借用申请会锁定目标设备，在同一事务中完成可借校验、时间冲突校验、申请创建和设备状态切换，避免并发申请占用重叠时段。审核借用仅允许处理 `pending` 记录：通过后借用记录和设备均变为 `borrowed`，驳回后借用记录为 `rejected`、设备恢复 `available`。归还确认仅允许处理 `pending_return` 记录：`confirmedStatus=normal` 时设备恢复 `available`，`confirmedStatus=damaged` 时设备进入 `repair_pending` 并确保报修记录和维修工单存在。
-
-归还记录中的 `confirmStatus` 表示管理员是否已经处理归还申报（`pending`、`confirmed`、`rejected`）；`confirmedStatus` 表示已确认后的最终验收结论（`normal`、`damaged`）。
+借用申请会锁定目标设备，在同一事务中完成可借校验、时间冲突校验、申请创建和设备状态切换，避免并发申请占用重叠时段。审核借用仅允许处理 `pending` 记录：通过后借用记录和设备均变为 `borrowed`，驳回后借用记录为 `rejected`、设备恢复 `available`。学生提交正常归还后，借用记录直接变为 `completed`、设备恢复 `available`；提交损坏归还后，借用记录直接变为 `completed`、设备变为 `repair_pending`，并自动创建待处理报修记录和待派单维修工单。
 
 ## 审计与状态历史
 
-管理员审核借用和确认归还会在同一事务中写入：
+管理员审核借用会在同一事务中写入：
 
 - `audit_record`：记录业务类型、业务 ID、操作类型、管理员、处理结果和备注。当前借用流程使用 `businessType=borrow_record`，`businessId=borrow_record.id`。
 - `equipment_status_record`：记录设备状态变更前后值、关联业务、操作管理员、原因和时间。

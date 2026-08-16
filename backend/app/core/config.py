@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     REPAIR_JWT_SECRET_KEY: str = Field(..., description="维修端 JWT 密钥")
     ALGORITHM: str = Field("HS256", description="JWT 签名算法")
     ACCESS_TOKEN_EXPIRE_MINUTES: int = Field(60 * 12, description="访问令牌有效期，单位为分钟")
+    ADMIN_REGISTRATION_CODE: str = Field("ADMIN-2026", description="管理员注册注册码")
 
     #oss配置
     ALIYUN_OSS_ACCESS_KEY_ID: str = Field(..., description="阿里云 OSS AccessKey ID")

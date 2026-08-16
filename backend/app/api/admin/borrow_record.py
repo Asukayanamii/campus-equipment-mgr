@@ -12,11 +12,8 @@ from app.schema.admin_borrow_record_schema import (
     AdminBorrowRecordQuery,
     BorrowRecordReview,
     BorrowRecordReviewOut,
-    BorrowReturnConfirm,
-    BorrowReturnConfirmOut,
 )
 from app.service.admin_borrow_record_service import (
-    confirm_borrow_return_service,
     get_borrow_record_detail_by_admin_service,
     query_borrow_record_by_admin_service,
     review_borrow_record_service,
@@ -52,14 +49,3 @@ def review_borrow_record(
 ):
     logger.info("管理端审核借用申请，借用记录 ID：%s", borrow_record_id)
     return Result.success(review_borrow_record_service(db, borrow_record_id, info["id"], review_in))
-
-
-@router.post("/{borrowRecordId}/confirm-return", response_model=Result[BorrowReturnConfirmOut], name="确认设备归还")
-def confirm_borrow_return(
-    confirm_in: BorrowReturnConfirm,
-    borrow_record_id: int = Path(..., alias="borrowRecordId", ge=1),
-    info: dict = Depends(admin_verity),
-    db: Session = Depends(get_db),
-):
-    logger.info("管理端确认设备归还，借用记录 ID：%s", borrow_record_id)
-    return Result.success(confirm_borrow_return_service(db, borrow_record_id, info["id"], confirm_in))

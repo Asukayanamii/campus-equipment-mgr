@@ -28,7 +28,6 @@ def get_borrow_record_by_equipment_time(
             BorrowRecordStatus.PENDING,
             BorrowRecordStatus.APPROVED,
             BorrowRecordStatus.BORROWED,
-            BorrowRecordStatus.PENDING_RETURN,
         ]),
         BorrowRecord.borrow_start_time < borrow_end_time,
         BorrowRecord.borrow_end_time > borrow_start_time,

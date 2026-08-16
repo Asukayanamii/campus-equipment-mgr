@@ -6,8 +6,6 @@ class ItemStatus:
     PENDING_BORROW = "借用审核中"
     # 已借出
     BORROWED = "已借出"
-    # 待确认归还
-    PENDING_RETURN = "待确认归还"
     # 已损坏
     DAMAGED = "已损坏"
     # 待维修
@@ -26,7 +24,6 @@ class ItemStatusCode:
     AVAILABLE = "available"
     PENDING_BORROW = "pending_borrow"
     BORROWED = "borrowed"
-    PENDING_RETURN = "pending_return"
     DAMAGED = "damaged"
     REPAIR_PENDING = "repair_pending"
     REPAIRING = "repairing"
@@ -39,7 +36,6 @@ ITEM_STATUS_MAP = {
     ItemStatusCode.AVAILABLE: ItemStatus.AVAILABLE,
     ItemStatusCode.PENDING_BORROW: ItemStatus.PENDING_BORROW,
     ItemStatusCode.BORROWED: ItemStatus.BORROWED,
-    ItemStatusCode.PENDING_RETURN: ItemStatus.PENDING_RETURN,
     ItemStatusCode.DAMAGED: ItemStatus.DAMAGED,
     ItemStatusCode.REPAIR_PENDING: ItemStatus.REPAIR_PENDING,
     ItemStatusCode.REPAIRING: ItemStatus.REPAIRING,
@@ -53,7 +49,6 @@ class BorrowRecordStatus:
     APPROVED = "approved"
     REJECTED = "rejected"
     BORROWED = "borrowed"
-    PENDING_RETURN = "pending_return"
     COMPLETED = "completed"
 
 
@@ -62,7 +57,6 @@ BORROW_RECORD_STATUS_MAP = {
     BorrowRecordStatus.APPROVED: "审核通过",
     BorrowRecordStatus.REJECTED: "审核驳回",
     BorrowRecordStatus.BORROWED: "已借出",
-    BorrowRecordStatus.PENDING_RETURN: "待确认归还",
     BorrowRecordStatus.COMPLETED: "已完成",
 }
 
@@ -152,12 +146,10 @@ AUDIT_BUSINESS_TYPE_CODES = list(AUDIT_BUSINESS_TYPE_MAP.keys())
 
 class AuditOperationType:
     REVIEW = "review"
-    CONFIRM_RETURN = "confirm_return"
 
 
 AUDIT_OPERATION_TYPE_MAP = {
     AuditOperationType.REVIEW: "审核借用申请",
-    AuditOperationType.CONFIRM_RETURN: "确认设备归还",
 }
 
 AUDIT_OPERATION_TYPE_CODES = list(AUDIT_OPERATION_TYPE_MAP.keys())

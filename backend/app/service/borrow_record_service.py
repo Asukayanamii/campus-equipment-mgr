@@ -158,15 +158,21 @@ def create_borrow_return_record_service(
                 session,
             )
 
-        # 归还提交后，借用记录与设备均进入待确认归还状态。
+        # 学生归还立即完成借用；损坏归还则将设备转入待维修。
         borrow_record_crud.update_borrow_record(
             borrow_record,
-            {"status": BorrowRecordStatus.PENDING_RETURN},
+            {"status": BorrowRecordStatus.COMPLETED},
             session,
         )
         equipment_crud.update_equipment(
             equipment,
-            {"status": ItemStatusCode.PENDING_RETURN},
+            {
+                "status": (
+                    ItemStatusCode.REPAIR_PENDING
+                    if borrow_return_in.return_status == BorrowReturnStatus.DAMAGED
+                    else ItemStatusCode.AVAILABLE
+                )
+            },
             session,
         )
         # 使用已 flush 的归还记录回显，并补充本次上传的图片地址。
