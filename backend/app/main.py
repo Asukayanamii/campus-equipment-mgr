@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi_pagination import Page, add_pagination, paginate
 
 from app.api.common import common
-from app.api.user import user, equipment, borrow_record, repair_report
+from app.api.user import user, equipment, borrow_record, repair_report, equipment_category
 from app.api.admin import admin, borrow_record as admin_borrow_record, equipment as admin_equipment, equipment_category as admin_equipment_category, registration_code as admin_registration_code, repair_order as admin_repair_order, repair_report as admin_repair_report
 from app.api.repair import repair, equipment as repair_equipment, repair_order as repair_repair_order
 from app.core.exception_handler import register_exception_handler
@@ -23,6 +23,7 @@ register_exception_handler(app)
 add_pagination(app)  # 全局注册分页工具
 app.include_router(user.router)
 app.include_router(equipment.router)
+app.include_router(equipment_category.router)
 app.include_router(borrow_record.router)
 app.include_router(repair_report.router)
 app.include_router(admin.router)
