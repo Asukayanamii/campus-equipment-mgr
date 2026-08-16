@@ -419,19 +419,7 @@ function layoutCategoryColumns(categoryShowing){
     })
 
     categoryShowing.replaceChildren(...columns)
-    cells.forEach(cell => {
-        const shortestColumn = columns.reduce((shortest, column) => {
-            return column.offsetHeight < shortest.offsetHeight ? column : shortest
-        })
-        shortestColumn.appendChild(cell)
-    })
-}
-
-function scheduleCategoryColumnLayout(){
-    window.setTimeout(() => {
-        const categoryShowing = document.getElementById('category-showing')
-        if(categoryShowing) layoutCategoryColumns(categoryShowing)
-    }, 300)
+    cells.forEach((cell, index) => columns[index % columnCount].appendChild(cell))
 }
 
 // 渲染响应式分类卡片，展开设备时只影响当前分类卡片。
@@ -517,7 +505,6 @@ async function toggleCategoryMembers(bar){
         window.setTimeout(() => {
             if(!membersBox.classList.contains('is-open')) membersInner.innerHTML = ''
         }, 280)
-        scheduleCategoryColumnLayout()
         return
     }
 
@@ -542,7 +529,6 @@ async function toggleCategoryMembers(bar){
     cell?.classList.add('is-open')
     membersBox.classList.add('is-open')
     bar.setAttribute('aria-expanded', 'true')
-    scheduleCategoryColumnLayout()
     membersInner.querySelectorAll('.member-row').forEach(row => {
         row.addEventListener('click', async () => {
             const equipment = await getDataById(row.dataset.equipmentId, apiChoose())

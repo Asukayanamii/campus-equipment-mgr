@@ -117,7 +117,7 @@ function renderData(QueryData = {}){
         dataShowing.innerHTML = ''
         list.forEach(i => {
             dataShowing.insertAdjacentHTML('beforeend',`
-                <div class="data-card status-${chineseToStatus(EQUIPMENT_STATUS_MAP, i.status || 'unknown')}" data-equipment-id="${i.id}">
+                <div class="data-card status-${chineseToStatus(EQUIPMENT_STATUS_MAP, i.status || 'unknown')}" data-equipment-id="${i.id}" role="button" tabindex="0" aria-label="查看${i.equipmentName}详情">
                     <h1>${i.equipmentName}</h1>
                     <p>${i.location}</p>
                     <div class="data-detail-showing">
@@ -145,6 +145,54 @@ function renderData(QueryData = {}){
         renderButton()
         checkButton()
     })
+}
+
+function appendEquipmentDetail(list, label, value){
+    const row = document.createElement('div')
+    const term = document.createElement('dt')
+    const description = document.createElement('dd')
+    term.textContent = label
+    description.textContent = value === null || value === undefined || value === '' ? '暂无' : String(value)
+    row.append(term, description)
+    list.appendChild(row)
+}
+
+async function openEquipmentDetail(equipmentId){
+    const equipment = await getDataById(equipmentId, apiChoose())
+    if(!equipment) return
+
+    const dialog = document.createElement('dialog')
+    dialog.className = 'repair-equipment-dialog'
+    dialog.innerHTML = `
+        <header>
+            <div><p>设备 #${equipment.id}</p><h2></h2></div>
+            <button class="equipment-dialog-close" type="button" aria-label="关闭">×</button>
+        </header>
+        <dl class="equipment-detail-list"></dl>
+    `
+    dialog.querySelector('h2').textContent = equipment.equipmentName || `设备 #${equipment.id}`
+    const list = dialog.querySelector('.equipment-detail-list')
+    const fields = [
+        ['设备编号', equipment.equipmentNo],
+        ['设备分类', equipment.categoryName],
+        ['设备状态', statusToChinese(EQUIPMENT_STATUS_MAP, equipment.status)],
+        ['存放位置', equipment.location],
+        ['品牌', equipment.brand],
+        ['规格型号', equipment.spec],
+        ['计量单位', equipment.unit],
+        ['采购日期', equipment.purchaseDate],
+        ['采购价格', equipment.price],
+        ['备注', equipment.remark],
+        ['创建时间', equipment.createTime || equipment.creatTime],
+        ['更新时间', equipment.updateTime]
+    ]
+    fields.forEach(([label, value]) => appendEquipmentDetail(list, label, value))
+
+    document.body.appendChild(dialog)
+    dialog.querySelector('.equipment-dialog-close').addEventListener('click', () => dialog.close())
+    dialog.addEventListener('click', event => { if(event.target === dialog) dialog.close() })
+    dialog.addEventListener('close', () => dialog.remove())
+    dialog.showModal()
 }
 
 // 渲染个人信息
@@ -339,6 +387,19 @@ dataCard.addEventListener('mousemove', (e) => {
     }
     
     
+})
+
+dataCard.addEventListener('click', event => {
+    const card = event.target.closest('.data-card[data-equipment-id]')
+    if(card) openEquipmentDetail(card.dataset.equipmentId)
+})
+
+dataCard.addEventListener('keydown', event => {
+    if(event.key !== 'Enter' && event.key !== ' ') return
+    const card = event.target.closest('.data-card[data-equipment-id]')
+    if(!card) return
+    event.preventDefault()
+    openEquipmentDetail(card.dataset.equipmentId)
 })
 
 profilePictureBox.addEventListener('click',() => {
