@@ -1335,6 +1335,122 @@
         "security": []
       }
     },
+    "/user/email-verification-code": {
+      "post": {
+        "summary": "发送学生邮箱验证码",
+        "deprecated": false,
+        "description": "",
+        "operationId": "发送学生邮箱验证码_user_email_verification_code_post",
+        "tags": [
+          "学生端"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "鉴权jwt令牌",
+            "example": "{{token}}",
+            "schema": {
+              "type": "string",
+              "default": "{{token}}"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailVerificationCodeIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result"
+                }
+              }
+            },
+            "headers": {}
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
+    "/user/email-login": {
+      "post": {
+        "summary": "学生邮箱验证码注册登录",
+        "deprecated": false,
+        "description": "",
+        "operationId": "学生邮箱验证码注册登录_user_email_login_post",
+        "tags": [
+          "学生端"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "鉴权jwt令牌",
+            "example": "{{token}}",
+            "schema": {
+              "type": "string",
+              "default": "{{token}}"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmailLoginIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Result_EmailLoginOut_"
+                }
+              }
+            },
+            "headers": {}
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {}
+          }
+        },
+        "security": []
+      }
+    },
     "/repair/equipment/page": {
       "get": {
         "summary": "分页条件查询设备",
@@ -9952,6 +10068,126 @@
           "message"
         ],
         "title": "Result[RepairReportConfirmOut]"
+      },
+      "EmailLoginIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "邮箱"
+          },
+          "verificationCode": {
+            "type": "string",
+            "maxLength": 6,
+            "minLength": 6,
+            "title": "Verificationcode",
+            "description": "六位邮箱验证码"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "verificationCode"
+        ],
+        "title": "EmailLoginIn",
+        "description": "学生邮箱验证码注册并登录请求。"
+      },
+      "EmailLoginOut": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id",
+            "description": "用户 ID"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "昵称"
+          },
+          "username": {
+            "type": "string",
+            "title": "Username",
+            "description": "系统生成的账号"
+          },
+          "image": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image",
+            "description": "头像图片 URL"
+          },
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "邮箱"
+          },
+          "token": {
+            "type": "string",
+            "title": "Token",
+            "description": "登录令牌"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "username",
+          "email",
+          "token"
+        ],
+        "title": "EmailLoginOut",
+        "description": "学生邮箱验证码注册或登录成功响应。"
+      },
+      "EmailVerificationCodeIn": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "title": "Email",
+            "description": "邮箱"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "title": "EmailVerificationCodeIn",
+        "description": "学生邮箱验证码发送请求。"
+      },
+      "Result_EmailLoginOut_": {
+        "properties": {
+          "code": {
+            "type": "integer",
+            "title": "Code",
+            "description": "业务状态码"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "响应消息"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/EmailLoginOut"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "响应数据"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "title": "Result[EmailLoginOut]"
       }
     },
     "responses": {},
