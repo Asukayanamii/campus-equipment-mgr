@@ -48,9 +48,10 @@
         const dialog=document.createElement('dialog');dialog.className='operation-dialog';dialog.innerHTML='<header><div><p>维修工单</p><h2></h2></div><button type="button" aria-label="关闭">×</button></header><dl></dl><div class="operation-actions"></div>'
         dialog.querySelector('h2').textContent=detail.equipmentName||`工单 #${id}`;const list=dialog.querySelector('dl');[['工单状态',statusToChinese(REPAIR_ORDER_STATUS_MAP,detail.status)],['设备编号',detail.equipmentNo],['设备状态',statusToChinese(EQUIPMENT_STATUS_MAP,detail.equipmentStatus)],['损坏说明',detail.damageDescription],['维修人员',detail.repairUserName],['派单备注',detail.assignRemark],['故障原因',detail.faultCause],['维修过程',detail.repairProcess],['维修结果',detail.repairResult]].forEach(([l,v])=>addField(list,l,v))
         const actions=dialog.querySelector('.operation-actions')
-        if(detail.status==='pending_assign'){const button=document.createElement('button');button.textContent='派单';button.addEventListener('click',()=>openAssign(dialog,detail));actions.appendChild(button)}
-        if(detail.status==='pending_confirm')actions.appendChild(actionButton('确认完成',`确认工单 #${id} 已维修完成吗？`,()=>adminBusinessRequest(`/admin/repair-orders/${id}/confirm`,{method:'POST'}),dialog))
-        if(detail.status==='unrepairable')actions.appendChild(actionButton('报废设备',`报废操作不可逆，确认报废工单 #${id} 对应设备吗？`,()=>adminBusinessRequest(`/admin/repair-orders/${id}/scrap`,{method:'POST'}),dialog,'danger'))
+        const orderStatus=chineseToStatus(REPAIR_ORDER_STATUS_MAP,detail.status)
+        if(orderStatus==='pending_assign'){const button=document.createElement('button');button.textContent='派单';button.addEventListener('click',()=>openAssign(dialog,detail));actions.appendChild(button)}
+        if(orderStatus==='pending_confirm')actions.appendChild(actionButton('确认完成',`确认工单 #${id} 已维修完成吗？`,()=>adminBusinessRequest(`/admin/repair-orders/${id}/confirm`,{method:'POST'}),dialog))
+        if(orderStatus==='unrepairable')actions.appendChild(actionButton('报废设备',`报废操作不可逆，确认报废工单 #${id} 对应设备吗？`,()=>adminBusinessRequest(`/admin/repair-orders/${id}/scrap`,{method:'POST'}),dialog,'danger'))
         document.body.appendChild(dialog);dialog.querySelector('header button').addEventListener('click',()=>dialog.close());dialog.addEventListener('close',()=>dialog.remove());dialog.showModal()
     }
     function actionButton(text,confirmation,request,dialog,className=''){const button=document.createElement('button');button.textContent=text;button.className=className;button.addEventListener('click',async()=>{if(!confirm(confirmation))return;button.disabled=true;const ok=await request();if(ok){Toast.success(`${text}成功`);dialog.close();load()}else button.disabled=false});return button}

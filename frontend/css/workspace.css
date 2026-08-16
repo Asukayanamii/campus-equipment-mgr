@@ -627,6 +627,35 @@ body.workspace-app {
 .workspace-app.repair-app .repair-equipment-dialog dt { margin-bottom: 4px; font-size: 1.08rem; }
 .workspace-app.repair-app .repair-equipment-dialog dd { font-size: 1.28rem; font-weight: 650; overflow-wrap: anywhere; }
 
+.workspace-app.user-app .record-detail-window.report-detail-window {
+    display: flex;
+    height: min(760px, calc(100dvh - 48px));
+    max-height: calc(100dvh - 48px) !important;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+
+.workspace-app.user-app .record-detail-window.report-detail-window::before,
+.workspace-app.user-app .record-detail-window.report-detail-window > h1 {
+    flex: 0 0 auto;
+}
+
+.workspace-app.user-app .record-detail-window.report-detail-window .record-detail-content {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding-right: 10px !important;
+    overflow-x: hidden !important;
+    overflow-y: scroll !important;
+    overscroll-behavior: contain;
+    scrollbar-color: var(--ws-line-strong) transparent;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+}
+
+.workspace-app.user-app .record-detail-window.report-detail-window .record-detail-content::-webkit-scrollbar { width: 9px; }
+.workspace-app.user-app .record-detail-window.report-detail-window .record-detail-content::-webkit-scrollbar-track { background: transparent; }
+.workspace-app.user-app .record-detail-window.report-detail-window .record-detail-content::-webkit-scrollbar-thumb { border: 2px solid #fff; border-radius: 5px; background: var(--ws-line-strong); }
+
 .workspace-app .dialog-actions button,
 .workspace-app .operation-actions button,
 .workspace-app .return-dialog-actions button,

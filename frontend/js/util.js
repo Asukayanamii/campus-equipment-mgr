@@ -313,12 +313,15 @@ function chineseToStatus(statusMap,chinese){
 /**
  *
  * @param {Object} statusMap 状态映射对象
- * @param {string} currentStatus 当前英文状态编码，用于默认选中
+ * @param {string} currentStatus 当前状态编码或中文状态，用于默认选中
  * @returns {string}
  */
 function statusSelectOptions(statusMap,currentStatus){
+    const selectedStatus = Object.hasOwn(statusMap, currentStatus)
+        ? currentStatus
+        : chineseToStatus(statusMap, currentStatus)
     return Object.entries(statusMap).map(([key,chinese]) =>
-        `<option value="${chinese}" ${key === currentStatus ? 'selected' : ''}>${chinese}</option>`
+        `<option value="${chinese}" ${key === selectedStatus ? 'selected' : ''}>${chinese}</option>`
     ).join('')
 }
 
