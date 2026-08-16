@@ -208,7 +208,7 @@
     gap: 10px;
 }
 
-.admin-damage-gallery a {
+.admin-damage-gallery .image-preview-trigger {
     aspect-ratio: 1;
     border-radius: 5px;
     overflow: hidden;

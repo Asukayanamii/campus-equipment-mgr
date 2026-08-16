@@ -141,22 +141,57 @@
         list.appendChild(row)
     }
 
+    function normalizeImageUrls(value){
+        let items = value
+        if(typeof value === 'string'){
+            const trimmed = value.trim()
+            if(!trimmed) return []
+            try {
+                const parsed = JSON.parse(trimmed)
+                items = Array.isArray(parsed) ? parsed : [parsed]
+            } catch {
+                items = [trimmed]
+            }
+        }
+        if(!Array.isArray(items)) items = [items]
+
+        return [...new Set(items.map(item => {
+            const rawUrl = typeof item === 'string' ? item : item?.imageUrl || item?.url
+            if(typeof rawUrl !== 'string' || !rawUrl.trim()) return ''
+            try {
+                return new URL(rawUrl.trim(), `${BASE_URL}/`).href
+            } catch {
+                return ''
+            }
+        }).filter(Boolean))]
+    }
+
     function appendGallery(container, title, urls){
-        if(!Array.isArray(urls) || urls.length === 0) return
+        const imageUrls = normalizeImageUrls(urls)
+        if(imageUrls.length === 0) return
         const heading = document.createElement('h3')
         const gallery = document.createElement('div')
         heading.textContent = title
         gallery.className = 'repair-order-gallery'
-        urls.forEach((url, index) => {
-            const link = document.createElement('a')
+        imageUrls.forEach((url, index) => {
+            const button = document.createElement('button')
             const image = document.createElement('img')
-            link.href = url
-            link.target = '_blank'
-            link.rel = 'noopener noreferrer'
+            button.type = 'button'
+            button.className = 'image-preview-trigger'
+            button.dataset.imagePreviewSrc = url
+            button.setAttribute('aria-label', `放大查看${title} ${index + 1}`)
             image.src = url
             image.alt = `${title} ${index + 1}`
-            link.appendChild(image)
-            gallery.appendChild(link)
+            image.loading = 'lazy'
+            image.addEventListener('error', () => {
+                button.classList.add('is-error')
+                button.removeAttribute('data-image-preview-src')
+                button.removeAttribute('aria-label')
+                button.disabled = true
+                button.textContent = '图片加载失败'
+            }, { once: true })
+            button.appendChild(image)
+            gallery.appendChild(button)
         })
         container.append(heading, gallery)
     }
@@ -164,8 +199,9 @@
     function createOrderActions(dialog, detail){
         const actions = document.createElement('div')
         actions.className = 'repair-order-actions'
+        const orderStatus = chineseToStatus(REPAIR_ORDER_STATUS_MAP, detail.status)
 
-        if(detail.status === 'pending_accept'){
+        if(orderStatus === 'pending_accept'){
             const acceptButton = document.createElement('button')
             acceptButton.type = 'button'
             acceptButton.textContent = '接单'
@@ -177,7 +213,7 @@
                 request: () => acceptRepairOrder(detail.id)
             }))
             actions.appendChild(acceptButton)
-        }else if(detail.status === 'pending_repair'){
+        }else if(orderStatus === 'pending_repair'){
             const startButton = document.createElement('button')
             startButton.type = 'button'
             startButton.textContent = '开始维修'
@@ -189,7 +225,7 @@
                 request: () => startRepairOrder(detail.id)
             }))
             actions.appendChild(startButton)
-        }else if(detail.status === 'repairing'){
+        }else if(orderStatus === 'repairing'){
             actions.appendChild(createCompletionForm(dialog, detail))
         }
 
@@ -257,20 +293,31 @@
         }
         const beforeImages = beforeUploader.getUrls()
         const afterImages = afterUploader.getUrls()
+        const faultCause = form.elements.faultCause.value.trim()
+        const repairProcess = form.elements.repairProcess.value.trim()
+        const repairResult = form.elements.repairResult.value.trim()
+        if(!faultCause || !repairProcess || !repairResult){
+            Toast.warning('故障原因、维修过程和维修结果不能为空')
+            return
+        }
         if(beforeImages.length === 0 || afterImages.length === 0){
             Toast.warning('维修前和维修后图片都至少需要一张')
             return
         }
-        if(!window.confirm('维修结果提交后将等待管理员确认，确认提交吗？')) return
+        const resultStatus = form.elements.resultStatus.value
+        const confirmation = resultStatus === 'unrepairable'
+            ? '提交后工单将标记为无法维修，设备将等待管理员报废，确认提交吗？'
+            : '维修结果提交后将等待管理员确认，确认提交吗？'
+        if(!window.confirm(confirmation)) return
 
         const submitButton = form.querySelector('.repair-completion-submit')
         submitButton.disabled = true
         submitButton.textContent = '提交中...'
         const result = await completeRepairOrder(detail.id, {
-            resultStatus: form.elements.resultStatus.value,
-            faultCause: form.elements.faultCause.value.trim(),
-            repairProcess: form.elements.repairProcess.value.trim(),
-            repairResult: form.elements.repairResult.value.trim(),
+            resultStatus,
+            faultCause,
+            repairProcess,
+            repairResult,
             beforeImages,
             afterImages
         })
@@ -279,7 +326,7 @@
             submitButton.textContent = '提交维修结果'
             return
         }
-        Toast.success('维修结果已提交')
+        Toast.success(resultStatus === 'unrepairable' ? '已提交无法维修结果' : '维修结果已提交')
         dialog.close()
         loadOrders()
     }

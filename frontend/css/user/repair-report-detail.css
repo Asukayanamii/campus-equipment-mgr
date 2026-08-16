@@ -71,7 +71,7 @@
     gap: 10px;
 }
 
-.report-image-gallery a {
+.report-image-gallery .image-preview-trigger {
     display: block;
     aspect-ratio: 1;
     border: 1px solid var(--border-light);
@@ -87,7 +87,7 @@
     transition: transform 0.2s ease;
 }
 
-.report-image-gallery a:hover img {
+.report-image-gallery .image-preview-trigger:hover img {
     transform: scale(1.04);
 }
 

@@ -26,6 +26,7 @@ const end = document.getElementById('end')
 const dataCard = document.getElementById('data-showing') 
 const equipmentStatusFilter = document.querySelector('[data-equipment-filter="status"]')
 if(equipmentStatusFilter?.tagName === 'INPUT'){ const select=document.createElement('select'); select.dataset.equipmentFilter='status'; select.innerHTML='<option value="">全部</option><option value="available">可用</option><option value="borrowed">已借出</option><option value="repair_pending">待维修</option><option value="repairing">维修中</option><option value="repaired">已维修</option><option value="damaged">已损坏</option><option value="scrapped">已报废</option>'; equipmentStatusFilter.replaceWith(select) }
+populateEquipmentCategorySelect(document.querySelector('select[data-equipment-filter="categoryId"]'))
 
 document.addEventListener('click', event => {
     if(event.target.closest('.multi-filter-submit')){
@@ -140,6 +141,15 @@ function renderData(QueryData = {}){
             card.style.background = i.coverImg
                 ? `linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url("${i.coverImg}")`
                 : 'rgba(255,255,255,0.5)'
+            if(i.coverImg){
+                const previewButton = document.createElement('button')
+                previewButton.type = 'button'
+                previewButton.className = 'data-card-image-preview'
+                previewButton.dataset.imagePreviewSrc = i.coverImg
+                previewButton.setAttribute('aria-label', `放大查看${i.equipmentName}封面`)
+                previewButton.title = '查看封面大图'
+                card.appendChild(previewButton)
+            }
         });
         pageAll = res.data.pages;
         renderButton()
@@ -168,9 +178,15 @@ async function openEquipmentDetail(equipmentId){
             <div><p>设备 #${equipment.id}</p><h2></h2></div>
             <button class="equipment-dialog-close" type="button" aria-label="关闭">×</button>
         </header>
+        <img class="repair-equipment-cover" alt="设备封面" hidden>
         <dl class="equipment-detail-list"></dl>
     `
     dialog.querySelector('h2').textContent = equipment.equipmentName || `设备 #${equipment.id}`
+    if(equipment.coverImg){
+        const cover = dialog.querySelector('.repair-equipment-cover')
+        cover.src = equipment.coverImg
+        cover.hidden = false
+    }
     const list = dialog.querySelector('.equipment-detail-list')
     const fields = [
         ['设备编号', equipment.equipmentNo],
@@ -419,7 +435,7 @@ searchWayChoose.addEventListener('change',(e) =>{
             resetQueryData()
             queryDataYouChange = ''
             search.value = ''
-            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID'
+            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类名称'
             searchWayChoose.querySelector('option[value="status"]').textContent = '设备状态'
             searchWayChoose.querySelector('option[value="equipmentName"]').textContent = '设备名称'
             searchWayChoose.querySelector('option[value="equipmentNo"]').textContent = '设备编号'
@@ -432,7 +448,7 @@ searchWayChoose.addEventListener('change',(e) =>{
             break
         case 'categoryId':
             queryDataYouChange  = 'categoryId'
-            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类ID（已指定）'
+            searchWayChoose.querySelector('option[value="categoryId"]').textContent = '设备分类名称（已指定）'
             break
         case 'status':
             queryDataYouChange  = 'status'

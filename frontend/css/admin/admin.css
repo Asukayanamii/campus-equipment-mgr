@@ -756,39 +756,6 @@ body {
     background-color: #e67260;
 }
 
-/* 确认归还区域 */
-.record-confirm-return-box{
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding-top: 10px;
-    border-top: 1px dashed var(--border-light);
-    font-size: 1.4rem;
-}
-
-.record-confirm-return-box select{
-    height: 30px;
-    border-radius: 6px;
-}
-
-.record-confirm-return-box input{
-    height: 30px;
-    width: 300px;
-    border-radius: 6px;
-    border-style: solid;
-    border-width: 1px;
-}
-
-.record-confirm-return-box #record-confirm-submit{
-    align-self: center;
-    background-color: #719adc;
-    border: none;
-    border-radius: 20px;
-    width: 40%;
-    padding: 6px 0;
-    font-size: 1.4rem;
-    cursor: pointer;
-}
 .data-card {
     background-size: contain !important;
     background-position: center;

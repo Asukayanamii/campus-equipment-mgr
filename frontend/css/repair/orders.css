@@ -141,6 +141,7 @@
     background: #ffffff;
     box-shadow: 0 24px 70px rgba(15, 23, 42, 0.24);
     overflow: auto;
+    overflow-x: hidden;
 }
 
 .repair-order-dialog::backdrop {
@@ -190,6 +191,11 @@
     font-size: 1.35rem;
 }
 
+.repair-order-images {
+    display: block;
+    min-width: 0;
+}
+
 .repair-order-images h3 {
     margin: 18px 0 8px;
     font-size: 1.4rem;
@@ -198,15 +204,28 @@
 
 .repair-order-gallery {
     display: grid;
+    width: 100%;
+    min-width: 0;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 10px;
 }
 
-.repair-order-gallery a {
+.repair-order-gallery .image-preview-trigger {
+    min-width: 0;
     aspect-ratio: 1;
     border: 1px solid var(--border-light);
     border-radius: 5px;
     overflow: hidden;
+}
+
+.repair-order-gallery .image-preview-trigger.is-error {
+    display: grid;
+    padding: 10px;
+    place-items: center;
+    color: #8a3f3f;
+    background: #fff5f5;
+    font-size: 1.2rem;
+    cursor: default;
 }
 
 .repair-order-gallery img {

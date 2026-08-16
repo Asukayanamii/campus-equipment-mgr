@@ -154,15 +154,16 @@
         if(!Array.isArray(urls) || urls.length === 0) return
         const gallery = dialog.querySelector('.admin-damage-gallery')
         urls.forEach((url, index) => {
-            const link = document.createElement('a')
-            link.href = url
-            link.target = '_blank'
-            link.rel = 'noopener noreferrer'
+            const button = document.createElement('button')
+            button.type = 'button'
+            button.className = 'image-preview-trigger'
+            button.dataset.imagePreviewSrc = url
+            button.setAttribute('aria-label', `放大查看损坏图片 ${index + 1}`)
             const image = document.createElement('img')
             image.src = url
             image.alt = `损坏图片 ${index + 1}`
-            link.appendChild(image)
-            gallery.appendChild(link)
+            button.appendChild(image)
+            gallery.appendChild(button)
         })
     }
 
@@ -210,7 +211,6 @@
     }
 
     async function confirmReport(dialog, repairReportId, button){
-        if(!window.confirm('确认报修后将生成维修工单，是否继续？')) return
         button.disabled = true
         button.textContent = '确认中...'
         const result = await AdminRepairReportApi.confirmReport(repairReportId)
@@ -219,7 +219,7 @@
             button.textContent = '确认报修'
             return
         }
-        Toast.success('报修已确认，维修工单已生成')
+        Toast.success('报修状态已更新为已确认')
         dialog.close()
         loadReports()
     }

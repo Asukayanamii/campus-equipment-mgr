@@ -29,42 +29,6 @@ if(equipmentStatusFilter?.tagName === 'INPUT'){ const select=document.createElem
 const recordStatusFilter = document.querySelector('[data-record-filter="status"]')
 if(recordStatusFilter?.tagName === 'INPUT'){ const select=document.createElement('select'); select.dataset.recordFilter='status'; select.innerHTML='<option value="">全部</option><option value="pending">待审核</option><option value="approved">已通过</option><option value="rejected">已驳回</option><option value="borrowed">借用中</option><option value="completed">已完成</option>'; recordStatusFilter.replaceWith(select) }
 
-async function renderEquipmentCategoryFilter(){
-    const select = document.querySelector('select[data-equipment-filter="categoryId"]')
-    if(!select) return
-
-    const categories = new Map()
-    let page = 1
-    let pages = 1
-    try{
-        do{
-            const response = await getCategoryData({ page, size: 100 })
-            if(!response || response.code !== 0 || !response.data) break
-            const items = response.data.items || []
-            items.forEach(category => {
-                categories.set(String(category.id), category.categoryName)
-            })
-            pages = Math.max(1, response.data.pages || 1)
-            page += 1
-        }while(page <= pages)
-    }catch(error){
-        console.error('加载设备分类失败', error)
-    }
-
-    select.replaceChildren()
-    const allOption = document.createElement('option')
-    allOption.value = ''
-    allOption.textContent = '全部分类'
-    select.appendChild(allOption)
-    categories.forEach((categoryName, categoryId) => {
-        const option = document.createElement('option')
-        option.value = categoryId
-        option.textContent = categoryName
-        select.appendChild(option)
-    })
-    select.disabled = false
-}
-
 document.addEventListener('click', event => {
     if(event.target.closest('.multi-filter-submit')){
         defaultQueryData = {page:1,size:PAGE_SIZE}
@@ -193,6 +157,15 @@ function renderData(QueryData = {}){
             card.style.background = i.coverImg
                 ? `linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url("${i.coverImg}")`
                 : 'rgba(255,255,255,0.5)'
+            if(i.coverImg){
+                const previewButton = document.createElement('button')
+                previewButton.type = 'button'
+                previewButton.className = 'data-card-image-preview'
+                previewButton.dataset.imagePreviewSrc = i.coverImg
+                previewButton.setAttribute('aria-label', `放大查看${i.equipmentName}封面`)
+                previewButton.title = '查看封面大图'
+                card.appendChild(previewButton)
+            }
         });
         pageAll = res.data.pages;
         renderButton()
@@ -788,7 +761,7 @@ document.addEventListener('profile-updated', renderPersonalData)
 
 renderData(defaultQueryData)
 renderPersonalData()
-renderEquipmentCategoryFilter()
+populateEquipmentCategorySelect(document.querySelector('select[data-equipment-filter="categoryId"]'))
 
 
 

@@ -176,7 +176,6 @@ const EQUIPMENT_STATUS_MAP = {
     available : '可用',
     pending_borrow : '待借用',
     borrowed : '借用中',
-    pending_return : '待归还',
     damaged : '损坏',
     repair_pending : '待维修',
     repairing : '维修中',
@@ -191,7 +190,6 @@ const BORROW_RECORD_STATUS_MAP = {
     approved : '已通过',
     rejected : '已驳回',
     borrowed : '借用中',
-    pending_return : '待确认归还',
     completed : '已完成',
 }
 
@@ -255,6 +253,64 @@ function apiChoose(){
     }
 
     return sessionStorage.getItem('role')
+}
+
+let equipmentCategoryMap = new Map()
+let equipmentCategoryMapPromise = null
+
+function invalidateEquipmentCategoryMap(){
+    equipmentCategoryMap = new Map()
+    equipmentCategoryMapPromise = null
+}
+
+async function loadEquipmentCategoryMap({ refresh = false } = {}){
+    if(refresh) invalidateEquipmentCategoryMap()
+    if(equipmentCategoryMapPromise) return equipmentCategoryMapPromise
+
+    equipmentCategoryMapPromise = (async () => {
+        const categories = new Map()
+        let page = 1
+        let pages = 1
+        do{
+            const response = await getCategoryData({ page, size: 100 })
+            if(!response || response.code !== 0 || !response.data){
+                throw new Error(response?.message || '设备分类接口返回异常')
+            }
+            const items = response.data.items || []
+            items.forEach(category => {
+                categories.set(String(category.id), category.categoryName)
+            })
+            pages = Math.max(1, Number(response.data.pages) || 1)
+            page += 1
+        }while(page <= pages)
+        equipmentCategoryMap = categories
+        return equipmentCategoryMap
+    })().catch(error => {
+        equipmentCategoryMapPromise = null
+        throw error
+    })
+
+    return equipmentCategoryMapPromise
+}
+
+async function populateEquipmentCategorySelect(select, { refresh = false } = {}){
+    if(!select) return
+    const selectedValue = select.value
+    select.disabled = true
+    select.replaceChildren(new Option('正在加载分类...', ''))
+    try{
+        const categories = await loadEquipmentCategoryMap({ refresh })
+        select.replaceChildren(new Option('全部分类', ''))
+        categories.forEach((categoryName, categoryId) => {
+            const option = new Option(categoryName, categoryId)
+            select.appendChild(option)
+        })
+        if(categories.has(String(selectedValue))) select.value = String(selectedValue)
+        select.disabled = false
+    }catch(error){
+        console.error('加载设备分类失败', error)
+        select.replaceChildren(new Option('分类加载失败', ''))
+    }
 }
 
 //验证账号是否合规
@@ -889,17 +945,6 @@ class BorrowRecordReview{
     } = {}){
         this.approved = approved;
         this.reviewRemark = reviewRemark;
-    }
-}
-
-// 管理员确认设备归还请求模型
-class BorrowReturnConfirm{
-    constructor({
-        confirmedStatus,
-        confirmRemark,
-    } = {}){
-        this.confirmedStatus = confirmedStatus;
-        this.confirmRemark = confirmRemark;
     }
 }
 

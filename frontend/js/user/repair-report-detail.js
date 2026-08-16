@@ -32,17 +32,17 @@
         gallery.className = 'report-image-gallery'
 
         urls.forEach((url, index) => {
-            const link = document.createElement('a')
-            link.href = url
-            link.target = '_blank'
-            link.rel = 'noopener noreferrer'
-            link.setAttribute('aria-label', `查看${title}第 ${index + 1} 张`)
+            const button = document.createElement('button')
+            button.type = 'button'
+            button.className = 'image-preview-trigger'
+            button.dataset.imagePreviewSrc = url
+            button.setAttribute('aria-label', `放大查看${title}第 ${index + 1} 张`)
             const image = document.createElement('img')
             image.src = url
             image.alt = `${title} ${index + 1}`
             image.loading = 'lazy'
-            link.appendChild(image)
-            gallery.appendChild(link)
+            button.appendChild(image)
+            gallery.appendChild(button)
         })
         section.append(heading, gallery)
     }
