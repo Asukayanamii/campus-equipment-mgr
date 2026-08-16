@@ -350,6 +350,7 @@ function callDataShowing(){
 // 召唤分类展示页
 function callCategoryShowing(){
     rightSide.insertAdjacentHTML('beforeend',`
+        <section class="category-management-view">
         <!-- 搜索框 -->
         <div class="search-box">
             <div class="filter-fields">
@@ -358,7 +359,8 @@ function callCategoryShowing(){
             </div>
             <div class="filter-actions">
                 <button type="button" class="category-filter-submit">查询</button><button type="button" class="category-filter-reset">重置</button><button type="button" class="add-category">新增分类</button>
-         </div>
+            </div>
+        </div>
         <!-- 分类列表 -->
         <div class="category-showing" id="category-showing">
 
@@ -373,7 +375,8 @@ function callCategoryShowing(){
             <button id="aft-1"></button>
             <button id="aft-2"></button>
             <button id="end"></button>
-        </div>`
+        </div>
+        </section>`
     )
     attachEventsForCategoryPageButton()
     attachCategoryFilters()

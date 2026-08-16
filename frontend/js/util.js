@@ -121,8 +121,9 @@ class Toast {
             document.body.appendChild(this.container)
         }
 
-        // Popover places notifications above modal dialog backdrops in the browser top layer.
-        if(typeof this.container.showPopover === 'function' && !this.container.matches(':popover-open')){
+        // Reopen the popover so it is placed after any newer modal dialog in the top layer.
+        if(typeof this.container.showPopover === 'function'){
+            if(this.container.matches(':popover-open')) this.container.hidePopover()
             this.container.showPopover()
         }
     }

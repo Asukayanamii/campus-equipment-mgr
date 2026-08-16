@@ -937,6 +937,16 @@ body.workspace-app {
 .workspace-app.admin-app .equipment-detail-window-delete-button { border: 1px solid #e8b8b8; color: #a73535; background: #fff !important; }
 
 /* Equipment categories */
+.workspace-app.admin-app .category-management-view {
+    display: flex;
+    width: min(100%, 1440px) !important;
+    min-width: 0;
+    flex: 1 0 auto;
+    flex-direction: column;
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+
 .workspace-app.admin-app .category-showing {
     display: grid !important;
     width: 100% !important;
@@ -948,6 +958,10 @@ body.workspace-app {
     align-items: start;
     gap: 14px;
     padding: 0 0 24px !important;
+}
+
+.workspace-app.admin-app .category-management-view .page-choose-box {
+    margin-top: auto !important;
 }
 
 .workspace-app.admin-app .category-col {
@@ -1198,6 +1212,21 @@ body.workspace-app {
 .workspace-app.admin-app .admin-repair-dialog-actions:empty { display: none; }
 .workspace-app.admin-app .admin-repair-dialog-actions .repair-confirm-button { min-height: 40px; padding: 8px 16px; border-radius: 5px; color: #fff; background: var(--ws-primary); font-weight: 700; }
 
+/* Admin repair-order evidence images */
+.workspace-app.admin-app .operation-dialog .operation-image-galleries {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.workspace-app.admin-app .operation-dialog .operation-image-group { min-width: 0; }
+.workspace-app.admin-app .operation-dialog .operation-image-group h3 { margin-bottom: 9px; color: var(--ws-ink); font-size: 1.3rem; }
+.workspace-app.admin-app .operation-dialog .operation-image-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.workspace-app.admin-app .operation-dialog .operation-image-gallery .image-preview-trigger { aspect-ratio: 1; overflow: hidden; border: 1px solid var(--ws-line); border-radius: 5px; background: #fff; }
+.workspace-app.admin-app .operation-dialog .operation-image-gallery img { width: 100%; height: 100%; object-fit: cover; }
+.workspace-app.admin-app .operation-dialog .operation-image-gallery .image-preview-trigger.is-error { padding: 8px; color: var(--ws-muted); font-size: 1.15rem; }
+
 .workspace-app .app-toast { border-radius: 6px !important; box-shadow: 0 16px 40px rgba(16, 39, 32, .18) !important; }
 
 @media (max-width: 1020px) {
@@ -1266,6 +1295,7 @@ body.workspace-app {
     .workspace-app.admin-app .search-box .filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
     .workspace-app.admin-app .search-box .filter-actions { width: 100%; margin-top: 12px; }
     .workspace-app.admin-app .search-box .filter-actions button { width: auto !important; flex: 1 1 0; }
+    .workspace-app.admin-app .operation-dialog .operation-image-galleries { grid-template-columns: 1fr; }
     .workspace-app .data-card { height: 260px !important; padding: 142px 14px 14px; }
     .workspace-app .data-card::after { inset-block-start: 132px; }
     .workspace-app .data-detail-showing { display: none !important; }

@@ -43,10 +43,50 @@
         state.page=data.page||1;state.pages=Math.max(1,data.pages||1);view.querySelector('.operation-pagination span').textContent=`第 ${state.page} / ${state.pages} 页，共 ${data.total} 条`;view.querySelector('.previous').disabled=state.page<=1;view.querySelector('.next').disabled=state.page>=state.pages
     }
     function addField(list,label,value){if(value===null||value===undefined||value==='')return;const row=document.createElement('div'),dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=label;dd.textContent=String(value);row.append(dt,dd);list.appendChild(row)}
+    function normalizeImageUrls(value){
+        let items=value
+        if(typeof items==='string'){
+            const text=items.trim()
+            if(!text)return []
+            try{items=JSON.parse(text)}catch{items=[text]}
+        }
+        if(!Array.isArray(items))items=[items]
+        return [...new Set(items.map(item=>{
+            const url=typeof item==='string'?item:item?.imageUrl||item?.url
+            if(typeof url!=='string'||!url.trim())return ''
+            try{return new URL(url.trim(),`${BASE_URL}/`).href}catch{return ''}
+        }).filter(Boolean))]
+    }
+    function addImageGallery(container,title,urls){
+        const imageUrls=normalizeImageUrls(urls)
+        if(imageUrls.length===0)return
+        const group=document.createElement('section'),heading=document.createElement('h3'),gallery=document.createElement('div')
+        group.className='operation-image-group'
+        heading.textContent=title
+        gallery.className='operation-image-gallery'
+        imageUrls.forEach((url,index)=>{
+            const button=document.createElement('button'),image=document.createElement('img')
+            button.type='button'
+            button.className='image-preview-trigger'
+            button.dataset.imagePreviewSrc=url
+            button.setAttribute('aria-label',`放大查看${title} ${index+1}`)
+            image.src=url
+            image.alt=`${title} ${index+1}`
+            image.loading='lazy'
+            image.addEventListener('error',()=>{button.classList.add('is-error');button.removeAttribute('data-image-preview-src');button.disabled=true;button.textContent='图片加载失败'},{once:true})
+            button.appendChild(image)
+            gallery.appendChild(button)
+        })
+        group.append(heading,gallery)
+        container.appendChild(group)
+    }
     async function openDetail(id){
         const detail=await adminBusinessRequest(`/admin/repair-orders/${id}`);if(!detail)return
-        const dialog=document.createElement('dialog');dialog.className='operation-dialog';dialog.innerHTML='<header><div><p>维修工单</p><h2></h2></div><button type="button" aria-label="关闭">×</button></header><dl></dl><div class="operation-actions"></div>'
+        const dialog=document.createElement('dialog');dialog.className='operation-dialog';dialog.innerHTML='<header><div><p>维修工单</p><h2></h2></div><button type="button" aria-label="关闭">×</button></header><dl></dl><section class="operation-image-galleries"></section><div class="operation-actions"></div>'
         dialog.querySelector('h2').textContent=detail.equipmentName||`工单 #${id}`;const list=dialog.querySelector('dl');[['工单状态',statusToChinese(REPAIR_ORDER_STATUS_MAP,detail.status)],['设备编号',detail.equipmentNo],['设备状态',statusToChinese(EQUIPMENT_STATUS_MAP,detail.equipmentStatus)],['损坏说明',detail.damageDescription],['维修人员',detail.repairUserName],['派单备注',detail.assignRemark],['故障原因',detail.faultCause],['维修过程',detail.repairProcess],['维修结果',detail.repairResult]].forEach(([l,v])=>addField(list,l,v))
+        const galleries=dialog.querySelector('.operation-image-galleries')
+        addImageGallery(galleries,'维修前图片',detail.beforeImages)
+        addImageGallery(galleries,'维修后图片',detail.afterImages)
         const actions=dialog.querySelector('.operation-actions')
         const orderStatus=chineseToStatus(REPAIR_ORDER_STATUS_MAP,detail.status)
         if(orderStatus==='pending_assign'){const button=document.createElement('button');button.textContent='派单';button.addEventListener('click',()=>openAssign(dialog,detail));actions.appendChild(button)}
