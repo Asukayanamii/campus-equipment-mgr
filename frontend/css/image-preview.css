@@ -105,16 +105,21 @@
     width: 40px;
     height: 40px;
     place-items: center;
-    border: 1px solid rgba(255, 255, 255, .48);
+    border: 1px solid transparent;
     border-radius: 5px;
     color: #fff;
-    background: rgba(4, 15, 12, .7);
+    background: transparent;
     font-size: 2.6rem;
     line-height: 1;
     caret-color: transparent;
     cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
+}
+
+.workspace-app .image-preview-close:hover {
+    background: transparent;
+    opacity: .7;
 }
 
 @media (max-width: 640px) {

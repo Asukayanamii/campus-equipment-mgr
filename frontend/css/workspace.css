@@ -34,6 +34,14 @@ body.workspace-app {
     font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
 }
 
+/* Legacy custom windows share one layer scale with their matching backdrop. */
+.workspace-app .dim-overlay { z-index: 100000 !important; }
+.workspace-app .change-panel,
+.workspace-app .equipment-detail-window,
+.workspace-app .record-detail-window,
+.workspace-app .add-equipment-panel-window,
+.workspace-app .data-detail-showing { z-index: 100001 !important; }
+
 .workspace-app button,
 .workspace-app input,
 .workspace-app select,
@@ -582,17 +590,42 @@ body.workspace-app {
 .workspace-app .return-dialog-close,
 .workspace-app .repair-dialog-close,
 .workspace-app .profile-close,
-.workspace-app .profile-center-close {
+.workspace-app .profile-center-close,
+.workspace-app dialog > header > button,
+.workspace-app dialog > form > header > button {
     display: grid !important;
     width: 34px !important;
     height: 34px !important;
     place-items: center;
-    border: 1px solid var(--ws-line) !important;
+    border: 1px solid transparent !important;
     border-radius: 5px !important;
     color: #5a6c64 !important;
-    background: #f7f9f7 !important;
+    background: transparent !important;
+    box-shadow: none !important;
     font-size: 2rem !important;
     line-height: 1;
+    transition: color .18s ease, opacity .18s ease;
+}
+
+.workspace-app .close-button:hover,
+.workspace-app .close-button-plus:hover,
+.workspace-app .close-button-equipment-detail-window:hover,
+.workspace-app .dialog-close:hover,
+.workspace-app .equipment-dialog-close:hover,
+.workspace-app .return-dialog-close:hover,
+.workspace-app .repair-dialog-close:hover,
+.workspace-app .profile-close:hover,
+.workspace-app .profile-center-close:hover,
+.workspace-app dialog > header > button:hover,
+.workspace-app dialog > form > header > button:hover {
+    background: transparent !important;
+    transform: none !important;
+    opacity: .7;
+}
+
+.workspace-app .record-detail-window > .close-button-plus {
+    z-index: 2;
+    color: #fff !important;
 }
 
 .workspace-app .equipment-detail-list,
@@ -717,6 +750,7 @@ body.workspace-app {
 }
 
 .workspace-app.admin-app #admin-record-detail-window .record-detail-buttons {
+    justify-content: center;
     width: 100%;
     margin: 0;
     padding-top: 2px;

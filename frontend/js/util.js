@@ -75,10 +75,11 @@ class Toast {
             style.id = this.styleId
             style.textContent = `
                 .app-toast-stack {
-                    position: fixed; left: 50%; top: 24px; z-index: 10000;
+                    position: fixed; inset: 24px auto auto 50%; z-index: 100000;
                     width: min(360px, calc(100vw - 32px)); max-height: calc(100dvh - 32px);
                     display: flex; flex-direction: column; gap: 10px;
                     transform: translateX(-50%); pointer-events: none;
+                    margin: 0; padding: 0; border: 0; background: transparent;
                 }
                 .app-toast {
                     width: 100%; min-height: 54px; padding: 10px 13px;
@@ -105,7 +106,7 @@ class Toast {
                 .app-toast.is-leaving { animation: app-toast-out .2s ease-in both; }
                 @keyframes app-toast-in { from { opacity: 0; transform: translateY(10px) scale(.98); } to { opacity: 1; transform: none; } }
                 @keyframes app-toast-out { to { opacity: 0; transform: translateY(-8px) scale(.98); } }
-                @media (max-width: 480px) { .app-toast-stack { top: 16px; } }
+                @media (max-width: 480px) { .app-toast-stack { inset: 16px auto auto 50%; } }
                 @media (prefers-reduced-motion: reduce) { .app-toast, .app-toast.is-leaving { animation-duration: .01ms; } }
             `
             document.head.appendChild(style)
@@ -114,9 +115,15 @@ class Toast {
         if(!this.container || !this.container.isConnected){
             this.container = document.createElement('div')
             this.container.className = 'app-toast-stack'
+            this.container.setAttribute('popover', 'manual')
             this.container.setAttribute('aria-live', 'polite')
             this.container.setAttribute('aria-relevant', 'additions')
             document.body.appendChild(this.container)
+        }
+
+        // Popover places notifications above modal dialog backdrops in the browser top layer.
+        if(typeof this.container.showPopover === 'function' && !this.container.matches(':popover-open')){
+            this.container.showPopover()
         }
     }
 }
