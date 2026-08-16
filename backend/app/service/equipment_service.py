@@ -124,7 +124,7 @@ def update_equipment_service(
             ItemStatusCode.REPAIRED,
         }
         # 维修链路中的设备状态只能由工单服务变更，避免绕过维修确认直接重新可借。
-        if target_status is not None and (
+        if target_status is not None and target_status != equipment.status and (
             equipment.status in repair_flow_statuses or target_status in repair_flow_statuses
         ):
             raise BussinessException("设备维修状态只能通过维修工单流转", status_code=400)
