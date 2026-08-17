@@ -1,0 +1,1367 @@
+:root {
+    --ws-nav: #12352f;
+    --ws-nav-deep: #0c2925;
+    --ws-nav-text: #d9e9e5;
+    --ws-primary: #176b5b;
+    --ws-primary-hover: #115447;
+    --ws-blue: #2868c7;
+    --ws-danger: #c34444;
+    --ws-warning: #bd7a16;
+    --ws-canvas: #f3f5f2;
+    --ws-surface: #ffffff;
+    --ws-surface-soft: #f8faf8;
+    --ws-ink: #17251f;
+    --ws-muted: #62716a;
+    --ws-line: #dce4df;
+    --ws-line-strong: #c9d5cf;
+    --ws-shadow-sm: 0 1px 2px rgba(24, 52, 43, .05), 0 6px 18px rgba(24, 52, 43, .05);
+    --ws-shadow-lg: 0 24px 70px rgba(16, 39, 32, .2);
+    --ws-nav-width: 248px;
+}
+
+html { background: var(--ws-canvas); }
+
+body.workspace-app {
+    min-width: 320px;
+    min-height: 100vh;
+    min-height: 100dvh;
+    color: var(--ws-ink);
+    background:
+        linear-gradient(rgba(23, 107, 91, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(23, 107, 91, .025) 1px, transparent 1px),
+        var(--ws-canvas);
+    background-size: 28px 28px;
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+/* Legacy custom windows share one layer scale with their matching backdrop. */
+.workspace-app .dim-overlay { z-index: 100000 !important; }
+.workspace-app .change-panel,
+.workspace-app .equipment-detail-window,
+.workspace-app .record-detail-window,
+.workspace-app .add-equipment-panel-window,
+.workspace-app .data-detail-showing { z-index: 100001 !important; }
+
+.workspace-app button,
+.workspace-app input,
+.workspace-app select,
+.workspace-app textarea { letter-spacing: 0; }
+
+.workspace-app button:focus-visible,
+.workspace-app a:focus-visible,
+.workspace-app input:focus-visible,
+.workspace-app select:focus-visible,
+.workspace-app textarea:focus-visible {
+    outline: 3px solid rgba(40, 104, 199, .2);
+    outline-offset: 2px;
+}
+
+.workspace-app .place-holder {
+    width: var(--ws-nav-width);
+    min-width: var(--ws-nav-width);
+}
+
+.workspace-app .nav {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 300;
+    width: var(--ws-nav-width);
+    height: 100vh;
+    height: 100dvh;
+    padding: 22px 16px 18px;
+    align-items: stretch;
+    overflow: hidden;
+    background: var(--ws-nav);
+    box-shadow: 8px 0 30px rgba(12, 41, 37, .12);
+}
+
+.workspace-app .nav::before {
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    content: "";
+    background: #78b79e;
+}
+
+.workspace-app .nav-title {
+    width: 100%;
+    margin: 0;
+    padding: 0 4px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, .11);
+}
+
+.workspace-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+    color: #fff;
+}
+
+.workspace-brand-mark {
+    display: grid;
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, .25);
+    border-radius: 7px;
+    color: var(--ws-nav-deep);
+    background: #f4faf7;
+    font-size: 1.7rem;
+    font-weight: 800;
+}
+
+.workspace-brand > span:last-child { min-width: 0; }
+.workspace-brand strong { display: block; overflow: hidden; font-size: 1.55rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-brand small { display: block; margin-top: 3px; color: #9ec5bb; font-size: .92rem; font-weight: 700; letter-spacing: .08em; }
+
+.workspace-app .nav-options {
+    gap: 5px;
+    width: auto;
+    margin: 0 -4px;
+    padding: 24px 0;
+    overflow-y: auto;
+}
+
+.workspace-app .nav-options::before {
+    display: block;
+    margin: 0 12px 8px;
+    content: "工作台";
+    color: #86afa5;
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+.workspace-app .nav-options button {
+    position: relative;
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 14px 10px 42px;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    color: #c1d6d1;
+    font-size: 1.38rem;
+    font-weight: 600;
+    text-align: left;
+    transition: background .18s ease, border-color .18s ease, color .18s ease;
+}
+
+.workspace-app .nav-options button::before {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    width: 18px;
+    content: "□";
+    color: #91bdb2;
+    font-size: 1.6rem;
+    line-height: 1;
+    text-align: center;
+    transform: translateY(-50%);
+}
+
+.workspace-app #data-showing-button::before,
+.workspace-app #repair-equipment-button::before { content: "⌕"; }
+.workspace-app #admin-equipment-button::before { content: "▦"; }
+.workspace-app #my-record-button::before { content: "≡"; }
+.workspace-app #repair-reports-button::before { content: "!"; }
+.workspace-app #repair-orders-button::before { content: "◇"; }
+.workspace-app #registration-codes-button::before { content: "#"; }
+
+.workspace-app .nav-options button:hover,
+.workspace-app .nav-options button:focus-visible,
+.workspace-app .nav-options button[aria-current="page"] {
+    color: #fff;
+    border-color: rgba(255, 255, 255, .09);
+    background: rgba(255, 255, 255, .1);
+    transform: none;
+}
+
+.workspace-app .nav-options button[aria-current="page"]::after {
+    position: absolute;
+    inset: 9px auto 9px -4px;
+    width: 3px;
+    border-radius: 2px;
+    content: "";
+    background: #93d0b7;
+}
+
+.workspace-app .profile-showing {
+    width: 100%;
+    height: auto;
+    min-height: 64px;
+    padding: 10px;
+    gap: 10px;
+    border-top: 1px solid rgba(255, 255, 255, .1);
+    border-radius: 6px;
+    background: rgba(0, 0, 0, .08);
+}
+
+.workspace-app .nav .profile-picture-box {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    overflow: hidden;
+    border: 2px solid rgba(255, 255, 255, .22);
+    border-radius: 50%;
+    background: #fff;
+}
+
+.workspace-app .nav button.profile-picture-box:hover { border-color: #9dd2bf; }
+.workspace-app .nav .profile-picture { width: 100%; height: 100%; object-fit: cover; }
+.workspace-app .profile-name-box { min-width: 0; align-items: flex-start; }
+.workspace-app .profile-name-box::before { content: "当前用户"; color: #89aea5; font-size: 1.05rem; }
+.workspace-app .profile-name { max-width: 100%; overflow: hidden; color: #fff; font-size: 1.3rem; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+
+.mobile-menu-button,
+.nav-backdrop { display: none; }
+
+.workspace-app .right-side {
+    display: flex;
+    width: calc(100% - var(--ws-nav-width));
+    min-width: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    align-items: stretch !important;
+    flex-direction: column;
+    padding: 26px clamp(18px, 3vw, 44px) 32px;
+}
+
+.workspace-app .right-side > * { width: min(100%, 1440px) !important; margin-right: auto !important; margin-left: auto !important; }
+
+/* Filter panels */
+.workspace-app .search-box,
+.workspace-app .operation-filters,
+.workspace-app .repair-filter-form,
+.workspace-app .repair-orders-filters,
+.workspace-app .record-filters {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    align-items: end !important;
+    gap: 12px;
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    margin: 0 0 22px !important;
+    padding: 16px !important;
+    border: 1px solid var(--ws-line) !important;
+    border-radius: 7px !important;
+    background: rgba(255, 255, 255, .92) !important;
+    box-shadow: var(--ws-shadow-sm) !important;
+}
+
+.workspace-app .search-box label,
+.workspace-app .operation-filters label,
+.workspace-app .repair-filter-form label,
+.workspace-app .repair-orders-filters label,
+.workspace-app .record-filters label {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+    color: #465850;
+    font-size: 1.24rem;
+    font-weight: 700;
+}
+
+.workspace-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.workspace-app select,
+.workspace-app textarea {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 8px 11px;
+    border: 1px solid var(--ws-line-strong) !important;
+    border-radius: 5px !important;
+    color: var(--ws-ink);
+    background: #fff !important;
+    font-size: 1.34rem;
+    font-weight: 400;
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.workspace-app input::placeholder,
+.workspace-app textarea::placeholder { color: #9aa7a0; }
+.workspace-app input:focus,
+.workspace-app select:focus,
+.workspace-app textarea:focus { border-color: var(--ws-primary) !important; box-shadow: 0 0 0 3px rgba(23, 107, 91, .1); }
+
+.workspace-app .multi-filter-submit,
+.workspace-app .multi-filter-reset,
+.workspace-app .equipment-filter-submit,
+.workspace-app .equipment-filter-reset,
+.workspace-app .category-filter-submit,
+.workspace-app .category-filter-reset,
+.workspace-app .record-filter-submit,
+.workspace-app .record-filter-reset,
+.workspace-app .operation-filters button,
+.workspace-app .repair-filter-form button,
+.workspace-app .repair-orders-filters button,
+.workspace-app .repair-orders-refresh,
+.workspace-app .operation-refresh,
+.workspace-app .create-code,
+.workspace-app .add-category,
+.workspace-app .add-equipment {
+    position: static !important;
+    width: auto !important;
+    min-width: 76px;
+    min-height: 40px !important;
+    padding: 8px 15px !important;
+    border: 1px solid transparent !important;
+    border-radius: 5px !important;
+    color: #fff !important;
+    background: var(--ws-primary) !important;
+    font-size: 1.3rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.workspace-app .multi-filter-reset,
+.workspace-app .equipment-filter-reset,
+.workspace-app .category-filter-reset,
+.workspace-app .record-filter-reset,
+.workspace-app .repair-filter-reset,
+.workspace-app .repair-orders-reset,
+.workspace-app .operation-reset { border-color: var(--ws-line-strong) !important; color: #455850 !important; background: #fff !important; }
+
+.workspace-app .add-equipment,
+.workspace-app .add-category { background: var(--ws-blue) !important; }
+
+.workspace-app.user-app #data-view > .search-box,
+.workspace-app.repair-app .right-side > .search-box {
+    grid-template-columns: repeat(7, minmax(0, 1fr)) auto;
+}
+
+.workspace-app.user-app #data-view > .search-box > .filter-actions,
+.workspace-app.repair-app .right-side > .search-box > .filter-actions {
+    display: flex;
+    align-items: end;
+    gap: 8px;
+}
+
+/* Admin filters keep all conditions together on the left and actions together on the right. */
+.workspace-app.admin-app .search-box {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-items: stretch !important;
+    gap: 14px;
+}
+
+.workspace-app.admin-app .search-box .filter-fields {
+    display: grid;
+    flex: 1 1 720px;
+    grid-template-columns: repeat(auto-fit, minmax(125px, 1fr));
+    min-width: 0;
+    align-items: end;
+    gap: 12px;
+}
+
+.workspace-app.admin-app .search-box .equipment-filter-fields {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.workspace-app.admin-app .search-box .record-filter-fields {
+    grid-template-columns: repeat(3, minmax(160px, 1fr));
+}
+
+.workspace-app.admin-app .search-box .filter-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: end;
+    gap: 8px;
+    margin-left: auto;
+}
+
+.workspace-app.admin-app .search-box .filter-actions button { flex: 0 0 auto; }
+
+/* Equipment cards */
+.workspace-app .data-showing {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    flex: 1;
+    align-content: start;
+    justify-content: stretch !important;
+    gap: 16px !important;
+    padding: 0 0 24px !important;
+    background: transparent !important;
+}
+
+.workspace-app .data-card {
+    position: relative;
+    width: 100% !important;
+    min-width: 0;
+    height: 288px !important;
+    padding: 158px 18px 18px;
+    align-items: flex-start;
+    justify-content: flex-end;
+    gap: 5px;
+    overflow: hidden !important;
+    border: 1px solid var(--ws-line) !important;
+    border-radius: 7px !important;
+    background-color: #fff !important;
+    background-position: center !important;
+    background-size: cover !important;
+    box-shadow: var(--ws-shadow-sm) !important;
+    isolation: isolate;
+    transition: border-color .18s ease, box-shadow .18s ease, translate .18s ease !important;
+}
+
+.workspace-app .data-card::before {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 2;
+    width: 11px;
+    height: 11px;
+    content: "";
+    border: 3px solid rgba(255, 255, 255, .92);
+    border-radius: 50%;
+    background: var(--equipment-status-color, #98a5a0);
+    box-shadow: 0 2px 8px rgba(21, 55, 44, .2), 0 0 0 1px rgba(23, 37, 31, .12);
+    transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.workspace-app .data-card::after {
+    position: absolute;
+    inset: 146px 0 0;
+    z-index: -1;
+    content: "";
+    background: linear-gradient(180deg, rgba(255, 255, 255, .82), #fff 28%);
+}
+
+.workspace-app .data-card:not([style*="url("]) {
+    background-image: url('../assets/images/all-icon..png') !important;
+    background-position: center 22px !important;
+    background-size: 116px 116px !important;
+    background-repeat: no-repeat !important;
+}
+
+.workspace-app .data-card:hover { border-color: #b9ccc4 !important; box-shadow: 0 12px 30px rgba(21, 55, 44, .11) !important; translate: 0 -2px; }
+.workspace-app .data-card:hover::before { transform: scale(1.12); box-shadow: 0 3px 10px rgba(21, 55, 44, .24), 0 0 0 1px rgba(23, 37, 31, .12); }
+.workspace-app .data-card[role="button"] { cursor: pointer; }
+.workspace-app .data-card h1 { width: 100%; padding: 0; overflow: hidden; color: var(--ws-ink) !important; font-size: 1.65rem; font-weight: 750; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-app .data-card > p { width: 100%; overflow: hidden; color: var(--ws-muted); font-size: 1.22rem; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.workspace-app .data-card.status-available { --equipment-status-color: #2e8b62; }
+.workspace-app .data-card.status-pending_borrow,
+.workspace-app .data-card.status-borrowed { --equipment-status-color: var(--ws-blue); }
+.workspace-app .data-card.status-pending_return { --equipment-status-color: #7b61c9; }
+.workspace-app .data-card.status-repair_pending,
+.workspace-app .data-card.status-repairing { --equipment-status-color: var(--ws-warning); }
+.workspace-app .data-card.status-repaired { --equipment-status-color: #2e9b7b; }
+.workspace-app .data-card.status-damaged { --equipment-status-color: var(--ws-danger); }
+.workspace-app .data-card.status-scrapped,
+.workspace-app .data-card.status-offline { --equipment-status-color: #77847e; }
+.workspace-app .data-card.status-unknown { --equipment-status-color: #98a5a0; }
+
+.workspace-app .data-detail-showing {
+    width: 280px !important;
+    max-height: min(420px, calc(100vh - 32px));
+    padding: 16px !important;
+    border: 1px solid var(--ws-line) !important;
+    border-radius: 7px !important;
+    color: var(--ws-ink) !important;
+    background: rgba(255, 255, 255, .98) !important;
+    box-shadow: var(--ws-shadow-lg) !important;
+    translate: 0 6px;
+}
+.workspace-app .data-card:hover .data-detail-showing { translate: 0; }
+
+/* Page headers, records and tables */
+.workspace-app .operation-heading,
+.workspace-app .admin-repair-header,
+.workspace-app .repair-orders-heading,
+.workspace-app .profile-center-heading {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.workspace-app .operation-heading p,
+.workspace-app .admin-repair-header p,
+.workspace-app .repair-orders-heading p,
+.workspace-app .profile-center-heading p { margin-bottom: 4px; color: var(--ws-primary); font-size: 1.08rem; font-weight: 800; }
+.workspace-app .operation-heading h1,
+.workspace-app .admin-repair-header h1,
+.workspace-app .repair-orders-heading h1,
+.workspace-app .profile-center-heading h1 { color: var(--ws-ink); font-size: 2.45rem; font-weight: 750; }
+
+.workspace-app .record-tabs {
+    display: inline-flex;
+    width: fit-content;
+    margin-bottom: 18px;
+    padding: 3px;
+    border: 1px solid var(--ws-line);
+    border-radius: 6px;
+    background: #fff;
+}
+.workspace-app .record-tabs button { min-height: 36px; padding: 7px 16px; border-radius: 4px; color: var(--ws-muted); font-size: 1.3rem; font-weight: 700; }
+.workspace-app .record-tabs button.record-tab-active { color: #fff; background: var(--ws-primary); }
+
+.workspace-app .record-showing,
+.workspace-app .operation-result,
+.workspace-app .repair-table-wrap,
+.workspace-app .repair-orders-result { overflow-x: auto; border: 1px solid var(--ws-line); border-radius: 7px; background: #fff; box-shadow: var(--ws-shadow-sm); }
+
+.workspace-app table { width: 100% !important; min-width: 720px; border-collapse: separate; border-spacing: 0; background: #fff; }
+.workspace-app th { padding: 12px 14px !important; border-bottom: 1px solid var(--ws-line) !important; color: #52645c !important; background: #f3f7f4 !important; font-size: 1.18rem !important; font-weight: 750; text-align: left; white-space: nowrap; }
+.workspace-app td { padding: 13px 14px !important; border-bottom: 1px solid #e8eeea !important; color: #31443b; font-size: 1.28rem !important; text-align: left; }
+.workspace-app tbody tr:last-child td { border-bottom: 0 !important; }
+.workspace-app tbody tr:hover { background: #f5faf7 !important; }
+.workspace-app .table-actions { display: flex; gap: 7px; }
+.workspace-app .table-actions button,
+.workspace-app .repair-detail-button,
+.workspace-app .open-return-dialog-button,
+.workspace-app .record-detail-buttons button { min-height: 34px; padding: 6px 11px; border: 1px solid var(--ws-line-strong); border-radius: 4px; color: var(--ws-primary); background: #fff; font-size: 1.2rem; font-weight: 700; }
+.workspace-app .table-actions .danger { color: var(--ws-danger); }
+
+.workspace-app .operation-message,
+.workspace-app .repair-list-message,
+.workspace-app .repair-orders-loading,
+.workspace-app .repair-orders-empty { padding: 70px 20px !important; color: var(--ws-muted); text-align: center; }
+
+.workspace-app .admin-operation-view,
+.workspace-app .admin-repair-page,
+.workspace-app .repair-orders-view {
+    display: flex;
+    min-height: 100vh;
+    min-height: 100dvh;
+    flex-direction: column;
+}
+
+.workspace-app .operation-result,
+.workspace-app .repair-table-wrap,
+.workspace-app .repair-orders-result { flex: 1 1 auto; }
+
+.workspace-app .page-choose-box,
+.workspace-app .operation-pagination,
+.workspace-app .repair-pagination,
+.workspace-app .repair-orders-pagination {
+    display: flex;
+    width: 100%;
+    min-height: 58px;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    gap: 8px !important;
+    margin-top: auto !important;
+    padding-top: 18px;
+}
+.workspace-app .page-choose-box button,
+.workspace-app .operation-pagination button,
+.workspace-app .repair-pagination button,
+.workspace-app .repair-orders-pagination button { width: auto; min-width: 36px; height: 36px; padding: 6px 11px; border: 1px solid var(--ws-line-strong); border-radius: 5px; color: #41564d; background: #fff; font-weight: 700; }
+.workspace-app .page-choose-box #cur { border-color: var(--ws-primary) !important; color: #fff; background: var(--ws-primary) !important; }
+.workspace-app button:disabled { cursor: not-allowed; opacity: .5; }
+
+/* Dialogs and legacy panels */
+.workspace-app dialog,
+.workspace-app .equipment-detail-window,
+.workspace-app .record-detail-window,
+.workspace-app .change-panel,
+.workspace-app .change-profile-submit-window,
+.workspace-app .add-equipment-panel-window {
+    max-width: calc(100vw - 32px) !important;
+    max-height: calc(100vh - 32px) !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow-y: auto !important;
+    border: 1px solid var(--ws-line) !important;
+    border-radius: 8px !important;
+    color: var(--ws-ink) !important;
+    background: #fff !important;
+    box-shadow: var(--ws-shadow-lg) !important;
+}
+.workspace-app dialog::backdrop { background: rgba(8, 28, 24, .58); backdrop-filter: blur(3px); }
+.workspace-app .dim-overlay { background: rgba(8, 28, 24, .58); backdrop-filter: blur(3px); }
+.workspace-app dialog header,
+.workspace-app .equipment-dialog-heading,
+.workspace-app .return-dialog-heading { border-bottom-color: var(--ws-line) !important; }
+.workspace-app dialog h2,
+.workspace-app .equipment-detail-window h1,
+.workspace-app .record-detail-window h1,
+.workspace-app .change-panel h1 { color: var(--ws-ink) !important; }
+
+.workspace-app .close-button,
+.workspace-app .close-button-plus,
+.workspace-app .close-button-equipment-detail-window,
+.workspace-app .dialog-close,
+.workspace-app .equipment-dialog-close,
+.workspace-app .return-dialog-close,
+.workspace-app .repair-dialog-close,
+.workspace-app .profile-close,
+.workspace-app .profile-center-close,
+.workspace-app dialog > header > button,
+.workspace-app dialog > form > header > button {
+    display: grid !important;
+    width: 34px !important;
+    height: 34px !important;
+    place-items: center;
+    border: 1px solid transparent !important;
+    border-radius: 5px !important;
+    color: #5a6c64 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    font-size: 2rem !important;
+    line-height: 1;
+    transition: color .18s ease, opacity .18s ease;
+}
+
+.workspace-app .close-button:hover,
+.workspace-app .close-button-plus:hover,
+.workspace-app .close-button-equipment-detail-window:hover,
+.workspace-app .dialog-close:hover,
+.workspace-app .equipment-dialog-close:hover,
+.workspace-app .return-dialog-close:hover,
+.workspace-app .repair-dialog-close:hover,
+.workspace-app .profile-close:hover,
+.workspace-app .profile-center-close:hover,
+.workspace-app dialog > header > button:hover,
+.workspace-app dialog > form > header > button:hover {
+    background: transparent !important;
+    transform: none !important;
+    opacity: .7;
+}
+
+.workspace-app .record-detail-window > .close-button-plus {
+    z-index: 2;
+    color: #fff !important;
+}
+
+.workspace-app .equipment-detail-list,
+.workspace-app .admin-repair-detail-list,
+.workspace-app .repair-order-detail-list,
+.workspace-app .profile-account-info { border-color: var(--ws-line) !important; background: var(--ws-line) !important; }
+.workspace-app .equipment-detail-list > div,
+.workspace-app .admin-repair-detail-list > div,
+.workspace-app .repair-order-detail-list > div,
+.workspace-app .profile-account-info > div { border-color: var(--ws-line) !important; background: #fff !important; }
+.workspace-app dt { color: var(--ws-muted); }
+.workspace-app dd { color: var(--ws-ink) !important; }
+
+.workspace-app.repair-app .repair-equipment-dialog[open] {
+    position: fixed;
+    inset: 0;
+    width: min(720px, calc(100vw - 32px));
+    margin: auto;
+    padding: 0 !important;
+    overflow: hidden !important;
+}
+
+.workspace-app.repair-app .repair-equipment-dialog > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--ws-line);
+}
+
+.workspace-app.repair-app .repair-equipment-dialog > header p { margin-bottom: 3px; color: var(--ws-primary); font-weight: 750; }
+.workspace-app.repair-app .repair-equipment-dialog > header h2 { font-size: 1.9rem; }
+.workspace-app.repair-app .repair-equipment-dialog .equipment-detail-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; margin: 0; padding: 1px !important; border-radius: 0; }
+.workspace-app.repair-app .repair-equipment-dialog .equipment-detail-list > div { min-width: 0; padding: 11px 13px; }
+.workspace-app.repair-app .repair-equipment-dialog dt { margin-bottom: 4px; font-size: 1.08rem; }
+.workspace-app.repair-app .repair-equipment-dialog dd { font-size: 1.28rem; font-weight: 650; overflow-wrap: anywhere; }
+
+.workspace-app.user-app .record-detail-window.report-detail-window {
+    display: flex;
+    height: min(760px, calc(100dvh - 48px));
+    max-height: calc(100dvh - 48px) !important;
+    flex-direction: column;
+    overflow: hidden !important;
+}
+
+.workspace-app.user-app .record-detail-window.report-detail-window::before,
+.workspace-app.user-app .record-detail-window.report-detail-window > h1 {
+    flex: 0 0 auto;
+}
+
+.workspace-app.user-app .record-detail-window.report-detail-window .record-detail-content {
+    min-height: 0;
+    flex: 1 1 auto;
+    padding-right: 10px !important;
+    overflow-x: hidden !important;
+    overflow-y: scroll !important;
+    overscroll-behavior: contain;
+    scrollbar-color: var(--ws-line-strong) transparent;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+}
+
+.workspace-app.user-app .record-detail-window.report-detail-window .record-detail-content::-webkit-scrollbar { width: 9px; }
+.workspace-app.user-app .record-detail-window.report-detail-window .record-detail-content::-webkit-scrollbar-track { background: transparent; }
+.workspace-app.user-app .record-detail-window.report-detail-window .record-detail-content::-webkit-scrollbar-thumb { border: 2px solid #fff; border-radius: 5px; background: var(--ws-line-strong); }
+
+/* Admin borrow details keep the heading/actions fixed while the field list scrolls. */
+.workspace-app.admin-app #admin-record-detail-window {
+    display: flex !important;
+    width: min(760px, calc(100vw - 32px)) !important;
+    height: min(720px, calc(100dvh - 32px)) !important;
+    max-height: calc(100dvh - 32px) !important;
+    flex-direction: column;
+    gap: 14px;
+    overflow: hidden !important;
+}
+
+.workspace-app.admin-app #admin-record-detail-window::before,
+.workspace-app.admin-app #admin-record-detail-window > h1,
+.workspace-app.admin-app #admin-record-detail-window > .record-detail-buttons {
+    flex: 0 0 auto;
+}
+
+.workspace-app.admin-app #admin-record-detail-window > h1 {
+    margin: 0;
+    font-size: 2rem;
+    line-height: 1.35;
+}
+
+.workspace-app.admin-app #admin-record-detail-window .record-detail-content {
+    display: block;
+    min-height: 0;
+    flex: 1 1 auto;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    scrollbar-color: var(--ws-line-strong) transparent;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+}
+
+.workspace-app.admin-app #admin-record-detail-window .detail-grid-row {
+    display: grid;
+    grid-template-columns: 150px minmax(0, 1fr);
+    min-height: 44px;
+}
+
+.workspace-app.admin-app #admin-record-detail-window .detail-grid-label,
+.workspace-app.admin-app #admin-record-detail-window .detail-grid-value {
+    min-width: 0;
+    padding: 10px 14px;
+    line-height: 1.5;
+}
+
+.workspace-app.admin-app #admin-record-detail-window .detail-grid-label {
+    white-space: nowrap;
+}
+
+.workspace-app.admin-app #admin-record-detail-window .detail-grid-value {
+    overflow-wrap: anywhere;
+}
+
+.workspace-app.admin-app #admin-record-detail-window .record-detail-buttons {
+    justify-content: center;
+    width: 100%;
+    margin: 0;
+    padding-top: 2px;
+}
+
+.workspace-app .dialog-actions button,
+.workspace-app .operation-actions button,
+.workspace-app .return-dialog-actions button,
+.workspace-app .borrow-form-actions button,
+.workspace-app .profile-center-actions button,
+.workspace-app .profile-save,
+.workspace-app .repair-completion-submit,
+.workspace-app .add-equipment-panel-submit-button { min-height: 40px; padding: 8px 16px; border: 1px solid transparent; border-radius: 5px !important; color: #fff; background: var(--ws-primary) !important; font-weight: 700; }
+.workspace-app .equipment-detail-window-delete-button,
+.workspace-app .profile-logout,
+.workspace-app .profile-logout-button { border-color: #e8b8b8 !important; color: #a73535 !important; background: #fff !important; }
+
+/* Admin equipment editor */
+.workspace-app.admin-app .equipment-detail-window {
+    display: flex !important;
+    z-index: 500;
+    width: min(840px, calc(100vw - 32px)) !important;
+    height: auto !important;
+    max-height: calc(100dvh - 32px) !important;
+    inset: 50% auto auto 50% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    flex-direction: column;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    background: #fff !important;
+    translate: -50% -50%;
+}
+
+.workspace-app.admin-app .equipment-detail-window::before { display: none !important; }
+
+.workspace-app.admin-app .equipment-detail-header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 20px 22px 18px;
+    border-bottom: 1px solid var(--ws-line);
+    background: #fff;
+}
+
+.workspace-app.admin-app .equipment-detail-header p {
+    margin-bottom: 3px;
+    color: var(--ws-primary);
+    font-size: 1.05rem;
+    font-weight: 800;
+}
+
+.workspace-app.admin-app .equipment-detail-header h2 {
+    color: var(--ws-ink);
+    font-size: 2rem;
+    font-weight: 750;
+}
+
+.workspace-app.admin-app .equipment-detail-header .close-button-equipment-detail-window {
+    position: static !important;
+    flex: 0 0 34px;
+}
+
+.workspace-app.admin-app .equipment-detail-window .equipment-detail-window-change {
+    display: grid !important;
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    flex: 0 1 auto;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 15px 18px !important;
+    padding: 20px 22px !important;
+    overflow-y: auto !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: var(--ws-surface-soft) !important;
+    box-shadow: none !important;
+}
+
+.workspace-app.admin-app .equipment-edit-field {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: 6px;
+    color: #465850;
+    font-size: 1.22rem;
+    font-weight: 700;
+}
+
+.workspace-app.admin-app .equipment-edit-field > input,
+.workspace-app.admin-app .equipment-edit-field > select,
+.workspace-app.admin-app .equipment-edit-field > textarea { font-size: 1.32rem; font-weight: 400; }
+
+.workspace-app.admin-app .equipment-edit-field-wide,
+.workspace-app.admin-app .equipment-cover-field { grid-column: 1 / -1; }
+
+.workspace-app.admin-app .equipment-date-inputs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+}
+
+.workspace-app.admin-app .equipment-date-inputs label { position: relative; min-width: 0; }
+.workspace-app.admin-app .equipment-date-inputs select { padding-right: 27px; }
+.workspace-app.admin-app .equipment-date-inputs label > span {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    color: var(--ws-muted);
+    font-size: 1.2rem;
+    font-weight: 600;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.workspace-app.admin-app .equipment-file-control {
+    display: flex;
+    min-height: 40px;
+    align-items: center;
+    gap: 12px;
+    padding: 5px;
+    border: 1px solid var(--ws-line-strong);
+    border-radius: 5px;
+    background: #fff;
+}
+
+.workspace-app.admin-app .equipment-file-picker {
+    flex: 0 0 auto;
+    padding: 6px 12px;
+    border-radius: 4px;
+    color: #fff;
+    background: var(--ws-blue);
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.workspace-app.admin-app .equipment-file-name {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--ws-muted);
+    font-size: 1.2rem;
+    font-weight: 400;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workspace-app.admin-app #coverImgFile {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+}
+
+.workspace-app.admin-app .equipment-detail-window-buttons {
+    display: flex;
+    width: 100%;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 16px 22px;
+    border-top: 1px solid var(--ws-line);
+    background: #fff;
+}
+
+.workspace-app.admin-app .equipment-detail-window-buttons button {
+    width: auto !important;
+    min-width: 104px;
+    min-height: 40px;
+    margin: 0 !important;
+    padding: 8px 16px;
+    border-radius: 5px !important;
+}
+
+.workspace-app.admin-app .equipment-detail-window-submit-button { color: #fff; background: var(--ws-primary) !important; }
+.workspace-app.admin-app .equipment-detail-window-delete-button { border: 1px solid #e8b8b8; color: #a73535; background: #fff !important; }
+
+/* Equipment categories */
+.workspace-app.admin-app .category-management-view {
+    display: flex;
+    width: min(100%, 1440px) !important;
+    min-width: 0;
+    flex: 1 0 auto;
+    flex-direction: column;
+    margin-right: auto !important;
+    margin-left: auto !important;
+}
+
+.workspace-app.admin-app .category-showing {
+    display: grid !important;
+    width: 100% !important;
+    min-width: 0;
+    flex: 0 0 auto !important;
+    align-self: stretch;
+    grid-template-columns: repeat(var(--category-column-count, 1), minmax(0, 1fr));
+    align-content: start;
+    align-items: start;
+    gap: 14px;
+    padding: 0 0 24px !important;
+}
+
+.workspace-app.admin-app .category-management-view .page-choose-box {
+    margin-top: auto !important;
+}
+
+.workspace-app.admin-app .category-col {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    align-self: start;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.workspace-app.admin-app .category-cell {
+    display: flex;
+    width: 100%;
+    max-width: 100%;
+    flex: 0 0 auto;
+    min-width: 0;
+    flex-direction: column;
+    gap: 0;
+    align-self: start;
+    overflow: hidden;
+    border: 1px solid var(--ws-line);
+    border-radius: 7px;
+    background: #fff;
+    box-shadow: var(--ws-shadow-sm);
+    transition: border-color .18s ease, box-shadow .18s ease;
+}
+
+.workspace-app.admin-app .category-cell:hover { border-color: #b9ccc4; box-shadow: 0 10px 24px rgba(21, 55, 44, .09); }
+
+.workspace-app.admin-app .category-bar {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    min-height: 72px;
+    height: auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 13px 14px 13px 16px;
+    border: 0;
+    border-left: 3px solid var(--ws-primary);
+    border-radius: 0;
+    background: #fff;
+    box-shadow: none;
+}
+
+.workspace-app.admin-app .category-bar:hover { background: #f8fbf9; box-shadow: none; }
+
+.workspace-app.admin-app .category-info {
+    display: flex;
+    min-width: 0;
+    flex: 1;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.workspace-app.admin-app .category-id { color: var(--ws-muted); font-size: 1.05rem; font-weight: 650; }
+.workspace-app.admin-app .category-bar .category-name {
+    width: 100%;
+    overflow: hidden;
+    color: var(--ws-ink);
+    font-size: 1.48rem;
+    font-weight: 750;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.workspace-app.admin-app .category-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 5px;
+}
+
+.workspace-app.admin-app .category-actions button {
+    position: static !important;
+    width: auto !important;
+    min-width: 0;
+    height: 32px !important;
+    min-height: 32px !important;
+    margin: 0;
+    padding: 5px 9px !important;
+    border: 1px solid var(--ws-line-strong) !important;
+    border-radius: 4px !important;
+    color: #496058 !important;
+    background: #fff !important;
+    font-size: 1.12rem !important;
+    font-weight: 700;
+    line-height: 1;
+}
+
+.workspace-app.admin-app .category-actions .category-delete { border-color: #ebcaca !important; color: #b33b3b !important; }
+.workspace-app.admin-app .category-actions .category-add-equipment {
+    width: 32px !important;
+    padding: 0 !important;
+    border-color: var(--ws-primary) !important;
+    color: #fff !important;
+    background: var(--ws-primary) !important;
+    font-size: 1.55rem !important;
+}
+
+.workspace-app.admin-app .category-arrow {
+    width: 16px;
+    color: var(--ws-muted);
+    font-size: 0;
+    text-align: center;
+    transition: transform .28s ease, color .18s ease;
+}
+
+.workspace-app.admin-app .category-arrow::before {
+    content: ">";
+    font-size: 1.35rem;
+}
+
+.workspace-app.admin-app .category-bar[aria-expanded="true"] .category-arrow {
+    color: var(--ws-primary);
+    transform: rotate(90deg);
+}
+
+.workspace-app.admin-app .category-members {
+    display: grid;
+    grid-template-rows: 0fr;
+    min-height: 0;
+    padding: 0 14px;
+    opacity: 0;
+    visibility: hidden;
+    border-top: 1px solid transparent;
+    background: var(--ws-surface-soft);
+    transition: grid-template-rows .28s ease, padding .28s ease, border-color .28s ease, opacity .2s ease, visibility 0s linear .28s;
+}
+
+.workspace-app.admin-app .category-members-inner {
+    display: flex;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.workspace-app.admin-app .category-members.is-open {
+    grid-template-rows: 1fr;
+    padding: 5px 14px 10px;
+    opacity: 1;
+    visibility: visible;
+    border-top-color: var(--ws-line);
+    transition: grid-template-rows .28s ease, padding .28s ease, border-color .28s ease, opacity .2s ease;
+}
+
+.workspace-app.admin-app .category-members .member-row {
+    padding: 10px 2px;
+    border: 0;
+    border-bottom: 1px solid var(--ws-line);
+    border-left: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.workspace-app.admin-app .category-members .member-row:last-child { border-bottom: 0; }
+.workspace-app.admin-app .category-members .member-row:hover { background: #eef6f1; box-shadow: none; }
+.workspace-app.admin-app .category-members .member-empty { padding: 12px 2px 7px; color: var(--ws-muted); }
+
+/* Repair report detail */
+.workspace-app.admin-app .admin-repair-dialog[open] {
+    position: fixed;
+    inset: 50% auto auto 50%;
+    display: flex;
+    width: min(780px, calc(100vw - 32px)) !important;
+    max-width: none !important;
+    height: auto;
+    max-height: calc(100dvh - 32px) !important;
+    margin: 0;
+    padding: 0 !important;
+    flex-direction: column;
+    overflow: hidden !important;
+    border: 1px solid var(--ws-line) !important;
+    border-radius: 8px !important;
+    background: #fff !important;
+    translate: -50% -50%;
+}
+
+.workspace-app.admin-app .admin-repair-dialog::before { display: none !important; }
+
+.workspace-app.admin-app .admin-repair-dialog > header {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    margin: 0;
+    padding: 19px 22px 17px;
+    border-bottom: 1px solid var(--ws-line);
+    background: #fff;
+}
+
+.workspace-app.admin-app .admin-repair-dialog > header p { margin-bottom: 3px; color: var(--ws-primary); font-size: 1.05rem; font-weight: 800; }
+.workspace-app.admin-app .admin-repair-dialog > header h2 { color: var(--ws-ink) !important; font-size: 2rem; font-weight: 750; }
+
+.workspace-app.admin-app .admin-repair-dialog-body {
+    min-width: 0;
+    min-height: 0;
+    padding: 20px 22px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: var(--ws-surface-soft);
+}
+
+.workspace-app.admin-app .admin-repair-detail-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    padding: 0 !important;
+    overflow: visible;
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+
+.workspace-app.admin-app .admin-repair-detail-list > div {
+    min-width: 0;
+    padding: 10px 12px !important;
+    border: 1px solid var(--ws-line) !important;
+    border-radius: 5px;
+    background: #fff !important;
+}
+
+.workspace-app.admin-app .admin-repair-detail-list dt { margin-bottom: 4px; color: var(--ws-muted); font-size: 1.08rem; }
+.workspace-app.admin-app .admin-repair-detail-list dd { color: var(--ws-ink) !important; font-size: 1.3rem; font-weight: 650; overflow-wrap: anywhere; }
+
+.workspace-app.admin-app .admin-damage-section h3 { margin: 20px 0 10px; color: var(--ws-ink); font-size: 1.35rem; }
+.workspace-app.admin-app .admin-damage-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 10px; }
+.workspace-app.admin-app .admin-damage-gallery .image-preview-trigger { max-width: 150px; aspect-ratio: 1; overflow: hidden; border: 1px solid var(--ws-line); border-radius: 6px; background: #fff; }
+.workspace-app.admin-app .admin-damage-gallery img { width: 100%; height: 100%; object-fit: cover; }
+
+.workspace-app.admin-app .admin-repair-dialog-actions {
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 0;
+    padding: 15px 22px;
+    border-top: 1px solid var(--ws-line);
+    background: #fff;
+}
+
+.workspace-app.admin-app .admin-repair-dialog-actions:empty { display: none; }
+.workspace-app.admin-app .admin-repair-dialog-actions .repair-confirm-button { min-height: 40px; padding: 8px 16px; border-radius: 5px; color: #fff; background: var(--ws-primary); font-weight: 700; }
+
+/* Admin repair-order evidence images */
+.workspace-app.admin-app .operation-dialog .operation-image-galleries {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.workspace-app.admin-app .operation-dialog .operation-image-group { min-width: 0; }
+.workspace-app.admin-app .operation-dialog .operation-image-group h3 { margin-bottom: 9px; color: var(--ws-ink); font-size: 1.3rem; }
+.workspace-app.admin-app .operation-dialog .operation-image-gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; }
+.workspace-app.admin-app .operation-dialog .operation-image-gallery .image-preview-trigger { aspect-ratio: 1; overflow: hidden; border: 1px solid var(--ws-line); border-radius: 5px; background: #fff; }
+.workspace-app.admin-app .operation-dialog .operation-image-gallery img { width: 100%; height: 100%; object-fit: cover; }
+.workspace-app.admin-app .operation-dialog .operation-image-gallery .image-preview-trigger.is-error { padding: 8px; color: var(--ws-muted); font-size: 1.15rem; }
+
+.workspace-app .app-toast { border-radius: 6px !important; box-shadow: 0 16px 40px rgba(16, 39, 32, .18) !important; }
+
+@media (max-width: 1020px) {
+    :root { --ws-nav-width: 218px; }
+    .workspace-app .data-showing { grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); }
+}
+
+@media (max-width: 1140px) and (min-width: 761px) {
+    .workspace-app.admin-app .search-box .equipment-filter-fields {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    }
+}
+
+@media (max-width: 1260px) and (min-width: 761px) {
+    .workspace-app.user-app #data-view > .search-box,
+    .workspace-app.repair-app .right-side > .search-box { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+    body.workspace-app { display: block; padding-top: 62px; }
+    .workspace-app .place-holder { display: none; }
+    .workspace-app .right-side { width: 100%; min-height: calc(100dvh - 62px); padding: 14px 14px 24px; }
+
+    .mobile-menu-button {
+        position: fixed;
+        top: 13px;
+        left: 14px;
+        z-index: 420;
+        display: flex;
+        width: 38px;
+        height: 36px;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        border: 1px solid #d5dfda;
+        border-radius: 5px;
+        background: #fff;
+        box-shadow: var(--ws-shadow-sm);
+    }
+    .mobile-menu-button::after { position: fixed; top: 18px; left: 64px; content: "校园设备管理"; color: var(--ws-ink); font-size: 1.45rem; font-weight: 750; white-space: nowrap; }
+    .mobile-menu-button span { width: 17px; height: 2px; border-radius: 1px; background: var(--ws-nav); transition: transform .18s ease, opacity .18s ease; }
+    body.nav-open .mobile-menu-button span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    body.nav-open .mobile-menu-button span:nth-child(2) { opacity: 0; }
+    body.nav-open .mobile-menu-button span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .workspace-app .nav { width: min(280px, calc(100vw - 54px)); translate: -102% 0; transition: translate .22s ease; }
+    body.nav-open .nav { translate: 0; }
+    .nav-backdrop { position: fixed; inset: 0; z-index: 280; display: block; pointer-events: none; opacity: 0; background: rgba(8, 28, 24, .52); transition: opacity .22s ease; }
+    body.nav-open .nav-backdrop { pointer-events: auto; opacity: 1; }
+    body.nav-open { overflow: hidden; }
+
+    .workspace-app .search-box,
+    .workspace-app .operation-filters,
+    .workspace-app .repair-filter-form,
+    .workspace-app .repair-orders-filters,
+    .workspace-app .record-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .workspace-app.user-app #data-view > .search-box,
+    .workspace-app.repair-app .right-side > .search-box { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .workspace-app.user-app #data-view > .search-box > .filter-actions,
+    .workspace-app.repair-app .right-side > .search-box > .filter-actions { grid-column: 1 / -1; }
+    .workspace-app.user-app #data-view > .search-box > .filter-actions button,
+    .workspace-app.repair-app .right-side > .search-box > .filter-actions button { flex: 1 1 0; }
+    .workspace-app .data-showing { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .workspace-app.admin-app .search-box { display: block !important; }
+    .workspace-app.admin-app .search-box .filter-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+    .workspace-app.admin-app .search-box .filter-actions { width: 100%; margin-top: 12px; }
+    .workspace-app.admin-app .search-box .filter-actions button { width: auto !important; flex: 1 1 0; }
+    .workspace-app.admin-app .operation-dialog .operation-image-galleries { grid-template-columns: 1fr; }
+    .workspace-app .data-card { height: 260px !important; padding: 142px 14px 14px; }
+    .workspace-app .data-card::after { inset-block-start: 132px; }
+    .workspace-app .data-detail-showing { display: none !important; }
+}
+
+@media (max-width: 520px) {
+    .workspace-app .right-side { padding-inline: 10px; }
+    .workspace-app .search-box,
+    .workspace-app .operation-filters,
+    .workspace-app .repair-filter-form,
+    .workspace-app .repair-orders-filters,
+    .workspace-app .record-filters { grid-template-columns: 1fr; padding: 12px !important; }
+    .workspace-app.user-app #data-view > .search-box,
+    .workspace-app.repair-app .right-side > .search-box { grid-template-columns: 1fr; }
+    .workspace-app .search-box button,
+    .workspace-app .operation-filters button,
+    .workspace-app .repair-filter-form button,
+    .workspace-app .repair-orders-filters button { width: 100% !important; }
+    .workspace-app.admin-app .search-box .filter-actions { flex-direction: column; }
+    .workspace-app.admin-app .search-box .filter-actions button { width: 100% !important; }
+    .workspace-app .data-showing { grid-template-columns: 1fr; gap: 12px !important; }
+    .workspace-app .data-card { width: 100% !important; height: 268px !important; }
+    .workspace-app .operation-heading,
+    .workspace-app .admin-repair-header,
+    .workspace-app .repair-orders-heading,
+    .workspace-app .profile-center-heading { align-items: flex-start; flex-direction: column; }
+    .workspace-app .operation-heading h1,
+    .workspace-app .admin-repair-header h1,
+    .workspace-app .repair-orders-heading h1,
+    .workspace-app .profile-center-heading h1 { font-size: 2.1rem; }
+    .workspace-app .record-tabs { display: grid; width: 100%; grid-template-columns: repeat(2, 1fr); }
+    .workspace-app .page-choose-box { gap: 4px !important; }
+    .workspace-app .page-choose-box button { min-width: 32px; width: 32px; padding-inline: 4px; }
+    .workspace-app.repair-app .repair-equipment-dialog .equipment-detail-list { grid-template-columns: 1fr; }
+    .workspace-app dialog,
+    .workspace-app .equipment-detail-window,
+    .workspace-app .record-detail-window,
+    .workspace-app .change-panel,
+    .workspace-app .change-profile-submit-window,
+    .workspace-app .add-equipment-panel-window { max-width: calc(100vw - 20px) !important; max-height: calc(100dvh - 20px) !important; }
+    .workspace-app.admin-app .equipment-detail-window { width: calc(100vw - 20px) !important; max-width: none !important; max-height: calc(100dvh - 20px) !important; }
+    .workspace-app.admin-app .equipment-detail-header { padding: 16px; }
+    .workspace-app.admin-app .equipment-detail-header h2 { font-size: 1.75rem; }
+    .workspace-app.admin-app .equipment-detail-window .equipment-detail-window-change { grid-template-columns: 1fr; padding: 16px !important; }
+    .workspace-app.admin-app .equipment-edit-field-wide,
+    .workspace-app.admin-app .equipment-cover-field { grid-column: auto; }
+    .workspace-app.admin-app .equipment-detail-window-buttons { padding: 14px 16px; }
+    .workspace-app.admin-app .equipment-detail-window-buttons button { min-width: 0; }
+    .workspace-app.admin-app .category-showing { grid-template-columns: 1fr; }
+    .workspace-app.admin-app .category-bar { align-items: flex-start; flex-direction: column; }
+    .workspace-app.admin-app .category-actions { width: 100%; }
+    .workspace-app.admin-app .category-arrow { margin-left: auto; align-self: center; }
+    .workspace-app.admin-app .admin-repair-dialog[open] { width: calc(100vw - 20px) !important; max-height: calc(100dvh - 20px) !important; }
+    .workspace-app.admin-app .admin-repair-dialog > header { padding: 16px; }
+    .workspace-app.admin-app .admin-repair-dialog > header h2 { font-size: 1.75rem; }
+    .workspace-app.admin-app .admin-repair-dialog-body { padding: 16px; }
+    .workspace-app.admin-app .admin-repair-detail-list { grid-template-columns: 1fr; }
+    .workspace-app.admin-app .admin-repair-dialog-actions { padding: 14px 16px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .workspace-app .nav,
+    .mobile-menu-button span,
+    .nav-backdrop,
+    .workspace-app .data-card,
+    .workspace-app .data-card::before,
+    .workspace-app.admin-app .category-members,
+    .workspace-app.admin-app .category-arrow { transition: none; }
+}

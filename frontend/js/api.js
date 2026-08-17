@@ -169,7 +169,7 @@ async function sendRegister(username , password, identity, registrationCode = ''
             body : JSON.stringify({
                 'username': username,
                 'password' : password,
-                ...(identity === 'admin' ? {'registration_code': registrationCode} : {})
+                ...(['admin', 'repair'].includes(identity) ? {'registration_code': registrationCode} : {})
             })
         })
 
@@ -561,6 +561,32 @@ async function sendEmailVerificationCode(email){
         })
         const result = await response.json().catch(() => ({message: '服务返回的数据格式不正确'}))
         if(!response.ok || result.code !== 0){ Toast.failure(result.message || '验证码发送失败'); return false }
+        return true
+    } catch { Toast.failure('网络异常，请稍后重试'); return false }
+}
+
+async function sendEmailBindingVerificationCode(email){
+    try {
+        const response = await fetch(`${BASE_URL}/user/email-binding-verification-code`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'token': sessionStorage.getItem('token')},
+            body: JSON.stringify({email})
+        })
+        const result = await response.json().catch(() => ({message: '服务返回的数据格式不正确'}))
+        if(!response.ok || result.code !== 0){ Toast.failure(result.message || '验证码发送失败'); return false }
+        return true
+    } catch { Toast.failure('网络异常，请稍后重试'); return false }
+}
+
+async function bindEmail(email, verificationCode){
+    try {
+        const response = await fetch(`${BASE_URL}/user/bind-email`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json', 'token': sessionStorage.getItem('token')},
+            body: JSON.stringify({email, verificationCode})
+        })
+        const result = await response.json().catch(() => ({message: '服务返回的数据格式不正确'}))
+        if(!response.ok || result.code !== 0){ Toast.failure(result.message || '邮箱绑定失败'); return false }
         return true
     } catch { Toast.failure('网络异常，请稍后重试'); return false }
 }
