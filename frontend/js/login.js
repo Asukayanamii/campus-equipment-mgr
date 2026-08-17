@@ -20,8 +20,11 @@ const registerCode = document.getElementById('register-code')
 const registerSubmit = document.getElementById('register-submit')
 const registerClose = document.getElementById('register-close')
 const registerCancel = document.getElementById('register-cancel')
+const accountLoginPanel = document.querySelector('.input-data')
 const emailLoginPanel = document.getElementById('email-login-panel')
 const emailLoginToggle = document.getElementById('email-login-toggle')
+const loginEmail = document.getElementById('login-email')
+const loginCode = document.getElementById('login-code')
 const sendCodeButton = document.getElementById('send-code-button')
 let emailLoginMode = false
 
@@ -66,14 +69,28 @@ function chooseIdentity(target){
     target.setAttribute('aria-checked', 'true')
     identity = showIdentity(target);
     if(identity !== 1){
-        emailLoginMode = false
-        emailLoginPanel.hidden = true
         emailLoginToggle.hidden = true
-        document.querySelector('.input-data').hidden = false
+        setEmailLoginMode(false)
     } else {
         emailLoginToggle.hidden = false
     }
     prepareRoleLogin(identityApi(identity))
+}
+
+function setLoginControlsEnabled(controls, enabled){
+    controls.forEach(control => {
+        control.disabled = !enabled
+        control.required = enabled
+    })
+}
+
+function setEmailLoginMode(enabled){
+    emailLoginMode = enabled
+    accountLoginPanel.hidden = enabled
+    emailLoginPanel.hidden = !enabled
+    emailLoginToggle.textContent = enabled ? '使用账号密码登录' : '使用邮箱验证码登录'
+    setLoginControlsEnabled([account, password], !enabled)
+    setLoginControlsEnabled([loginEmail, loginCode], enabled)
 }
 
 function identityName(identityValue){
@@ -129,20 +146,17 @@ async function register(){
 
 //登录
 async function submit(){
-    if(emailLoginMode) return await submitEmailLogin(document.getElementById('login-email').value.trim(), document.getElementById('login-code').value.trim())
+    if(emailLoginMode) return await submitEmailLogin(loginEmail.value.trim(), loginCode.value.trim())
     return await sendSubmit(account.value,password.value,apiChoose())
 }
 
 emailLoginToggle.addEventListener('click', () => {
     if(identity !== 1) return
-    emailLoginMode = !emailLoginMode
-    emailLoginPanel.hidden = !emailLoginMode
-    document.querySelector('.input-data').hidden = emailLoginMode
-    emailLoginToggle.textContent = emailLoginMode ? '使用账号密码登录' : '使用邮箱验证码登录'
+    setEmailLoginMode(!emailLoginMode)
 })
 
 sendCodeButton.addEventListener('click', async () => {
-    const email = document.getElementById('login-email').value.trim()
+    const email = loginEmail.value.trim()
     if(!email) { Toast.warning('请输入邮箱'); return }
     sendCodeButton.disabled = true
     if(await sendEmailVerificationCode(email)){
