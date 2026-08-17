@@ -1,7 +1,13 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import BorrowRecordStatus, ItemStatusCode
+from app.constant.status_constant import (
+    BorrowRecordStatus,
+    ItemStatusCode,
+    OperationAction,
+    OperationActorRole,
+    OperationBusinessType,
+)
 from app.core.exceptions import BussinessException
 from app.crud import borrow_record_crud, borrow_return_image_crud, equipment_crud
 from app.schema.admin_borrow_record_schema import (
@@ -12,6 +18,7 @@ from app.schema.admin_borrow_record_schema import (
     BorrowRecordReviewOut,
 )
 from app.service.equipment_service import change_equipment_status_service
+from app.service.operation_log_service import create_operation_log
 
 
 def _build_borrow_record_detail_out(session: Session, borrow_record_detail) -> AdminBorrowRecordOut:
@@ -122,5 +129,31 @@ def review_borrow_record_service(
             session=session,
             equipment=equipment,
             target_status=equipment_status,
+        )
+        # 审核结论与设备可用状态同步记录，保留审核人和审核备注。
+        operation_action = OperationAction.BORROW_APPROVE if review_in.approved else OperationAction.BORROW_REJECT
+        create_operation_log(
+            session,
+            OperationBusinessType.BORROW_RECORD,
+            borrow_record.id,
+            operation_action,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=equipment.id,
+            from_status=BorrowRecordStatus.PENDING,
+            to_status=result_status,
+            remark=review_in.review_remark,
+        )
+        create_operation_log(
+            session,
+            OperationBusinessType.EQUIPMENT,
+            equipment.id,
+            operation_action,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=equipment.id,
+            from_status=ItemStatusCode.PENDING_BORROW,
+            to_status=equipment_status,
+            remark=review_in.review_remark,
         )
         return BorrowRecordReviewOut.model_validate(borrow_record)

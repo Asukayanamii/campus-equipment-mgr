@@ -4,6 +4,7 @@ from app.db.models.borrow_return_image_model import BorrowReturnImage
 from app.db.models.borrow_return_record_model import BorrowReturnRecord
 from app.db.models.equipment_category_model import EquipmentCategory
 from app.db.models.equipment_model import Equipment
+from app.db.models.operation_log_model import OperationLog
 from app.db.models.repair_order_model import RepairOrder
 from app.db.models.repair_order_image_model import RepairOrderImage
 from app.db.models.repair_report_model import RepairReport

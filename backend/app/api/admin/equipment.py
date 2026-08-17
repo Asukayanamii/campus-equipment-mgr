@@ -35,9 +35,13 @@ def get_equipment(
 
 
 @router.post("", response_model=Result, name="新增设备")
-def create_equipment(equipment_in: EquipmentCreate, db: Session = Depends(get_db)):
+def create_equipment(
+    equipment_in: EquipmentCreate,
+    info: dict = Depends(admin_verity),
+    db: Session = Depends(get_db),
+):
     logger.info("管理端新增设备，设备编号：%s", equipment_in.equipment_no)
-    create_equipment_service(db, equipment_in)
+    create_equipment_service(db, equipment_in, info["id"])
     return Result.success()
 
 
@@ -45,18 +49,20 @@ def create_equipment(equipment_in: EquipmentCreate, db: Session = Depends(get_db
 def update_equipment(
     equipment_in: EquipmentUpdate,
     equipment_id: int = Path(..., alias="equipmentId", ge=1),
+    info: dict = Depends(admin_verity),
     db: Session = Depends(get_db),
 ):
     logger.info("管理端根据 ID 更新设备，设备 ID：%s", equipment_id)
-    update_equipment_service(db, equipment_id, equipment_in)
+    update_equipment_service(db, equipment_id, equipment_in, info["id"])
     return Result.success()
 
 
 @router.delete("/{equipmentId}", response_model=Result, name="根据 ID 删除设备")
 def delete_equipment(
     equipment_id: int = Path(..., alias="equipmentId", ge=1),
+    info: dict = Depends(admin_verity),
     db: Session = Depends(get_db),
 ):
     logger.info("管理端根据 ID 删除设备，设备 ID：%s", equipment_id)
-    delete_equipment_service(db, equipment_id)
+    delete_equipment_service(db, equipment_id, info["id"])
     return Result.success()

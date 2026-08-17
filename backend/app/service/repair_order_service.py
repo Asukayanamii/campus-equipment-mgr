@@ -3,7 +3,15 @@ from datetime import datetime
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import ITEM_STATUS_MAP, ItemStatusCode, RepairOrderStatus, RepairReportStatus
+from app.constant.status_constant import (
+    ITEM_STATUS_MAP,
+    ItemStatusCode,
+    OperationAction,
+    OperationActorRole,
+    OperationBusinessType,
+    RepairOrderStatus,
+    RepairReportStatus,
+)
 from app.core.exceptions import BussinessException
 from app.crud import borrow_return_image_crud, equipment_crud, repair_order_crud, repair_report_crud, repair_user_crud
 from app.db.models.repair_order_image_model import RepairOrderImage
@@ -22,6 +30,7 @@ from app.schema.repair_order_schema import (
     RepairReportConfirmOut,
     RepairUserPageOut,
 )
+from app.service.operation_log_service import create_operation_log
 from app.utils.redis_cache import mark_equipment_cache_invalidation
 
 
@@ -131,7 +140,11 @@ def get_repair_report_by_admin_service(session: Session, repair_report_id: int) 
     return result
 
 
-def confirm_repair_report_service(session: Session, repair_report_id: int) -> RepairReportConfirmOut:
+def confirm_repair_report_service(
+    session: Session,
+    repair_report_id: int,
+    admin_id: int,
+) -> RepairReportConfirmOut:
     with session.begin():
         # 仅允许确认待处理报修，避免重复推进工单流程。
         report = repair_report_crud.get_repair_report_by_id_for_update(session, repair_report_id)
@@ -143,6 +156,18 @@ def confirm_repair_report_service(session: Session, repair_report_id: int) -> Re
             report,
             {"status": RepairReportStatus.CONFIRMED},
             session,
+        )
+        # 管理员确认报修后记录审核人和报修状态变化。
+        create_operation_log(
+            session,
+            OperationBusinessType.REPAIR_REPORT,
+            report.id,
+            OperationAction.REPAIR_REPORT_CONFIRM,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=report.equipment_id,
+            from_status=RepairReportStatus.PENDING,
+            to_status=RepairReportStatus.CONFIRMED,
         )
         return RepairReportConfirmOut.model_validate(report)
 
@@ -159,6 +184,7 @@ def assign_repair_order_service(
     session: Session,
     repair_order_id: int,
     assign_in: RepairOrderAssignIn,
+    admin_id: int,
 ) -> RepairOrderAssignOut:
     with session.begin():
         # 派单前校验工单、报修单和目标维修人员均满足流转条件。
@@ -184,6 +210,19 @@ def assign_repair_order_service(
             },
             session,
         )
+        # 派单记录保留管理员、目标工单状态和派单备注。
+        create_operation_log(
+            session,
+            OperationBusinessType.REPAIR_ORDER,
+            order.id,
+            OperationAction.REPAIR_ORDER_ASSIGN,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=order.equipment_id,
+            from_status=RepairOrderStatus.PENDING_ASSIGN,
+            to_status=RepairOrderStatus.PENDING_ACCEPT,
+            remark=assign_in.assign_remark,
+        )
         result = RepairOrderAssignOut.model_validate(order)
         result.equipment_status = None
         return result
@@ -196,6 +235,18 @@ def accept_repair_order_service(session: Session, repair_order_id: int, repair_u
         if order.status != RepairOrderStatus.PENDING_ACCEPT:
             raise BussinessException("当前工单不能接单", status_code=400)
         repair_order_crud.update_repair_order(order, {"status": RepairOrderStatus.PENDING_REPAIR}, session)
+        # 维修人员接单后，工单进入待维修状态。
+        create_operation_log(
+            session,
+            OperationBusinessType.REPAIR_ORDER,
+            order.id,
+            OperationAction.REPAIR_ORDER_ACCEPT,
+            OperationActorRole.REPAIR_USER,
+            repair_user_id,
+            equipment_id=order.equipment_id,
+            from_status=RepairOrderStatus.PENDING_ACCEPT,
+            to_status=RepairOrderStatus.PENDING_REPAIR,
+        )
         return RepairOrderActionOut.model_validate(order)
 
 
@@ -210,6 +261,29 @@ def start_repair_order_service(session: Session, repair_order_id: int, repair_us
             raise BussinessException("设备不存在", status_code=404)
         repair_order_crud.update_repair_order(order, {"status": RepairOrderStatus.REPAIRING}, session)
         equipment.status = ItemStatusCode.REPAIRING
+        # 开始维修会同时推进工单和设备状态。
+        create_operation_log(
+            session,
+            OperationBusinessType.REPAIR_ORDER,
+            order.id,
+            OperationAction.REPAIR_ORDER_START,
+            OperationActorRole.REPAIR_USER,
+            repair_user_id,
+            equipment_id=equipment.id,
+            from_status=RepairOrderStatus.PENDING_REPAIR,
+            to_status=RepairOrderStatus.REPAIRING,
+        )
+        create_operation_log(
+            session,
+            OperationBusinessType.EQUIPMENT,
+            equipment.id,
+            OperationAction.REPAIR_ORDER_START,
+            OperationActorRole.REPAIR_USER,
+            repair_user_id,
+            equipment_id=equipment.id,
+            from_status=ItemStatusCode.REPAIR_PENDING,
+            to_status=ItemStatusCode.REPAIRING,
+        )
         # 维修状态变更在事务提交后使设备查询缓存失效。
         mark_equipment_cache_invalidation(session)
         session.flush()
@@ -265,6 +339,36 @@ def complete_repair_order_service(
                     session,
                 )
         equipment.status = target_equipment_status
+        operation_action = (
+            OperationAction.REPAIR_ORDER_COMPLETE
+            if completion_in.result_status == "repaired"
+            else OperationAction.REPAIR_ORDER_UNREPAIRABLE
+        )
+        # 维修结果与设备状态同步写入操作历史，便于管理员确认或报废时追溯。
+        create_operation_log(
+            session,
+            OperationBusinessType.REPAIR_ORDER,
+            order.id,
+            operation_action,
+            OperationActorRole.REPAIR_USER,
+            repair_user_id,
+            equipment_id=equipment.id,
+            from_status=RepairOrderStatus.REPAIRING,
+            to_status=target_order_status,
+            remark=completion_in.repair_result,
+        )
+        create_operation_log(
+            session,
+            OperationBusinessType.EQUIPMENT,
+            equipment.id,
+            operation_action,
+            OperationActorRole.REPAIR_USER,
+            repair_user_id,
+            equipment_id=equipment.id,
+            from_status=ItemStatusCode.REPAIRING,
+            to_status=target_equipment_status,
+            remark=completion_in.repair_result,
+        )
         # 维修结果会改变设备接口展示的状态。
         mark_equipment_cache_invalidation(session)
         session.flush()
@@ -275,7 +379,11 @@ def complete_repair_order_service(
         return result
 
 
-def confirm_completed_repair_order_service(session: Session, repair_order_id: int) -> RepairOrderActionOut:
+def confirm_completed_repair_order_service(
+    session: Session,
+    repair_order_id: int,
+    admin_id: int,
+) -> RepairOrderActionOut:
     with session.begin():
         # 管理员确认维修完成后，设备重新恢复为可借用状态。
         order = repair_order_crud.get_repair_order_by_id_for_update(session, repair_order_id)
@@ -288,6 +396,29 @@ def confirm_completed_repair_order_service(session: Session, repair_order_id: in
             raise BussinessException("设备不存在", status_code=404)
         repair_order_crud.update_repair_order(order, {"status": RepairOrderStatus.COMPLETED}, session)
         equipment.status = ItemStatusCode.AVAILABLE
+        # 管理员终审通过后，设备才恢复为可借用。
+        create_operation_log(
+            session,
+            OperationBusinessType.REPAIR_ORDER,
+            order.id,
+            OperationAction.REPAIR_ORDER_CONFIRM,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=equipment.id,
+            from_status=RepairOrderStatus.PENDING_CONFIRM,
+            to_status=RepairOrderStatus.COMPLETED,
+        )
+        create_operation_log(
+            session,
+            OperationBusinessType.EQUIPMENT,
+            equipment.id,
+            OperationAction.REPAIR_ORDER_CONFIRM,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=equipment.id,
+            from_status=ItemStatusCode.REPAIRED,
+            to_status=ItemStatusCode.AVAILABLE,
+        )
         mark_equipment_cache_invalidation(session)
         session.flush()
         result = RepairOrderActionOut.model_validate(order)
@@ -295,7 +426,11 @@ def confirm_completed_repair_order_service(session: Session, repair_order_id: in
         return result
 
 
-def scrap_repair_order_service(session: Session, repair_order_id: int) -> RepairOrderActionOut:
+def scrap_repair_order_service(
+    session: Session,
+    repair_order_id: int,
+    admin_id: int,
+) -> RepairOrderActionOut:
     with session.begin():
         # 仅无法维修的工单可报废，并同步将设备标记为已报废。
         order = repair_order_crud.get_repair_order_by_id_for_update(session, repair_order_id)
@@ -308,6 +443,29 @@ def scrap_repair_order_service(session: Session, repair_order_id: int) -> Repair
             raise BussinessException("设备不存在", status_code=404)
         repair_order_crud.update_repair_order(order, {"status": RepairOrderStatus.SCRAPPED}, session)
         equipment.status = ItemStatusCode.SCRAPPED
+        # 管理员确认无法维修后记录工单和设备的报废状态。
+        create_operation_log(
+            session,
+            OperationBusinessType.REPAIR_ORDER,
+            order.id,
+            OperationAction.REPAIR_ORDER_SCRAP,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=equipment.id,
+            from_status=RepairOrderStatus.UNREPAIRABLE,
+            to_status=RepairOrderStatus.SCRAPPED,
+        )
+        create_operation_log(
+            session,
+            OperationBusinessType.EQUIPMENT,
+            equipment.id,
+            OperationAction.REPAIR_ORDER_SCRAP,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=equipment.id,
+            from_status=ItemStatusCode.DAMAGED,
+            to_status=ItemStatusCode.SCRAPPED,
+        )
         mark_equipment_cache_invalidation(session)
         session.flush()
         result = RepairOrderActionOut.model_validate(order)

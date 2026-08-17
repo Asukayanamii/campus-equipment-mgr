@@ -39,7 +39,8 @@ def get_repair_report(
 @router.post("/{repairReportId}/confirm", response_model=Result[RepairReportConfirmOut], name="确认报修记录")
 def confirm_repair_report(
     repair_report_id: int = Path(..., alias="repairReportId", ge=1),
+    info: dict = Depends(admin_verity),
     db: Session = Depends(get_db),
 ):
     logger.info("管理端确认报修记录，报修记录 ID：%s", repair_report_id)
-    return Result.success(confirm_repair_report_service(db, repair_report_id))
+    return Result.success(confirm_repair_report_service(db, repair_report_id, info["id"]))

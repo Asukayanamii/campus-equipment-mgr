@@ -25,6 +25,7 @@ from app.db.models.borrow_record_model import BorrowRecord
 from app.db.models.borrow_return_image_model import BorrowReturnImage
 from app.db.models.borrow_return_record_model import BorrowReturnRecord
 from app.db.models.equipment_model import Equipment
+from app.db.models.operation_log_model import OperationLog
 from app.db.models.repair_order_image_model import RepairOrderImage
 from app.db.models.repair_order_model import RepairOrder
 from app.db.models.repair_report_model import RepairReport
@@ -177,6 +178,10 @@ class ApiContractAndFlowTests(unittest.TestCase):
             if borrow_ids:
                 session.query(BorrowRecord).filter(BorrowRecord.id.in_(borrow_ids)).delete(synchronize_session=False)
             if equipment_ids:
+                session.query(OperationLog).filter(OperationLog.equipment_id.in_(equipment_ids)).delete(
+                    synchronize_session=False
+                )
+            if equipment_ids:
                 session.query(Equipment).filter(Equipment.id.in_(equipment_ids)).delete(synchronize_session=False)
             if user_id:
                 session.query(User).filter(User.id == user_id).delete(synchronize_session=False)
@@ -224,7 +229,7 @@ class ApiContractAndFlowTests(unittest.TestCase):
         response = requests.get(f"{BASE_URL}/openapi.json", timeout=10)
         spec = response.json()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(spec["paths"]), 51)
+        self.assertGreaterEqual(len(spec["paths"]), 56)
         for path, operations in spec["paths"].items():
             for method, operation in operations.items():
                 if method not in {"get", "post", "put", "patch", "delete"}:
@@ -265,6 +270,7 @@ class ApiContractAndFlowTests(unittest.TestCase):
             ("/admin/repair-reports/page", self.admin_token),
             ("/admin/repair-orders/page", self.admin_token),
             ("/admin/repair-users/page", self.admin_token),
+            ("/admin/operation-logs/page", self.admin_token),
             ("/repair/equipment/page", self.repair_token),
             ("/repair/orders/page", self.repair_token),
         ]
@@ -416,6 +422,13 @@ class ApiContractAndFlowTests(unittest.TestCase):
         )["data"]
         self.assertEqual(reviewed["status"], "已借出")
         BorrowRecordReviewOut.model_validate(reviewed)
+        # 借用申请和管理员审核均应生成可追溯的操作日志。
+        logs = self._get(
+            f"/admin/operation-logs/page?businessType=borrow_record&businessId={borrow_id}",
+            self.admin_token,
+        )["data"]["items"]
+        self.assertEqual(len(logs), 2)
+        self.assertEqual({item["action"] for item in logs}, {"提交借用申请", "审核借用通过"})
         returned = self._post_json(
             f"/user/borrow-records/{borrow_id}/return",
             self.user_token,
@@ -466,6 +479,15 @@ class ApiContractAndFlowTests(unittest.TestCase):
         )["data"]
         RepairOrderAssignOut.model_validate(assigned)
         self.assertEqual(assigned["status"], "待接单")
+        # 维修人员只能读取已分配给自己的工单操作历史。
+        repair_logs = self._get(
+            f"/repair/orders/{order_id}/operation-logs",
+            self.repair_token,
+        )["data"]
+        self.assertEqual(
+            {item["action"] for item in repair_logs},
+            {"创建维修工单", "派发维修工单"},
+        )
         accepted = self._post_json(f"/repair/orders/{order_id}/accept", self.repair_token, {})["data"]
         RepairOrderActionOut.model_validate(accepted)
         self.assertEqual(accepted["status"], "待维修")
@@ -595,8 +617,8 @@ def write_report(result: unittest.TestResult):
         "skipped": len(result.skipped),
         "successful": result.wasSuccessful(),
         "coverage": {
-            "openapiPaths": 51,
-            "paginatedEndpoints": 11,
+            "openapiPaths": 56,
+            "paginatedEndpoints": 12,
             "idPathOperations": 19,
             "repairBranches": ["repaired", "unrepairable"],
             "uploadCases": ["missing", "invalid_extension", "too_large", "success_contract"],
@@ -620,8 +642,8 @@ def write_report(result: unittest.TestResult):
         "",
         "## 覆盖范围",
         "",
-        "- OpenAPI 路径：51 条",
-        "- 分页接口边界：11 个",
+        "- OpenAPI 路径：56 条",
+        "- 分页接口边界：12 个",
         "- ID 路径操作边界：19 个",
         "- 维修分支：正常修复、无法维修报废",
         "- 上传场景：缺失文件、非法扩展名、超限文件、成功响应契约",

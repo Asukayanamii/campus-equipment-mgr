@@ -1,13 +1,20 @@
 from fastapi_pagination import Page
 from sqlalchemy.orm import Session
 
-from app.constant.status_constant import ITEM_STATUS_MAP, ItemStatusCode
+from app.constant.status_constant import (
+    ITEM_STATUS_MAP,
+    ItemStatusCode,
+    OperationAction,
+    OperationActorRole,
+    OperationBusinessType,
+)
 from app.core.config import settings
 from app.core.exceptions import BussinessException
 from app.crud import equipment_crud
 from app.db.models.equipment_model import Equipment
 from app.schema.equipment_schema import EquipmentCreate, EquipmentOut, EquipmentUpdate, EquipQuery
 from app.schema.page_schema import PageResp
+from app.service.operation_log_service import create_operation_log
 from app.utils.redis_cache import mark_equipment_cache_invalidation, redis_cache
 
 
@@ -69,7 +76,7 @@ def get_equipment_service(session: Session, equipment_id: int) -> EquipmentOut:
     return equipment_out
 
 
-def create_equipment_service(session: Session, equipment_in: EquipmentCreate) -> None:
+def create_equipment_service(session: Session, equipment_in: EquipmentCreate, admin_id: int) -> None:
     with session.begin():
         # 校验资产编号的全局唯一性。
         if equipment_crud.get_equipment_by_no(session, equipment_in.equipment_no):
@@ -79,7 +86,19 @@ def create_equipment_service(session: Session, equipment_in: EquipmentCreate) ->
         if not equipment_data["cover_img"]:
             equipment_data["cover_img"] = settings.DEFAULT_EQUIPMENT_IMAGE_URL
         # 在当前事务中写入设备。
-        equipment_crud.add_equipment(Equipment(**equipment_data), session)
+        equipment = Equipment(**equipment_data)
+        equipment_crud.add_equipment(equipment, session)
+        # 新增设备时记录初始状态和创建管理员。
+        create_operation_log(
+            session,
+            OperationBusinessType.EQUIPMENT,
+            equipment.id,
+            OperationAction.EQUIPMENT_CREATE,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=equipment.id,
+            to_status=equipment.status,
+        )
         # 缓存版本只会在本次事务成功提交后更新。
         mark_equipment_cache_invalidation(session)
 
@@ -102,6 +121,7 @@ def update_equipment_service(
     session: Session,
     equipment_id: int,
     equipment_in: EquipmentUpdate,
+    admin_id: int,
 ) -> None:
     with session.begin():
         # 确认目标设备存在且未被逻辑删除。
@@ -132,19 +152,45 @@ def update_equipment_service(
             equipment_crud.update_equipment(equipment, values, session)
             mark_equipment_cache_invalidation(session)
         if target_status is not None:
+            original_status = equipment.status
             change_equipment_status_service(
                 session=session,
                 equipment=equipment,
                 target_status=target_status,
             )
+            if original_status != target_status:
+                # 设备状态由管理员手动调整时保留完整审计记录。
+                create_operation_log(
+                    session,
+                    OperationBusinessType.EQUIPMENT,
+                    equipment.id,
+                    OperationAction.EQUIPMENT_STATUS_CHANGE,
+                    OperationActorRole.ADMIN,
+                    admin_id,
+                    equipment_id=equipment.id,
+                    from_status=original_status,
+                    to_status=target_status,
+                )
 
 
-def delete_equipment_service(session: Session, equipment_id: int) -> None:
+def delete_equipment_service(session: Session, equipment_id: int, admin_id: int) -> None:
     with session.begin():
         # 确认设备存在后执行逻辑删除。
         equipment = equipment_crud.get_equipment_by_id(session, equipment_id)
         if not equipment:
             raise BussinessException("设备不存在", status_code=404)
         equipment_crud.delete_equipment(equipment, session)
+        # 逻辑下架同样保留操作者，便于追溯设备不可见的原因。
+        create_operation_log(
+            session,
+            OperationBusinessType.EQUIPMENT,
+            equipment.id,
+            OperationAction.EQUIPMENT_DELETE,
+            OperationActorRole.ADMIN,
+            admin_id,
+            equipment_id=equipment.id,
+            from_status=equipment.status,
+            to_status=equipment.status,
+        )
         # 逻辑删除成功提交后，所有列表和详情缓存都使用新的版本号。
         mark_equipment_cache_invalidation(session)

@@ -54,25 +54,28 @@ def get_repair_order(
 def assign_repair_order(
     assign_in: RepairOrderAssignIn,
     repair_order_id: int = Path(..., alias="repairOrderId", ge=1),
+    info: dict = Depends(admin_verity),
     db: Session = Depends(get_db),
 ):
     logger.info("管理端派发维修工单，工单 ID：%s", repair_order_id)
-    return Result.success(assign_repair_order_service(db, repair_order_id, assign_in))
+    return Result.success(assign_repair_order_service(db, repair_order_id, assign_in, info["id"]))
 
 
 @router.post("/{repairOrderId}/confirm", response_model=Result[RepairOrderActionOut], name="确认维修完成")
 def confirm_repair_order(
     repair_order_id: int = Path(..., alias="repairOrderId", ge=1),
+    info: dict = Depends(admin_verity),
     db: Session = Depends(get_db),
 ):
     logger.info("管理端确认维修完成，工单 ID：%s", repair_order_id)
-    return Result.success(confirm_completed_repair_order_service(db, repair_order_id))
+    return Result.success(confirm_completed_repair_order_service(db, repair_order_id, info["id"]))
 
 
 @router.post("/{repairOrderId}/scrap", response_model=Result[RepairOrderActionOut], name="报废维修工单设备")
 def scrap_repair_order(
     repair_order_id: int = Path(..., alias="repairOrderId", ge=1),
+    info: dict = Depends(admin_verity),
     db: Session = Depends(get_db),
 ):
     logger.info("管理端报废维修工单设备，工单 ID：%s", repair_order_id)
-    return Result.success(scrap_repair_order_service(db, repair_order_id))
+    return Result.success(scrap_repair_order_service(db, repair_order_id, info["id"]))
