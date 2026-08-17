@@ -280,6 +280,10 @@ body.workspace-app {
     transition: border-color .18s ease, box-shadow .18s ease;
 }
 
+.workspace-app textarea {
+    resize: none !important;
+}
+
 .workspace-app input::placeholder,
 .workspace-app textarea::placeholder { color: #9aa7a0; }
 .workspace-app input:focus,
@@ -377,7 +381,7 @@ body.workspace-app {
 /* Equipment cards */
 .workspace-app .data-showing {
     display: grid !important;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     flex: 1;
     align-content: start;
     justify-content: stretch !important;
@@ -1231,7 +1235,7 @@ body.workspace-app {
 
 @media (max-width: 1020px) {
     :root { --ws-nav-width: 218px; }
-    .workspace-app .data-showing { grid-template-columns: repeat(auto-fill, minmax(205px, 1fr)); }
+    .workspace-app .data-showing { grid-template-columns: repeat(auto-fit, minmax(205px, 1fr)); }
 }
 
 @media (max-width: 1140px) and (min-width: 761px) {

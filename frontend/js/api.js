@@ -199,7 +199,7 @@ async function sendRegister(username , password, identity, registrationCode = ''
  * @param {string} identity 
  * @returns {boolean}
  */
-async function sendSubmit(username , password ,identity){
+async function sendSubmit(username , password ,identity, suppressToast = false){
     prepareRoleLogin(identity)
     try{
         const response = await fetch(`${BASE_URL}/${identity}/login`,{
@@ -217,7 +217,7 @@ async function sendSubmit(username , password ,identity){
         const res = await response.json()
 
         if(response.ok !== true || res.code !== 0){
-            if(res.code !== 0){
+            if(res.code !== 0 && !suppressToast){
                 Toast.failure(`登录失败，${res.message}`)
             }
             console.log(`登录失败,错误码:${response.status},code ${res.code}`)

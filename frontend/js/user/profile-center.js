@@ -30,8 +30,14 @@
                     <label class="profile-field">姓名
                         <input name="name" type="text" minlength="2" maxlength="12" required>
                     </label>
-                    <label class="profile-field">密码
-                        <input name="password" type="password" minlength="6" maxlength="24" autocomplete="new-password" placeholder="请输入当前密码或新密码" required>
+                    <label class="profile-field">原密码
+                        <input name="originPassword" type="password" minlength="6" maxlength="24" autocomplete="current-password" placeholder="请输入当前密码" required>
+                    </label>
+                    <label class="profile-field">新密码
+                        <input name="password" type="password" minlength="6" maxlength="24" autocomplete="new-password" placeholder="请输入新密码" required>
+                    </label>
+                    <label class="profile-field">确认新密码
+                        <input name="passwordConfirm" type="password" minlength="6" maxlength="24" autocomplete="new-password" placeholder="请再次输入新密码" required>
                     </label>
                     <div class="profile-center-actions">
                         <button class="profile-logout-button" type="button">退出登录</button>
@@ -69,6 +75,7 @@
         const avatar = dialog.querySelector('.profile-avatar-preview')
         const avatarInput = dialog.querySelector('.profile-avatar-input')
         const avatarStatus = dialog.querySelector('.profile-avatar-status')
+        const username = profile.username
         let avatarUrl = profile.image || null
         let avatarUploading = false
 
@@ -104,6 +111,18 @@
                 return
             }
             if(!checkPassword(form.elements.password)) return
+            if(form.elements.password.value !== form.elements.passwordConfirm.value){
+                Toast.warning('两次输入的新密码不一致')
+                form.elements.passwordConfirm.focus()
+                return
+            }
+
+            const verified = await sendSubmit(username, form.elements.originPassword.value, 'user', true)
+            if(!verified){
+                Toast.failure('原密码输入错误')
+                form.elements.originPassword.focus()
+                return
+            }
 
             const saveButton = form.querySelector('.profile-save-button')
             saveButton.disabled = true

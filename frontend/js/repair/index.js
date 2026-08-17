@@ -302,41 +302,44 @@ function renderChangeProfileSubmitWindow(){
         changeProfileSubmitWindow.remove()
     })
     changeProfileSubmitWindowButton.addEventListener('click',async () => {
-        if(checkPassword(newPasswordFirst)){
-            const originPasswordString = originPassword.value
-            const newPasswordFirstString  = newPasswordFirst.value
-            const newPasswordSecondString = newPasswordSecond.value
-            if(!originPasswordString){
-                console.log('原密码不能为空')
-                return
-            }
-            if(!newPasswordFirst){
-                Toast.warning('第一次密码不能为空')
-                return
-            }
-            if(!newPasswordSecondString){
-                Toast.warning('第二次密码不能为空')
-            }
-            if(newPasswordFirstString !== newPasswordSecondString){
-                Toast.warning("两次密码输入不一致")
-                return
-            }
+        if(!checkPassword(newPasswordFirst)) return
+        const originPasswordString = originPassword.value
+        const newPasswordFirstString  = newPasswordFirst.value
+        const newPasswordSecondString = newPasswordSecond.value
+        if(!originPasswordString){
+            Toast.warning('原密码不能为空')
+            originPassword.focus()
+            return
+        }
+        if(!newPasswordSecondString){
+            Toast.warning('确认密码不能为空')
+            newPasswordSecond.focus()
+            return
+        }
+        if(newPasswordFirstString !== newPasswordSecondString){
+            Toast.warning('两次密码输入不一致')
+            newPasswordSecond.focus()
+            return
+        }
 
-            const temUserName = (await getPersonalData(apiChoose())).username
-            if(!await sendSubmit(temUserName,originPasswordString,apiChoose())){
-                Toast.failure('原密码输入错误')
-                return
-            }
+        const personalData = await getPersonalData(apiChoose())
+        if(!personalData) return
+        if(!await sendSubmit(personalData.username, originPasswordString, apiChoose(), true)){
+            Toast.failure('原密码输入错误')
+            originPassword.focus()
+            return
+        }
 
-            const temName = (await getPersonalData(apiChoose())).name
-            if(await changePersonalData({
-                name : changedName.value || temName,
-                password : newPasswordFirst.value
-            },apiChoose())){
-                Toast.failure('修改失败')
-            }else{
-                Toast.success('修改成功')
-            }
+        const saved = await changePersonalData({
+            name : changedName.value || personalData.name,
+            password : newPasswordFirstString
+        },apiChoose())
+        if(saved){
+            Toast.success('修改成功')
+            document.body.querySelector('.change-profile-submit-window')?.remove()
+            dimOverlay.style.zIndex = 400
+        }else{
+            Toast.failure('修改失败')
         }
     })
 }
