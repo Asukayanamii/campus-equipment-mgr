@@ -1,0 +1,278 @@
+from fastapi_pagination import Page
+from sqlalchemy.orm import Session
+
+from app.constant.status_constant import (
+    BorrowRecordStatus,
+    BorrowReturnStatus,
+    ItemStatusCode,
+    OperationAction,
+    OperationActorRole,
+    OperationBusinessType,
+    RepairOrderStatus,
+    RepairReportStatus,
+)
+from app.core.exceptions import BussinessException
+from app.crud import (
+    borrow_record_crud,
+    borrow_return_image_crud,
+    borrow_return_record_crud,
+    equipment_crud,
+    repair_order_crud,
+    repair_report_crud,
+)
+from app.db.models.borrow_record_model import BorrowRecord
+from app.db.models.borrow_return_image_model import BorrowReturnImage
+from app.db.models.borrow_return_record_model import BorrowReturnRecord
+from app.db.models.repair_report_model import RepairReport
+from app.db.models.repair_order_model import RepairOrder
+from app.schema.borrow_record_schema import BorrowRecordCreate, BorrowRecordCreateOut, BorrowRecordOut, BorrowRecordPageOut, BorrowRecordQuery
+from app.schema.borrow_return_schema import BorrowReturnCreate, BorrowReturnCreateOut
+from app.service.operation_log_service import create_operation_log
+from app.utils.redis_cache import mark_equipment_cache_invalidation
+
+
+def create_borrow_record_service(
+    session: Session,
+    user_id: int,
+    borrow_record_in: BorrowRecordCreate,
+) -> BorrowRecordCreateOut:
+    with session.begin():
+        # 锁定设备行，避免并发申请时重复占用同一设备。
+        equipment = equipment_crud.get_equipment_by_id_for_update(session, borrow_record_in.equipment_id)
+        if not equipment:
+            raise BussinessException("设备不存在", status_code=404)
+        if equipment.status != ItemStatusCode.AVAILABLE:
+            raise BussinessException("当前设备不可借用", status_code=400)
+
+        borrow_record = borrow_record_crud.get_borrow_record_by_equipment_time(
+            session,
+            borrow_record_in.equipment_id,
+            borrow_record_in.borrow_start_time,
+            borrow_record_in.borrow_end_time,
+        )
+        if borrow_record:
+            raise BussinessException("该时间段内设备已被申请借用", status_code=409)
+
+        # 创建待审核借用记录，并把设备切换为借用审核中。
+        borrow_record = BorrowRecord(
+            **borrow_record_in.model_dump(),
+            user_id=user_id,
+            status=BorrowRecordStatus.PENDING,
+        )
+        borrow_record_crud.add_borrow_record(borrow_record, session)
+        equipment_crud.update_equipment(equipment, {"status": ItemStatusCode.PENDING_BORROW}, session)
+        # 借用申请同时记录借用单与设备的初始状态，供后续审核追溯。
+        create_operation_log(
+            session,
+            OperationBusinessType.BORROW_RECORD,
+            borrow_record.id,
+            OperationAction.BORROW_APPLY,
+            OperationActorRole.USER,
+            user_id,
+            equipment_id=equipment.id,
+            to_status=BorrowRecordStatus.PENDING,
+            remark=borrow_record_in.purpose,
+        )
+        create_operation_log(
+            session,
+            OperationBusinessType.EQUIPMENT,
+            equipment.id,
+            OperationAction.BORROW_APPLY,
+            OperationActorRole.USER,
+            user_id,
+            equipment_id=equipment.id,
+            from_status=ItemStatusCode.AVAILABLE,
+            to_status=ItemStatusCode.PENDING_BORROW,
+        )
+        # 借用申请改变设备可借状态，提交后使设备查询缓存失效。
+        mark_equipment_cache_invalidation(session)
+        return BorrowRecordCreateOut.model_validate(borrow_record)
+
+
+def query_borrow_record_by_user_service(
+    session: Session,
+    user_id: int,
+    query: BorrowRecordQuery,
+) -> Page[BorrowRecordPageOut]:
+    list = []
+    # 按当前学生 ID 查询借用记录及列表展示所需的设备名称。
+    res = borrow_record_crud.query_borrow_record_by_user(session, user_id, query)
+    for borrow_record, equipment in res.items:
+        borrow_record_out = BorrowRecordPageOut.model_validate(borrow_record)
+        borrow_record_out.equipment_name = equipment.equipment_name if equipment else None
+        list.append(borrow_record_out)
+    # 保留分页器元数据并返回精简列表模型。
+    return Page(items=list, total=res.total, page=query.page, size=res.size, pages=res.pages)
+
+
+def get_borrow_record_detail_by_user_service(
+    session: Session,
+    borrow_record_id: int,
+    user_id: int,
+) -> BorrowRecordOut:
+    # 查询时同时按借用记录 ID 和当前学生 ID 过滤，隔离他人数据。
+    borrow_record_detail = borrow_record_crud.get_borrow_record_detail_by_id_and_user(
+        session,
+        borrow_record_id,
+        user_id,
+    )
+    if not borrow_record_detail:
+        raise BussinessException("借用记录不存在", status_code=404)
+
+    # 补齐详情展示所需的设备和分类字段。
+    borrow_record, equipment, category = borrow_record_detail
+    borrow_record_out = BorrowRecordOut.model_validate(borrow_record)
+    if equipment:
+        borrow_record_out.equipment_no = equipment.equipment_no
+        borrow_record_out.equipment_name = equipment.equipment_name
+        borrow_record_out.category_id = equipment.category_id
+        borrow_record_out.category_name = category.category_name if category else None
+        borrow_record_out.spec = equipment.spec
+        borrow_record_out.brand = equipment.brand
+        borrow_record_out.unit = equipment.unit
+        borrow_record_out.location = equipment.location
+        borrow_record_out.purchase_date = equipment.purchase_date
+        borrow_record_out.price = equipment.price
+        borrow_record_out.cover_img = equipment.cover_img
+        borrow_record_out.equipment_status = equipment.status
+        borrow_record_out.remark = equipment.remark
+    return borrow_record_out
+
+
+def create_borrow_return_record_service(
+    session: Session,
+    borrow_record_id: int,
+    user_id: int,
+    borrow_return_in: BorrowReturnCreate,
+) -> BorrowReturnCreateOut:
+    with session.begin():
+        # 锁定并校验当前学生的借用记录，防止重复归还。
+        borrow_record = borrow_record_crud.get_borrow_record_by_id_and_user_for_update(
+            session,
+            borrow_record_id,
+            user_id,
+        )
+        if not borrow_record:
+            raise BussinessException("借用记录不存在", status_code=404)
+        if borrow_record.status != BorrowRecordStatus.BORROWED:
+            raise BussinessException("当前借用记录不能提交归还", status_code=400)
+        if borrow_return_record_crud.get_borrow_return_record_by_borrow_record_id(session, borrow_record_id):
+            raise BussinessException("该借用记录已提交归还", status_code=409)
+
+        # 锁定关联设备，保证归还状态与设备状态同步更新。
+        equipment = equipment_crud.get_equipment_by_id_for_update(session, borrow_record.equipment_id)
+        if not equipment:
+            raise BussinessException("设备不存在", status_code=404)
+
+        # 创建归还主记录，归还图片作为一对多子记录保存。
+        borrow_return_record = BorrowReturnRecord(
+            return_status=borrow_return_in.return_status,
+            return_remark=borrow_return_in.return_remark,
+            damage_description=borrow_return_in.damage_description,
+            borrow_record_id=borrow_record_id,
+        )
+        borrow_return_record_crud.add_borrow_return_record(borrow_return_record, session)
+        for sort, image_url in enumerate(borrow_return_in.damage_images):
+            borrow_return_image_crud.add_borrow_return_image(
+                BorrowReturnImage(
+                    return_record_id=borrow_return_record.id,
+                    image_url=image_url,
+                    sort=sort,
+                ),
+                session,
+            )
+
+        # 损坏归还同时创建唯一待派单工单，保证报修与工单不会脱节。
+        repair_report = None
+        repair_order = None
+        if borrow_return_in.return_status == BorrowReturnStatus.DAMAGED:
+            repair_report = RepairReport(
+                return_record_id=borrow_return_record.id,
+                user_id=user_id,
+                equipment_id=borrow_record.equipment_id,
+                damage_description=borrow_return_in.damage_description,
+                status=RepairReportStatus.PENDING,
+            )
+            repair_report_crud.add_repair_report(repair_report, session)
+            repair_order = RepairOrder(
+                repair_report_id=repair_report.id,
+                equipment_id=borrow_record.equipment_id,
+                status=RepairOrderStatus.PENDING_ASSIGN,
+            )
+            repair_order_crud.add_repair_order(repair_order, session)
+
+        target_borrow_status = BorrowRecordStatus.COMPLETED
+        target_equipment_status = (
+            ItemStatusCode.REPAIR_PENDING
+            if borrow_return_in.return_status == BorrowReturnStatus.DAMAGED
+            else ItemStatusCode.AVAILABLE
+        )
+        borrow_record_crud.update_borrow_record(
+            borrow_record,
+            {"status": target_borrow_status},
+            session,
+        )
+        equipment_crud.update_equipment(
+            equipment,
+            {"status": target_equipment_status},
+            session,
+        )
+        operation_action = (
+            OperationAction.BORROW_RETURN_DAMAGED
+            if borrow_return_in.return_status == BorrowReturnStatus.DAMAGED
+            else OperationAction.BORROW_RETURN_NORMAL
+        )
+        # 归还、自动报修和自动建单与状态更新使用同一事务写入操作历史。
+        create_operation_log(
+            session,
+            OperationBusinessType.BORROW_RECORD,
+            borrow_record.id,
+            operation_action,
+            OperationActorRole.USER,
+            user_id,
+            equipment_id=equipment.id,
+            from_status=BorrowRecordStatus.BORROWED,
+            to_status=BorrowRecordStatus.COMPLETED,
+            remark=borrow_return_in.return_remark,
+        )
+        create_operation_log(
+            session,
+            OperationBusinessType.EQUIPMENT,
+            equipment.id,
+            operation_action,
+            OperationActorRole.USER,
+            user_id,
+            equipment_id=equipment.id,
+            from_status=ItemStatusCode.BORROWED,
+            to_status=target_equipment_status,
+            remark=borrow_return_in.damage_description,
+        )
+        if repair_report and repair_order:
+            create_operation_log(
+                session,
+                OperationBusinessType.REPAIR_REPORT,
+                repair_report.id,
+                OperationAction.REPAIR_REPORT_CREATE,
+                OperationActorRole.USER,
+                user_id,
+                equipment_id=equipment.id,
+                to_status=RepairReportStatus.PENDING,
+                remark=borrow_return_in.damage_description,
+            )
+            create_operation_log(
+                session,
+                OperationBusinessType.REPAIR_ORDER,
+                repair_order.id,
+                OperationAction.REPAIR_ORDER_CREATE,
+                OperationActorRole.USER,
+                user_id,
+                equipment_id=equipment.id,
+                to_status=RepairOrderStatus.PENDING_ASSIGN,
+            )
+        # 归还设备会改变列表和详情接口中的设备状态。
+        mark_equipment_cache_invalidation(session)
+        # 使用已 flush 的归还记录回显，并补充本次上传的图片地址。
+        borrow_return_out = BorrowReturnCreateOut.model_validate(borrow_return_record)
+        borrow_return_out.damage_images = borrow_return_in.damage_images
+        return borrow_return_out
+        # 校验设备当前可借用，再检查申请时间段是否冲突。

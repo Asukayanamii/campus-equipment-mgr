@@ -242,6 +242,43 @@ class ApiContractAndFlowTests(unittest.TestCase):
         wrong_role = self._get("/admin/repair-orders/page", self.user_token, 401)
         self.assertEqual(wrong_role["code"], 1)
 
+    def test_profile_update_requires_original_password_only_when_changing_password(self):
+        # 未提交密码字段时允许更新普通资料，且邮箱字段不会被普通更新接口写入。
+        response = requests.put(
+            f"{BASE_URL}/user/update",
+            json={"name": "资料测试", "email": "ignored@example.com"},
+            headers=self._headers(self.user_token),
+            timeout=10,
+        )
+        _assert_result(self, response)
+        profile = self._get("/user/me", self.user_token)["data"]
+        self.assertEqual(profile["name"], "资料测试")
+        self.assertIsNone(profile["email"])
+
+        # 只要请求修改密码，原密码错误就必须拒绝更新。
+        response = requests.put(
+            f"{BASE_URL}/user/update",
+            json={"name": "资料测试", "password": "WrongPass123", "newPassword": "NewPass123"},
+            headers=self._headers(self.user_token),
+            timeout=10,
+        )
+        _assert_result(self, response, 400)
+
+        # 原密码正确时，服务端使用新密码替换旧密码。
+        response = requests.put(
+            f"{BASE_URL}/user/update",
+            json={"name": "资料测试", "password": self.password, "newPassword": "NewPass123"},
+            headers=self._headers(self.user_token),
+            timeout=10,
+        )
+        _assert_result(self, response)
+        response = requests.post(
+            f"{BASE_URL}/user/login",
+            json={"username": self.user.username, "password": "NewPass123"},
+            timeout=10,
+        )
+        _assert_result(self, response)
+
     def test_pagination_and_path_boundaries(self):
         for query in ("page=0", "page=-1", "page=10001", "size=0", "size=-1", "size=101"):
             response = requests.get(

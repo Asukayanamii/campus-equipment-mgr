@@ -1,0 +1,114 @@
+services:
+  mysql:
+    image: mysql:8.4
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-this-root-password}
+      MYSQL_DATABASE: campus_equipment
+      MYSQL_USER: campus_app
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-change-this-mysql-password}
+      TZ: ${TZ:-Asia/Shanghai}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$MYSQL_ROOT_PASSWORD"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-change-this-redis-password}
+    command: ["redis-server", "--appendonly", "yes", "--requirepass", "${REDIS_PASSWORD:-change-this-redis-password}"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a $$REDIS_PASSWORD ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    restart: unless-stopped
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: campus_app
+      DB_PASSWORD: ${MYSQL_PASSWORD:-change-this-mysql-password}
+      DB_DATABASE: campus_equipment
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      REDIS_PASSWORD: ${REDIS_PASSWORD:-change-this-redis-password}
+      REDIS_SOCKET_TIMEOUT: ${REDIS_SOCKET_TIMEOUT:-0.5}
+      EQUIPMENT_QUERY_CACHE_TTL: ${EQUIPMENT_QUERY_CACHE_TTL:-300}
+      USER_JWT_SECRET_KEY: ${USER_JWT_SECRET_KEY:-change-this-user-jwt-secret}
+      ADMIN_JWT_SECRET_KEY: ${ADMIN_JWT_SECRET_KEY:-change-this-admin-jwt-secret}
+      REPAIR_JWT_SECRET_KEY: ${REPAIR_JWT_SECRET_KEY:-change-this-repair-jwt-secret}
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-720}
+      SUPER_ADMIN_USERNAME: ${SUPER_ADMIN_USERNAME:-superadmin123}
+      ALIYUN_OSS_ACCESS_KEY_ID: ${ALIYUN_OSS_ACCESS_KEY_ID:-replace-with-oss-access-key-id}
+      ALIYUN_OSS_ACCESS_KEY_SECRET: ${ALIYUN_OSS_ACCESS_KEY_SECRET:-replace-with-oss-access-key-secret}
+      ALIYUN_OSS_REGION: ${ALIYUN_OSS_REGION:-cn-hangzhou}
+      ALIYUN_OSS_BUCKET_NAME: ${ALIYUN_OSS_BUCKET_NAME:-replace-with-oss-bucket-name}
+      IMAGE_MAX_SIZE: ${IMAGE_MAX_SIZE:-5}
+      IMAGE_ALLOWED_EXTENSIONS: ${IMAGE_ALLOWED_EXTENSIONS:-jpg,jpeg,png,gif,webp}
+      IMAGE_ALLOWED_CONTENT_TYPES: ${IMAGE_ALLOWED_CONTENT_TYPES:-image/jpeg,image/png,image/gif,image/webp}
+      DEFAULT_EQUIPMENT_IMAGE_URL: /assets/images/all-icon..png
+      DEFAULT_PROFILE_IMAGE_URL: /assets/images/all-icon..png
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-}
+      MAIL_FROM_NAME: ${MAIL_FROM_NAME:-校园设备管理系统}
+      MAIL_PORT: ${MAIL_PORT:-465}
+      MAIL_SERVER: ${MAIL_SERVER:-}
+      MAIL_STARTTLS: ${MAIL_STARTTLS:-false}
+      MAIL_SSL_TLS: ${MAIL_SSL_TLS:-true}
+      EMAIL_VERIFICATION_CODE_EXPIRE_SECONDS: ${EMAIL_VERIFICATION_CODE_EXPIRE_SECONDS:-60}
+      TZ: ${TZ:-Asia/Shanghai}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    volumes:
+      - certbot_www:/var/www/certbot:ro
+      - certbot_conf:/etc/letsencrypt:ro
+    depends_on:
+      - backend
+
+  certbot:
+    image: certbot/certbot:v2.11.0
+    restart: unless-stopped
+    pid: "service:frontend"
+    entrypoint: /bin/sh
+    command: >
+      -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet --deploy-hook "kill -HUP 1"; sleep 12h & wait $${!}; done'
+    volumes:
+      - certbot_www:/var/www/certbot
+      - certbot_conf:/etc/letsencrypt
+    depends_on:
+      - frontend
+
+volumes:
+  mysql_data:
+  redis_data:
+  certbot_www:
+  certbot_conf:

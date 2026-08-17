@@ -1,142 +1,100 @@
-# 校园设备借用与维修管理系统
+# 校园设备管理系统
 
-面向学生、管理员和维修人员的前后端分离设备管理系统。项目覆盖设备查询与管理、借用申请、归还验收、损坏报修和维修流程的基础能力。
+面向学生、管理员和维修人员的校园设备借用、归还与维修管理系统。项目采用前后端分离架构：前端使用原生 HTML、CSS、JavaScript，后端基于 FastAPI，并使用 MySQL、Redis、阿里云 OSS 和 SMTP 完成业务支撑。
 
-当前仓库已包含学生借还、损坏报修、管理员派单和维修结果确认的完整基础流程；
+线上地址：[https://asukayanami.top](https://asukayanami.top)
+
+## 核心能力
+
+| 角色 | 功能 |
+| --- | --- |
+| 学生 | 用户名密码注册登录、邮箱验证码注册登录、绑定邮箱、设备与分类查询、借用申请、归还、报修、个人记录查询 |
+| 管理员 | 设备与分类维护、借用审核、报修确认、维修工单派发与确认、设备状态管理、操作日志查询 |
+| 超级管理员 | 管理员能力，以及管理员/维修员注册码的创建、更新、重置使用状态和删除 |
+| 维修人员 | 设备与分类查询、接单、维修处理、维修结果提交、本人维修工单操作历史查询 |
+
+## 业务与技术设计
+
+- 借用申请在数据库事务内使用 `SELECT ... FOR UPDATE` 锁定设备行，校验设备状态与时间冲突，避免并发超借。
+- 设备分页与详情查询使用 Redis 缓存。缓存键带版本号，设备或分类事务提交后更新版本，旧缓存自动失效；Redis 不可用时回源 MySQL。
+- 邮箱验证码使用随机六位数字、bcrypt 哈希、Redis `SET NX` 和可配置 TTL；登录注册与邮箱绑定使用不同 Redis 键前缀隔离。
+- 图片上传至阿里云 OSS，后端校验文件类型、扩展名与大小。未传设备封面时使用本地默认图片 `/assets/images/all-icon..png`。
+- 审核、状态变更和设备创建会写入操作日志，便于管理员审计及维修人员查看工单历史。
+- 三端 JWT 使用独立密钥；鉴权范围由后端控制，前端不保存角色字段。
+
+## 技术栈
+
+| 分类 | 技术 |
+| --- | --- |
+| 前端 | 原生 HTML、CSS、JavaScript、Fetch API |
+| 后端 | Python 3.13、FastAPI、Pydantic v2、SQLAlchemy |
+| 数据库 | MySQL 8 |
+| 缓存 | Redis 7 |
+| 认证 | JWT、bcrypt |
+| 外部服务 | 阿里云 OSS、SMTP、Let's Encrypt |
+| 部署 | Docker Compose、Nginx、Certbot |
 
 ## 项目结构
 
 ```text
 campus-equipment-mgr/
-├── frontend/                 # 原生 HTML、CSS、JavaScript 前端
-│   ├── index.html             # 前端入口
-│   ├── login.html             # 三角色登录页
-│   ├── pages/                 # 学生、管理员、维修人员页面
-│   ├── js/api.js              # 后端接口与 BASE_URL 配置
-│   └── css/                   # 页面样式
-├── backend/                   # FastAPI 后端
-│   ├── app/                   # 路由、业务服务、CRUD、ORM 模型
-│   ├── requirements.txt       # Python 依赖
-│   ├── environment.yml        # Conda 环境定义
-│   └── README.md              # 后端详细说明
-└── 暑期考核项目文档.txt         # 原始项目需求
+├── frontend/       # 前端静态页面、样式、脚本与资源
+├── backend/        # FastAPI 应用、模型、业务服务和测试
+├── deploy/         # 可独立复制到服务器的 Docker Compose 部署目录
+├── 接口文档.md      # 接口说明
+└── 暑期考核项目文档.txt
 ```
 
-## 当前功能
+## 本地开发
 
-| 角色 | 已完成能力 |
-| --- | --- |
-| 学生 | 注册登录、设备与详情查询、本人借用记录和报修记录查询、提交归还 |
-| 管理员 | 设备与设备分类管理、借用审核、报修确认、工单派发、维修确认和设备报废 |
-| 维修人员 | 注册登录、设备查询、个人信息维护、本人工单接收、维修和结果提交 |
+### 后端
 
-已实现的核心业务保障：
-
-- 借用申请锁定设备行，并校验同一设备的借用时间冲突。
-- 损坏归还在同一事务中创建报修记录和待派单工单。
-- 借用审核、归还提交和设备状态变更在同一事务中完成。
-- 三端使用独立 JWT 密钥；学生借用与报修数据按当前登录用户隔离。
-- 图片上传接入阿里云 OSS，并校验扩展名白名单和文件大小。
-
-后端进阶能力：
-
-- Redis 设备查询缓存：设备分页和详情查询使用带参数摘要、版本号命名空间和 TTL 的缓存；设备或分类事务提交后递增版本号，避免旧数据继续命中。Redis 不可用时自动回源数据库。
-- 邮箱验证码安全机制：验证码使用随机六位数字生成，bcrypt 哈希后写入 Redis；`SET NX` 限制有效期内重复发送，校验成功后立即删除，配合 SMTP 完成邮箱注册/登录。
-- OSS 对象存储：头像、设备图片、损坏凭证和维修前后图片只在业务表保存 URL，文件统一上传阿里云 OSS；服务端校验扩展名、MIME 类型和大小。
-- 并发借用保护：借用申请在事务内使用数据库行级锁校验设备状态和时间冲突；归还、报修、工单和设备状态同步提交，避免超卖和脏状态。
-
-前端体验增强：
-
-- 使用原生 JavaScript 按角色动态渲染学生、管理员和维修人员页面，减少页面之间的重复结构。
-- 设备、分类、借用记录和报修记录支持条件筛选、联查、重置搜索和分页，分页状态按业务视图独立维护。
-- 设备卡片支持悬浮查看详情；个人资料、设备编辑、记录详情使用动态弹窗和遮罩层，完成后端数据的即时回显。
-- 使用原生 CSS 提供卡片悬浮、按钮过渡、淡入和响应式布局，并在减少动态效果偏好下自动降低动画强度。
-- `dev-frontend` 分支进一步重构登录页和主页视觉：增加角色选择状态、管理员注册码输入区域、登录/注册交互提示、背景与卡片动效，并优化不同屏幕尺寸下的布局。
-
-需求文档中规划的前端进阶加分项（设备瀑布流与滚动懒加载、热门设备/搜索词推荐、多图轮播与放大预览）当前版本尚未实现，现有图片能力主要由后端 OSS 上传接口和前端 URL 展示组成。
-
-## 技术栈
-
-| 模块 | 技术 |
-| --- | --- |
-| 前端 | 原生 HTML、CSS、JavaScript、Fetch API |
-| 后端 | Python、FastAPI、SQLAlchemy、Pydantic v2 |
-| 数据库 | MySQL、PyMySQL |
-| 鉴权 | JWT、bcrypt |
-| 文件存储 | 阿里云 OSS |
-| 缓存与验证码 | Redis、SMTP |
-
-## 快速启动
-
-### 1. 启动后端
-
-要求：Python 3.10+、MySQL。进入后端目录后安装依赖：
+在 `backend` 目录创建或激活 Conda 环境，配置 `.env` 后启动服务：
 
 ```powershell
-cd backend
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-```
-
-复制 `backend/.env.template` 为 `backend/.env`，填写 MySQL、JWT 和 OSS 配置。然后启动服务：
-
-```powershell
+conda env create -f environment.yml
+conda activate campus-equipment-mgr
+Copy-Item .env.template .env
 uvicorn app.main:app --reload
 ```
 
-默认后端地址为 `http://127.0.0.1:8000`，接口文档为 `http://127.0.0.1:8000/docs`。
+后端默认地址为 `http://127.0.0.1:8000`，OpenAPI 文档为 `http://127.0.0.1:8000/docs`。配置项见 [后端 README](./backend/README.md)。
 
-### 2. 配置前端接口地址
+### 前端
 
-前端不需要 Node.js 或构建命令。接口基地址位于 [frontend/js/api.js](./frontend/js/api.js)：
-
-```js
-const BASE_URL = `https://frp-put.com:58235`
-```
-
-该值当前为外网联调地址。本地联调时改为：
-
-```js
-const BASE_URL = `http://127.0.0.1:8000`
-```
-
-### 3. 启动前端静态服务
-
-前端登录后的页面跳转使用 `/campus-equipment-mgr/frontend/...` 路径，因此从项目父目录启动静态服务：
+前端无需 Node.js 构建。开发联调时，设置 `window.API_BASE` 为后端地址，或在 `frontend/js/api.js` 中将默认接口地址改为 `http://127.0.0.1:8000`。从项目父目录启动静态服务：
 
 ```powershell
 cd ..
 python -m http.server 5500
 ```
 
-浏览器访问：
+访问 `http://127.0.0.1:5500/campus-equipment-mgr/frontend/`。
 
-```text
-http://127.0.0.1:5500/campus-equipment-mgr/frontend/
+## Docker 部署
+
+`deploy` 目录包含前端静态资源、后端代码、MySQL 初始化脚本、Nginx 和 Docker Compose 配置。复制整个目录到服务器后，按 [部署 README](./deploy/README.md) 配置环境变量、申请证书并启动容器。
+
+生产环境由 Nginx 统一提供静态页面与 `/api` 反向代理，HTTP 自动跳转 HTTPS。MySQL、Redis 和 Let's Encrypt 证书使用 Docker 命名卷持久化。
+
+## 测试
+
+后端语法检查：
+
+```powershell
+cd backend
+python -m compileall -q app
 ```
 
-## 联调约定
+端到端接口测试需要先启动本地后端和 MySQL：
 
-- 受保护接口通过请求头传递令牌：`token: <jwt>`。
-- 后端统一返回 `Result`：`code=0` 表示成功，`data` 为响应数据。
-- 请求和响应字段使用 camelCase；后端响应中的状态字段会转换为中文展示含义。
-- 后端已开启开发环境跨域支持；本地前端静态服务可以直接请求后端。
-
-## 借用状态流转
-
-```text
-available
-  -> pending_borrow    学生提交借用申请
-  -> borrowed          管理员审核通过
-  -> completed         学生提交归还
-  -> available         正常归还
-  -> repair_pending    损坏归还
+```powershell
+python -m unittest tests.test_api_contract_and_flow
 ```
-
-借用审核驳回时，借用记录变为 `rejected`，设备恢复 `available`。设备状态 `pending_return` 作为后续扩展预留，不参与当前归还流程。
 
 ## 相关文档
 
 - [后端说明](./backend/README.md)
 - [前端说明](./frontend/README.md)
+- [Docker 部署说明](./deploy/README.md)
+- [接口文档](./接口文档.md)
