@@ -2,7 +2,7 @@
 
 面向学生、管理员和维修人员的校园设备借用、归还与维修管理系统。项目采用前后端分离架构：前端使用原生 HTML、CSS、JavaScript，后端基于 FastAPI，并使用 MySQL、Redis、阿里云 OSS 和 SMTP 完成业务支撑。
 
-线上地址：[https://asukayanami.top](https://asukayanami.top)
+线上地址：[https://asukayanami.top/mgr](https://asukayanami.top/mgr)
 
 ## 核心能力
 
